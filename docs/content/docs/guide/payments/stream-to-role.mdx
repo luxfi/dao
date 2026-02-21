@@ -1,0 +1,486 @@
+---
+title: Stream to Role
+description: Automatic payment streams for role holders
+---
+
+# Stream to Role
+
+Stream to Role automatically creates and manages payment streams for all holders of a specific role. When members join or leave a role, their streams are automatically created or cancelled.
+
+## Overview
+
+Instead of manually managing individual streams:
+
+```
+Traditional:                      Stream to Role:
+─────────────────────────         ─────────────────────────
+Create stream for Alice           Set: Committee Members
+Create stream for Bob               → $1,000/month each
+Create stream for Carol           Alice joins  → stream created
+Alice leaves → cancel stream      Bob leaves   → stream cancelled
+Dave joins → create stream        Carol joins  → stream created
+...manual for every change        ...automatic forever
+```
+
+## Benefits
+
+- **Automatic management** - Streams created/cancelled on role changes
+- **Consistent compensation** - All role holders receive same rate
+- **Reduced governance overhead** - One proposal covers all members
+- **Real-time updates** - Changes take effect immediately
+- **Audit trail** - All stream events logged
+
+## Creating a Role Stream
+
+### Via UI
+
+1. Navigate to **Treasury** > **Payments**
+2. Click **"Stream to Role"**
+3. Configure the role stream
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│ Create Role Stream                                           │
+├─────────────────────────────────────────────────────────────┤
+│                                                              │
+│  Role:         [Committee Member ▼]                         │
+│                                                              │
+│  Current Holders: 5                                          │
+│  ┌─────────────────────────────────────────────────────┐   │
+│  │  • 0x1234...5678 (alice.eth)                        │   │
+│  │  • 0xABCD...EFGH (bob.eth)                          │   │
+│  │  • 0x9876...5432 (carol.eth)                        │   │
+│  │  • 0xDEF0...1234 (dave.eth)                         │   │
+│  │  • 0x5555...6666 (eve.eth)                          │   │
+│  └─────────────────────────────────────────────────────┘   │
+│                                                              │
+│  Token:        [USDC ▼]                                     │
+│                                                              │
+│  Amount per holder:  [1,000                         ]       │
+│  Per:                [Month ▼]                              │
+│                      ≈ $32.88/day per holder                │
+│                                                              │
+│  Duration:     [12    ] months                              │
+│                                                              │
+│  ──────────────────────────────────────────────────────     │
+│  Budget Impact                                               │
+│  ──────────────────────────────────────────────────────     │
+│                                                              │
+│  Current monthly: $5,000 (5 holders × $1,000)               │
+│  Annual maximum:  $60,000                                    │
+│  Treasury balance: 125,000 USDC                              │
+│                                                              │
+│  ⚠️ Budget will scale with role membership                  │
+│                                                              │
+│  [ Cancel ]                     [ Create Role Stream ]      │
+│                                                              │
+└─────────────────────────────────────────────────────────────┘
+```
+
+### Via Proposal
+
+```yaml
+Proposal: "Committee Member Compensation Streams"
+
+Description: |
+  This proposal establishes automatic payment streams for all
+  Research Committee members.
+
+  ## Terms
+  - Rate: $1,000 USDC per member per month
+  - Duration: 12 months
+  - Applies to: All current and future committee members
+
+  ## Current Members (5)
+  - alice.eth
+  - bob.eth
+  - carol.eth
+  - dave.eth
+  - eve.eth
+
+  ## Budget Impact
+  - Current: $5,000/month ($60,000/year)
+  - Maximum (10 members): $10,000/month ($120,000/year)
+
+Actions:
+  - type: stream_to_role
+    roleId: COMMITTEE_MEMBER_ROLE
+    token: USDC
+    amountPerHolder: 1000000000  # 1K USDC/month (6 decimals)
+    duration: 31536000           # 12 months in seconds
+```
+
+### Via SDK
+
+```typescript
+import { RoleStreamsClient } from '@lux/dao-sdk';
+import { ethers } from 'ethers';
+
+const roleStreams = new RoleStreamsClient(signer);
+
+// Create streams for all role holders
+const tx = await roleStreams.streamToRole({
+  roleId: ethers.keccak256(ethers.toUtf8Bytes('COMMITTEE_MEMBER')),
+  token: usdcAddress,
+  amountPerHolder: ethers.parseUnits('1000', 6), // Per month
+  duration: 365 * 24 * 60 * 60, // 12 months
+});
+
+const receipt = await tx.wait();
+const streamIds = receipt.events
+  .filter(e => e.event === 'StreamCreated')
+  .map(e => e.args.streamId);
+
+console.log(`Created ${streamIds.length} streams`);
+```
+
+## Smart Contract Interface
+
+```solidity
+interface IRoleStreams {
+    struct RoleStream {
+        bytes32 roleId;
+        address token;
+        uint256 amountPerHolder;
+        uint256 duration;
+        uint256 startTime;
+        bool active;
+    }
+
+    /// @notice Emitted when role stream configured
+    event RoleStreamCreated(
+        uint256 indexed roleStreamId,
+        bytes32 indexed roleId,
+        address token,
+        uint256 amountPerHolder,
+        uint256 duration
+    );
+
+    /// @notice Emitted when member stream created
+    event MemberStreamCreated(
+        uint256 indexed roleStreamId,
+        address indexed member,
+        uint256 streamId
+    );
+
+    /// @notice Emitted when member stream cancelled
+    event MemberStreamCancelled(
+        uint256 indexed roleStreamId,
+        address indexed member,
+        uint256 streamId
+    );
+
+    /// @notice Create streams for all role holders
+    function streamToRole(
+        bytes32 roleId,
+        address token,
+        uint256 amountPerHolder,
+        uint256 duration
+    ) external returns (uint256 roleStreamId);
+
+    /// @notice Update amount for future streams
+    function updateRoleStreamAmount(
+        uint256 roleStreamId,
+        uint256 newAmount
+    ) external;
+
+    /// @notice Pause role stream (no new streams created)
+    function pauseRoleStream(uint256 roleStreamId) external;
+
+    /// @notice Cancel all streams for a role
+    function cancelRoleStream(uint256 roleStreamId) external;
+
+    /// @notice Get all active streams for a role
+    function getRoleStreams(bytes32 roleId)
+        external view returns (uint256[] memory streamIds);
+}
+```
+
+## Automatic Management
+
+### When Members Join
+
+When a new member is granted the role:
+
+```
+1. Role granted to new address
+2. System detects role change
+3. New stream automatically created
+4. Stream starts immediately
+5. Event logged
+```
+
+```typescript
+// Example: Grant role and stream created automatically
+await accessControl.grantRole(COMMITTEE_ROLE, newMemberAddress);
+// Stream created in same transaction via hook
+```
+
+### When Members Leave
+
+When a member's role is revoked:
+
+```
+1. Role revoked from address
+2. System detects role change
+3. Stream cancelled
+4. Earned funds sent to member
+5. Remaining funds returned to treasury
+6. Event logged
+```
+
+```typescript
+// Example: Revoke role and stream cancelled automatically
+await accessControl.revokeRole(COMMITTEE_ROLE, leavingMemberAddress);
+// Stream cancelled, funds settled in same transaction
+```
+
+## Role Stream Management
+
+### Dashboard View
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│ Role Streams                                                 │
+├─────────────────────────────────────────────────────────────┤
+│                                                              │
+│  Committee Members                              Active ●     │
+│  ──────────────────────────────────────────────────────     │
+│  Rate: $1,000 USDC/month per holder                         │
+│  Duration: 12 months                                         │
+│  Active holders: 5                                           │
+│  Monthly cost: $5,000                                        │
+│                                                              │
+│  Member Streams:                                             │
+│  ┌─────────────────────────────────────────────────────┐   │
+│  │ alice.eth    ████████░░░░ 67%  Withdrawn: $8,000    │   │
+│  │ bob.eth      ████████░░░░ 67%  Withdrawn: $6,500    │   │
+│  │ carol.eth    ██████░░░░░░ 50%  Withdrawn: $4,000    │   │
+│  │ dave.eth     ████░░░░░░░░ 33%  Withdrawn: $2,000    │   │
+│  │ eve.eth      ██░░░░░░░░░░ 17%  Withdrawn: $500      │   │
+│  └─────────────────────────────────────────────────────┘   │
+│                                                              │
+│  [ Update Rate ]  [ Pause ]  [ Cancel All ]                 │
+│                                                              │
+└─────────────────────────────────────────────────────────────┘
+```
+
+### Updating Rate
+
+Adjust compensation for future periods:
+
+```yaml
+Proposal: "Increase Committee Member Compensation"
+
+Description: |
+  Increase monthly rate from $1,000 to $1,500 USDC.
+  Takes effect for all new stream periods.
+
+Actions:
+  - type: update_role_stream_amount
+    roleStreamId: 1
+    newAmount: 1500000000  # 1.5K USDC
+```
+
+```typescript
+// Via SDK
+await roleStreams.updateRoleStreamAmount(
+  roleStreamId,
+  ethers.parseUnits('1500', 6)
+);
+```
+
+### Pausing Streams
+
+Temporarily stop new streams:
+
+```typescript
+// Pause role stream
+await roleStreams.pauseRoleStream(roleStreamId);
+
+// Existing streams continue, no new streams created on role grant
+// Resume later:
+await roleStreams.resumeRoleStream(roleStreamId);
+```
+
+### Cancelling All Streams
+
+End all streams for a role:
+
+```yaml
+Proposal: "Discontinue Committee Compensation"
+
+Description: |
+  This proposal cancels all committee member streams.
+  All earned funds will be settled to members.
+
+Actions:
+  - type: cancel_role_stream
+    roleStreamId: 1
+```
+
+## Multi-Role Compensation
+
+Create different streams for different roles:
+
+```yaml
+Role Compensation Structure:
+
+Lead (1 holder):
+  - $5,000 USDC/month
+  - $50,000 DAO tokens/year (vesting)
+
+Senior Member (3 holders):
+  - $3,000 USDC/month
+  - $20,000 DAO tokens/year (vesting)
+
+Member (5 holders):
+  - $1,000 USDC/month
+  - $10,000 DAO tokens/year (vesting)
+```
+
+```typescript
+// Create multiple role streams
+const roles = [
+  { role: 'LEAD', usdcPerMonth: 5000, daoPerYear: 50000 },
+  { role: 'SENIOR_MEMBER', usdcPerMonth: 3000, daoPerYear: 20000 },
+  { role: 'MEMBER', usdcPerMonth: 1000, daoPerYear: 10000 },
+];
+
+for (const { role, usdcPerMonth, daoPerYear } of roles) {
+  const roleId = ethers.keccak256(ethers.toUtf8Bytes(role));
+
+  // USDC monthly stream
+  await roleStreams.streamToRole({
+    roleId,
+    token: usdcAddress,
+    amountPerHolder: ethers.parseUnits(String(usdcPerMonth), 6),
+    duration: 30 * 24 * 60 * 60, // Monthly
+  });
+
+  // DAO token annual vesting
+  await roleStreams.streamToRole({
+    roleId,
+    token: daoTokenAddress,
+    amountPerHolder: ethers.parseUnits(String(daoPerYear), 18),
+    duration: 365 * 24 * 60 * 60, // Annual
+  });
+}
+```
+
+## Budget Management
+
+### Budget Caps
+
+Set maximum budget for a role stream:
+
+```solidity
+interface IRoleStreams {
+    /// @notice Set maximum monthly budget for role
+    function setRoleBudgetCap(
+        uint256 roleStreamId,
+        uint256 maxMonthlyBudget
+    ) external;
+}
+```
+
+```typescript
+// Cap at 10 members worth ($10K/month)
+await roleStreams.setRoleBudgetCap(
+  roleStreamId,
+  ethers.parseUnits('10000', 6)
+);
+
+// If role exceeds cap, new members don't get streams
+// until others leave
+```
+
+### Budget Forecasting
+
+```typescript
+// Calculate budget impact
+const currentHolders = await accessControl.getRoleMemberCount(roleId);
+const monthlyRate = ethers.parseUnits('1000', 6);
+
+const monthly = monthlyRate * BigInt(currentHolders);
+const annual = monthly * 12n;
+
+console.log(`Current monthly: $${ethers.formatUnits(monthly, 6)}`);
+console.log(`Annual projection: $${ethers.formatUnits(annual, 6)}`);
+```
+
+## Withdrawal for Members
+
+Role stream recipients withdraw same as regular streams:
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│ Your Committee Compensation                                  │
+├─────────────────────────────────────────────────────────────┤
+│                                                              │
+│  Role: Committee Member                                      │
+│  Rate: $1,000 USDC/month                                    │
+│                                                              │
+│  Current Period:                                             │
+│  ●═══════════════════●░░░░░░░░░░░░░░░░░░░░░░░░░░░░░●       │
+│  Jan 1              Today                         Jan 31    │
+│                                                              │
+│  Earned this period: $666.67                                 │
+│  Available to withdraw: $666.67                              │
+│                                                              │
+│  Total withdrawn (all time): $8,000.00                      │
+│                                                              │
+│                         [ Withdraw $666.67 ]                │
+│                                                              │
+└─────────────────────────────────────────────────────────────┘
+```
+
+## Events and Monitoring
+
+```typescript
+// Monitor role stream events
+roleStreams.on('RoleStreamCreated', (id, roleId, token, amount, duration) => {
+  console.log(`Role stream ${id} created for role ${roleId}`);
+});
+
+roleStreams.on('MemberStreamCreated', (roleStreamId, member, streamId) => {
+  console.log(`Member ${member} joined, stream ${streamId} created`);
+});
+
+roleStreams.on('MemberStreamCancelled', (roleStreamId, member, streamId) => {
+  console.log(`Member ${member} left, stream ${streamId} cancelled`);
+});
+```
+
+## Common Errors
+
+| Error | Cause | Solution |
+|-------|-------|----------|
+| `RoleNotFound` | Invalid role ID | Check role exists |
+| `NoRoleHolders` | Role has no members | Add members first |
+| `BudgetCapExceeded` | Max budget reached | Increase cap or wait |
+| `RoleStreamPaused` | Stream is paused | Resume stream |
+| `Unauthorized` | Missing permission | Get ADMIN_ROLE |
+
+## Best Practices
+
+### Role Design
+
+- Keep roles focused and well-defined
+- Document role responsibilities
+- Set appropriate member limits
+- Review membership regularly
+
+### Compensation Design
+
+- Align rates with responsibilities
+- Include token component for alignment
+- Set reasonable budget caps
+- Plan for growth
+
+### Governance
+
+- Require proposals for rate changes
+- Log all membership changes
+- Regular budget reviews
+- Clear off-boarding process

@@ -1,0 +1,295 @@
+---
+title: Template Proposals
+description: Use pre-built proposal templates for common actions
+---
+
+# Template Proposals
+
+Templates provide pre-configured proposal structures for common governance actions. Fill in the blanks and submit.
+
+## Available Templates
+
+### Grant Disbursement
+
+Fund approved grants with proper documentation.
+
+```yaml
+Template: grant_disbursement
+Fields:
+  - recipient: address
+  - amount: uint256
+  - token: address
+  - grant_id: string
+  - milestone: string
+```
+
+**Use when:**
+- Paying approved grant recipients
+- Milestone-based funding
+- Research or development grants
+
+### Committee Budget Allocation
+
+Allocate quarterly budget to committees.
+
+```yaml
+Template: committee_budget
+Fields:
+  - committee: address
+  - quarter: string
+  - allocation: uint256
+  - breakdown: string[]
+```
+
+**Use when:**
+- Quarterly budget cycles
+- Committee funding requests
+- Budget adjustments
+
+### Role Creation
+
+Create new roles with permissions.
+
+```yaml
+Template: create_role
+Fields:
+  - name: string
+  - permissions: string[]
+  - initial_members: address[]
+  - budget_limit: uint256
+```
+
+**Use when:**
+- New working groups
+- Committee positions
+- Contributor roles
+
+### Parameter Adjustment
+
+Update governance parameters.
+
+```yaml
+Template: parameter_change
+Fields:
+  - parameter: string
+  - current_value: uint256
+  - new_value: uint256
+  - rationale: string
+```
+
+**Use when:**
+- Voting period changes
+- Quorum adjustments
+- Fee modifications
+
+### Emergency Action
+
+Quick response actions with expedited process.
+
+```yaml
+Template: emergency
+Fields:
+  - action_type: string
+  - affected_contracts: address[]
+  - mitigation_steps: string
+  - requires_guardian: boolean
+```
+
+**Use when:**
+- Security incidents
+- Critical bugs
+- Market emergencies
+
+## Using Templates
+
+### Step 1: Select Template
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│ Choose a Template                                            │
+├─────────────────────────────────────────────────────────────┤
+│                                                              │
+│  📋 Grant Disbursement                              [Use]   │
+│     Fund approved grants                                    │
+│                                                              │
+│  💰 Committee Budget                                [Use]   │
+│     Allocate quarterly budget                               │
+│                                                              │
+│  👤 Role Creation                                   [Use]   │
+│     Create new roles with permissions                       │
+│                                                              │
+│  ⚙️  Parameter Adjustment                           [Use]   │
+│     Update governance parameters                            │
+│                                                              │
+│  🚨 Emergency Action                                [Use]   │
+│     Quick response for incidents                            │
+│                                                              │
+└─────────────────────────────────────────────────────────────┘
+```
+
+### Step 2: Fill Template Fields
+
+**Example: Grant Disbursement**
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│ Grant Disbursement                                           │
+├─────────────────────────────────────────────────────────────┤
+│                                                              │
+│  Grant ID:                                                  │
+│  [GR-2026-042                                     ]         │
+│                                                              │
+│  Recipient Address:                                         │
+│  [0x1234567890abcdef1234567890abcdef12345678    ]          │
+│                                                              │
+│  Amount:                                                    │
+│  [15,000                    ] [USDC ▼]                     │
+│                                                              │
+│  Milestone:                                                 │
+│  [Milestone 2: MVP Completion                     ]         │
+│                                                              │
+│  ──────────────────────────────────────────────────────── │
+│                                                              │
+│  Supporting Documents:                                      │
+│  [📎 milestone_report.pdf                         ]         │
+│  [📎 demo_video.mp4                               ]         │
+│                                                              │
+│  Committee Approval:                                        │
+│  [Research Committee - Vote #RC-2026-018          ]         │
+│                                                              │
+└─────────────────────────────────────────────────────────────┘
+```
+
+### Step 3: Auto-Generated Description
+
+Templates generate formatted descriptions:
+
+```markdown
+# Grant Disbursement: GR-2026-042
+
+## Summary
+Disbursement of $15,000 USDC to grant recipient for Milestone 2 completion.
+
+## Details
+- **Grant ID:** GR-2026-042
+- **Recipient:** 0x1234...5678
+- **Amount:** 15,000 USDC
+- **Milestone:** Milestone 2: MVP Completion
+
+## Verification
+- Committee Approval: Research Committee Vote #RC-2026-018
+- Milestone Report: [IPFS Link]
+- Demo: [IPFS Link]
+
+## Actions
+1. Transfer 15,000 USDC from Treasury to 0x1234...5678
+2. Update grant status in registry
+```
+
+### Step 4: Review and Submit
+
+1. Review auto-generated content
+2. Add any custom notes
+3. Verify all fields
+4. Submit proposal
+
+## Custom Templates
+
+### Creating Organization Templates
+
+Committees can create custom templates:
+
+```yaml
+# custom_template.yaml
+name: "Research Fellowship"
+description: "Fund research fellowships"
+category: "Grants"
+
+fields:
+  - name: fellow_name
+    type: string
+    required: true
+
+  - name: institution
+    type: string
+    required: true
+
+  - name: research_topic
+    type: string
+    required: true
+
+  - name: duration_months
+    type: number
+    min: 3
+    max: 24
+
+  - name: monthly_stipend
+    type: number
+    token: USDC
+
+actions:
+  - type: create_stream
+    recipient: "{{fellow_address}}"
+    total: "{{monthly_stipend * duration_months}}"
+    duration: "{{duration_months}} months"
+
+  - type: register
+    contract: fellowship_registry
+    data:
+      fellow: "{{fellow_name}}"
+      institution: "{{institution}}"
+      topic: "{{research_topic}}"
+```
+
+### Submitting Custom Templates
+
+1. Draft template in YAML format
+2. Submit template proposal
+3. Committee review
+4. If approved, template becomes available
+
+## Template Best Practices
+
+### For Template Users
+
+- ✅ Verify all fields before submission
+- ✅ Attach supporting documentation
+- ✅ Reference approval votes
+- ✅ Use appropriate template
+
+### For Template Creators
+
+- ✅ Clear field descriptions
+- ✅ Sensible defaults
+- ✅ Input validation
+- ✅ Comprehensive auto-description
+- ✅ Proper error messages
+
+## Template Library
+
+### Finance Templates
+
+| Template | Description |
+|----------|-------------|
+| grant_disbursement | Pay approved grants |
+| committee_budget | Quarterly allocations |
+| stream_payment | Create payment streams |
+| batch_transfer | Multiple transfers |
+
+### Governance Templates
+
+| Template | Description |
+|----------|-------------|
+| create_role | New role with permissions |
+| update_role | Modify existing role |
+| remove_role | Revoke role |
+| parameter_change | Update parameters |
+
+### Operations Templates
+
+| Template | Description |
+|----------|-------------|
+| create_subdao | New Sub-DAO |
+| working_group | New working group |
+| committee_election | Run election |
+| emergency_action | Quick response |

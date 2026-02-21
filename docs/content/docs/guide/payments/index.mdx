@@ -1,0 +1,374 @@
+---
+title: Payments
+description: Send funds via transfers, airdrops, and streams
+---
+
+# Payments
+
+DAOs can distribute funds through various payment mechanisms. This guide covers all payment types from simple transfers to continuous streaming.
+
+## Overview
+
+| Payment Type | Use Case | Timing |
+|--------------|----------|--------|
+| [Transfer](/docs/guide/payments/transfer) | One-time payments | Immediate |
+| [Airdrop](/docs/guide/payments/airdrop) | Multi-recipient distribution | Batch |
+| [Stream](/docs/guide/payments/stream) | Continuous payments | Over time |
+| [Stream to Role](/docs/guide/payments/stream-to-role) | Role-based streams | Automatic |
+
+## Quick Comparison
+
+```
+Transfer          Airdrop           Stream            Stream to Role
+────────────────────────────────────────────────────────────────────
+Single recipient  Many recipients   Single recipient  Role holders
+One-time          One-time (batch)  Continuous        Continuous
+Immediate         Immediate         Over duration     Auto-managed
+Manual            Manual            Manual            Automatic
+
+Best for:         Best for:         Best for:         Best for:
+• Invoices        • Rewards         • Salaries        • Committees
+• Grants          • Airdrops        • Grants          • Working groups
+• Expenses        • Rebates         • Vesting         • Recurring roles
+```
+
+## Smart Contract Interface
+
+### IPayments
+
+```solidity
+interface IPayments {
+    /// @notice Simple transfer from treasury
+    function transfer(
+        address token,
+        address to,
+        uint256 amount,
+        string calldata memo
+    ) external;
+
+    /// @notice Batch transfer to multiple recipients
+    function airdrop(
+        address token,
+        address[] calldata recipients,
+        uint256[] calldata amounts
+    ) external;
+
+    /// @notice Create a payment stream
+    function createStream(
+        address token,
+        address recipient,
+        uint256 totalAmount,
+        uint256 startTime,
+        uint256 duration,
+        uint256 cliffDuration
+    ) external returns (uint256 streamId);
+
+    /// @notice Create streams for all role holders
+    function streamToRole(
+        bytes32 roleId,
+        address token,
+        uint256 amountPerHolder,
+        uint256 duration
+    ) external returns (uint256[] memory streamIds);
+
+    /// @notice Withdraw from a stream
+    function withdrawFromStream(uint256 streamId) external;
+
+    /// @notice Cancel a stream
+    function cancelStream(uint256 streamId) external;
+}
+```
+
+## Payment Methods
+
+<Cards>
+  <Card title="Transfer" href="/docs/guide/payments/transfer" icon="send">
+    One-time payments to single recipient
+  </Card>
+  <Card title="Airdrop" href="/docs/guide/payments/airdrop" icon="users">
+    Distribute to multiple addresses at once
+  </Card>
+  <Card title="Stream" href="/docs/guide/payments/stream" icon="clock">
+    Continuous payments over time (Sablier-style)
+  </Card>
+  <Card title="Stream to Role" href="/docs/guide/payments/stream-to-role" icon="shield">
+    Automatic streams to role holders
+  </Card>
+</Cards>
+
+## Choosing a Payment Type
+
+### Use Transfer When
+
+- Paying a single invoice or expense
+- One-time grant disbursement
+- Reimbursing a contributor
+- Any simple, immediate payment
+
+### Use Airdrop When
+
+- Distributing rewards to many addresses
+- Sending governance tokens to holders
+- Bulk refunds or rebates
+- Community rewards programs
+
+### Use Stream When
+
+- Paying salaries or stipends
+- Grant vesting schedules
+- Long-term contractor payments
+- Token unlock schedules
+
+### Use Stream to Role When
+
+- Committee member compensation
+- Working group stipends
+- Automatic contributor rewards
+- Any role-based recurring payment
+
+## Payment Workflow
+
+### Via Proposal
+
+Most payments require governance approval:
+
+```yaml
+Proposal: "Q1 Contributor Payments"
+
+Description: |
+  This proposal executes Q1 payments for approved contributors.
+
+Actions:
+  # Immediate transfer for completed work
+  - type: transfer
+    token: USDC
+    to: 0x1234...
+    amount: 5000
+    memo: "Q1 Development Milestone"
+
+  # Stream for ongoing work
+  - type: create_stream
+    token: USDC
+    recipient: 0x5678...
+    total: 12000
+    duration: 90 days
+    cliff: 0
+
+  # Airdrop rewards to participants
+  - type: airdrop
+    token: DAO
+    recipients: [0xAAA..., 0xBBB..., 0xCCC...]
+    amounts: [1000, 1000, 1000]
+```
+
+### Via Direct Action
+
+With appropriate permissions:
+
+```typescript
+import { PaymentsClient } from '@lux/dao-sdk';
+
+const payments = new PaymentsClient(signer);
+
+// Simple transfer (requires TREASURER_ROLE)
+await payments.transfer(
+  usdc.address,
+  recipientAddress,
+  ethers.parseUnits('5000', 6),
+  'Invoice #1234'
+);
+```
+
+## Treasury Limits
+
+### Spending Caps
+
+| Level | Single Payment | Daily Limit | Requires |
+|-------|----------------|-------------|----------|
+| Member | $0 | $0 | - |
+| Contributor | $1,000 | $2,500 | Lead approval |
+| Lead | $10,000 | $25,000 | 2/3 multi-sig |
+| Committee | $50,000 | $100,000 | Committee vote |
+| DAO | Unlimited | Unlimited | Full governance |
+
+### Approval Thresholds
+
+```yaml
+Payment Approval Matrix:
+
+< $1,000:
+  - Single Lead signature
+  - No proposal required
+
+$1,000 - $10,000:
+  - 2 Lead signatures
+  - Logged in treasury report
+
+$10,000 - $50,000:
+  - Committee proposal
+  - 3-day voting period
+
+> $50,000:
+  - Full DAO proposal
+  - 7-day voting period
+  - Standard timelock
+```
+
+## Monitoring Payments
+
+### Dashboard View
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│ Treasury Payments                                            │
+├─────────────────────────────────────────────────────────────┤
+│                                                              │
+│  Recent Transfers                                            │
+│  ──────────────────────────────────────────────────────     │
+│  Jan 15  0x1234...  5,000 USDC   "Q1 Development"           │
+│  Jan 14  0x5678...  2,500 USDC   "Design Work"              │
+│  Jan 10  0xABCD...  1,000 USDC   "Community Event"          │
+│                                                              │
+│  Active Streams (3)                              Total/mo   │
+│  ──────────────────────────────────────────────────────     │
+│  Research Lead     1,000 USDC/mo   ████████░░  80%          │
+│  Dev Contributor     500 USDC/mo   ██████░░░░  60%          │
+│  Community Mgr       750 USDC/mo   ████░░░░░░  40%          │
+│                                                              │
+│  Pending Airdrops (1)                                       │
+│  ──────────────────────────────────────────────────────     │
+│  Governance Rewards  500 recipients  50,000 DAO tokens      │
+│  Status: Awaiting execution                                  │
+│                                                              │
+└─────────────────────────────────────────────────────────────┘
+```
+
+### Event Tracking
+
+```typescript
+import { PaymentsClient } from '@lux/dao-sdk';
+
+const payments = new PaymentsClient(provider);
+
+// Track all payment events
+payments.on('Transfer', (token, to, amount, memo) => {
+  console.log(`Transfer: ${amount} to ${to}`);
+});
+
+payments.on('StreamCreated', (streamId, recipient, total, duration) => {
+  console.log(`Stream ${streamId}: ${total} over ${duration}s`);
+});
+
+payments.on('AirdropExecuted', (token, recipientCount, totalAmount) => {
+  console.log(`Airdrop: ${totalAmount} to ${recipientCount} addresses`);
+});
+```
+
+## Security Considerations
+
+### Multi-Sig Requirements
+
+For significant payments:
+
+```yaml
+Multi-sig thresholds:
+  - < $10K: 2-of-3 signers
+  - $10K-$50K: 3-of-5 signers
+  - > $50K: 4-of-7 signers + timelock
+```
+
+### Address Verification
+
+Always verify recipient addresses:
+
+```typescript
+// Validate address before payment
+function validateRecipient(address: string): boolean {
+  // Check format
+  if (!ethers.isAddress(address)) return false;
+
+  // Check against known addresses (optional)
+  const known = knownAddresses.get(address);
+  if (!known) {
+    console.warn('Unknown address - verify manually');
+  }
+
+  return true;
+}
+```
+
+### Payment Limits
+
+Configure reasonable limits:
+
+```solidity
+// In treasury contract
+uint256 public constant MAX_SINGLE_PAYMENT = 100_000e6; // 100K USDC
+uint256 public constant DAILY_LIMIT = 250_000e6;        // 250K USDC
+```
+
+## Best Practices
+
+### Documentation
+
+Always include clear memos:
+
+```typescript
+// Good
+await payments.transfer(usdc, recipient, amount,
+  'Invoice #1234 - Q1 Development Milestone 2');
+
+// Bad
+await payments.transfer(usdc, recipient, amount, '');
+```
+
+### Batching
+
+Combine related payments:
+
+```typescript
+// Instead of 10 separate transfers
+const recipients = [...];
+const amounts = [...];
+await payments.airdrop(token, recipients, amounts);
+```
+
+### Verification
+
+Always verify before execution:
+
+1. Confirm recipient address
+2. Check token and amount
+3. Review memo/reason
+4. Simulate transaction
+5. Get required approvals
+
+## Common Errors
+
+| Error | Cause | Solution |
+|-------|-------|----------|
+| `InsufficientBalance` | Treasury lacks funds | Fund treasury or reduce amount |
+| `ExceedsLimit` | Above spending cap | Get higher approval or split |
+| `Unauthorized` | Missing role | Get required permissions |
+| `InvalidRecipient` | Bad address | Verify recipient address |
+| `StreamNotFound` | Invalid stream ID | Check stream exists |
+
+## Gas Optimization
+
+### Batching Saves Gas
+
+| Operation | Gas (approx) |
+|-----------|--------------|
+| 10 separate transfers | 210,000 |
+| 1 airdrop (10 recipients) | 150,000 |
+| Savings | ~30% |
+
+### Stream Efficiency
+
+Streams are gas-efficient for recurring payments:
+
+| Payment Method | Annual Gas (monthly) |
+|----------------|---------------------|
+| 12 transfers | ~252,000 |
+| 1 stream | ~75,000 |
+| Savings | ~70% |

@@ -1,0 +1,470 @@
+---
+title: Governance Settings
+description: Configure voting periods, thresholds, and governance parameters
+---
+
+# Governance Settings
+
+Governance settings control how proposals are created, voted on, and executed. These settings define the rules that govern your DAO's decision-making process.
+
+<Callout type="warning">
+Most governance settings require a governance proposal to change. Modifications affect all future proposals and should be carefully considered.
+</Callout>
+
+## Overview
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│                    Governance Settings                           │
+├─────────────────────────────────────────────────────────────────┤
+│                                                                   │
+│  Proposal Lifecycle                                              │
+│  ─────────────────                                               │
+│                                                                   │
+│  ┌──────────┐    ┌──────────┐    ┌──────────┐    ┌──────────┐  │
+│  │ Creation │───▶│  Voting  │───▶│ Timelock │───▶│Execution │  │
+│  │Threshold │    │  Period  │    │  Delay   │    │          │  │
+│  └──────────┘    └──────────┘    └──────────┘    └──────────┘  │
+│   100K tokens     7 days         3 days         Immediate      │
+│                                                                   │
+│  Vote Requirements                                               │
+│  ─────────────────                                               │
+│  Quorum: 1,000,000 tokens (participation minimum)               │
+│  Approval: >50% For votes (standard proposals)                  │
+│                                                                   │
+└─────────────────────────────────────────────────────────────────┘
+```
+
+## Proposal Settings
+
+### Proposal Threshold
+
+The minimum voting power required to create a proposal.
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│  Proposal Threshold                                              │
+├─────────────────────────────────────────────────────────────────┤
+│                                                                   │
+│  Current Value: 100,000 veTOKEN                                  │
+│                                                                   │
+│  New Value: [100000________] veTOKEN                            │
+│                                                                   │
+│  │ Threshold │ % of Supply │ Effect                      │     │
+│  │───────────│─────────────│──────────────────────────────│     │
+│  │ 10,000    │ 0.1%        │ Very accessible              │     │
+│  │ 100,000   │ 1%          │ Moderate barrier (current)   │     │
+│  │ 500,000   │ 5%          │ Significant barrier          │     │
+│  │ 1,000,000 │ 10%         │ High barrier                 │     │
+│                                                                   │
+│  ⚠ Requires governance vote to change                           │
+│                                                                   │
+└─────────────────────────────────────────────────────────────────┘
+```
+
+**Considerations:**
+- **Too low**: Spam proposals, cluttered governance
+- **Too high**: Limits participation, centralizes power
+- **Balance**: Allow engaged members to propose while preventing noise
+
+### Proposal Deposit
+
+Optional deposit required when creating proposals.
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│  Proposal Deposit                                                │
+├─────────────────────────────────────────────────────────────────┤
+│                                                                   │
+│  ☑ Require deposit to create proposals                          │
+│                                                                   │
+│  Deposit Amount: [1000______] TOKEN                             │
+│                                                                   │
+│  Deposit Return:                                                 │
+│  ● Returned if proposal passes OR reaches quorum                │
+│  ○ Returned only if proposal passes                             │
+│  ○ Never returned (fee-based)                                   │
+│                                                                   │
+│  Slash Conditions:                                               │
+│  ☑ Proposal fails to reach quorum                               │
+│  ☐ Proposal is defeated                                         │
+│  ☐ Proposal is vetoed                                           │
+│                                                                   │
+│  Slashed deposits go to: [Treasury ▼]                           │
+│                                                                   │
+└─────────────────────────────────────────────────────────────────┘
+```
+
+## Voting Settings
+
+### Voting Period
+
+How long the voting window remains open.
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│  Voting Period                                                   │
+├─────────────────────────────────────────────────────────────────┤
+│                                                                   │
+│  Current Value: 7 days                                           │
+│                                                                   │
+│  New Value: [7___] days                                         │
+│                                                                   │
+│  │ Duration │ Blocks (~) │ Trade-off                     │     │
+│  │──────────│────────────│───────────────────────────────│     │
+│  │ 3 days   │ ~21,600    │ Fast decisions, less input    │     │
+│  │ 7 days   │ ~50,400    │ Balanced (recommended)        │     │
+│  │ 14 days  │ ~100,800   │ Maximum input, slow execution │     │
+│                                                                   │
+│  Note: Voting period is measured in blocks for precision         │
+│                                                                   │
+└─────────────────────────────────────────────────────────────────┘
+```
+
+### Voting Delay
+
+Optional delay between proposal creation and voting start.
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│  Voting Delay                                                    │
+├─────────────────────────────────────────────────────────────────┤
+│                                                                   │
+│  ☑ Enable voting delay                                          │
+│                                                                   │
+│  Delay Duration: [1___] days                                    │
+│                                                                   │
+│  Purpose:                                                        │
+│  - Allows community to prepare before voting starts              │
+│  - Prevents snapshot manipulation                                │
+│  - Enables token accumulation before snapshot                    │
+│                                                                   │
+│  Timeline with delay:                                            │
+│  ┌────────┐  ┌────────┐  ┌────────┐  ┌────────┐                │
+│  │Create  │─▶│ Delay  │─▶│ Voting │─▶│Timelock│                │
+│  │        │  │ 1 day  │  │ 7 days │  │ 3 days │                │
+│  └────────┘  └────────┘  └────────┘  └────────┘                │
+│                                                                   │
+└─────────────────────────────────────────────────────────────────┘
+```
+
+### Quorum Settings
+
+Minimum participation required for a valid vote.
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│  Quorum Settings                                                 │
+├─────────────────────────────────────────────────────────────────┤
+│                                                                   │
+│  Quorum Type:                                                    │
+│  ● Fixed Amount                                                  │
+│  ○ Percentage of Supply                                         │
+│  ○ Percentage of Locked Supply                                  │
+│                                                                   │
+│  Quorum Value: [1000000_____] veTOKEN                           │
+│                                                                   │
+│  │ Type       │ Standard │ Constitutional │ Emergency │         │
+│  │────────────│──────────│────────────────│───────────│         │
+│  │ Quorum     │ 1M       │ 5M             │ 500K      │         │
+│  │ % Supply   │ 10%      │ 50%            │ 5%        │         │
+│                                                                   │
+│  Quorum includes:                                                │
+│  ☑ For votes                                                    │
+│  ☑ Against votes                                                │
+│  ☑ Abstain votes                                                │
+│                                                                   │
+└─────────────────────────────────────────────────────────────────┘
+```
+
+### Approval Threshold
+
+Percentage of For votes required to pass.
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│  Approval Threshold                                              │
+├─────────────────────────────────────────────────────────────────┤
+│                                                                   │
+│  Standard Proposals:                                             │
+│  Approval Required: [50__]% + 1                                 │
+│  (Simple majority)                                               │
+│                                                                   │
+│  Constitutional Proposals:                                       │
+│  Approval Required: [67__]%                                      │
+│  (Supermajority)                                                 │
+│                                                                   │
+│  Emergency Proposals:                                            │
+│  Approval Required: [75__]%                                      │
+│  (High consensus)                                                │
+│                                                                   │
+│  Calculation:                                                    │
+│  Approval % = For / (For + Against) × 100                       │
+│  (Abstain votes excluded from calculation)                       │
+│                                                                   │
+└─────────────────────────────────────────────────────────────────┘
+```
+
+## Timelock Settings
+
+### Timelock Delay
+
+Mandatory waiting period before execution.
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│  Timelock Settings                                               │
+├─────────────────────────────────────────────────────────────────┤
+│                                                                   │
+│  │ Proposal Type    │ Timelock │ Purpose                    │  │
+│  │──────────────────│──────────│────────────────────────────│  │
+│  │ Standard         │ 3 days   │ Community review           │  │
+│  │ Constitutional   │ 14 days  │ Extended review            │  │
+│  │ Emergency        │ 0 days   │ Immediate action           │  │
+│                                                                   │
+│  Standard Timelock: [3___] days                                 │
+│  Constitutional Timelock: [14__] days                           │
+│                                                                   │
+│  Grace Period: [7___] days                                      │
+│  (Time to execute after timelock expires)                        │
+│                                                                   │
+│  ⚠ If not executed within grace period, proposal expires        │
+│                                                                   │
+└─────────────────────────────────────────────────────────────────┘
+```
+
+### Cancellation Rules
+
+Who can cancel pending proposals.
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│  Cancellation Rules                                              │
+├─────────────────────────────────────────────────────────────────┤
+│                                                                   │
+│  Proposals can be cancelled by:                                  │
+│  ☑ Proposer (before voting ends)                                │
+│  ☑ Guardian/Admin (any time before execution)                   │
+│  ☐ Governance vote (during timelock)                            │
+│                                                                   │
+│  Guardian Address: [0x1234...abcd]                              │
+│                                                                   │
+│  Auto-cancel conditions:                                         │
+│  ☑ Proposer's voting power drops below threshold                │
+│  ☐ Quorum not met at end of voting                              │
+│                                                                   │
+└─────────────────────────────────────────────────────────────────┘
+```
+
+## Proposal Types
+
+### Standard Proposals
+
+Default proposal type for routine governance.
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│  Standard Proposal Settings                                      │
+├─────────────────────────────────────────────────────────────────┤
+│                                                                   │
+│  Allowed Actions:                                                │
+│  ☑ Treasury transfers (< $100,000)                              │
+│  ☑ Role assignments                                             │
+│  ☑ Parameter updates (within range)                             │
+│  ☑ External contract calls                                      │
+│                                                                   │
+│  Settings:                                                       │
+│  - Proposal Threshold: 100,000 veTOKEN                          │
+│  - Voting Period: 7 days                                        │
+│  - Quorum: 1,000,000 veTOKEN                                    │
+│  - Approval: >50%                                               │
+│  - Timelock: 3 days                                             │
+│                                                                   │
+└─────────────────────────────────────────────────────────────────┘
+```
+
+### Constitutional Proposals
+
+For significant protocol changes.
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│  Constitutional Proposal Settings                                │
+├─────────────────────────────────────────────────────────────────┤
+│                                                                   │
+│  Required for:                                                   │
+│  ☑ Contract upgrades                                            │
+│  ☑ Governance parameter changes                                 │
+│  ☑ Treasury transfers > $100,000                                │
+│  ☑ Adding/removing signers                                      │
+│                                                                   │
+│  Settings:                                                       │
+│  - Proposal Threshold: 500,000 veTOKEN                          │
+│  - Voting Period: 14 days                                       │
+│  - Quorum: 5,000,000 veTOKEN                                    │
+│  - Approval: >66.7%                                             │
+│  - Timelock: 14 days                                            │
+│                                                                   │
+└─────────────────────────────────────────────────────────────────┘
+```
+
+### Emergency Proposals
+
+For urgent security actions.
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│  Emergency Proposal Settings                                     │
+├─────────────────────────────────────────────────────────────────┤
+│                                                                   │
+│  ⚠ Emergency proposals bypass normal timelock                   │
+│                                                                   │
+│  Allowed for:                                                    │
+│  ☑ Pausing contracts                                            │
+│  ☑ Revoking compromised permissions                             │
+│  ☐ Treasury transfers                                           │
+│  ☐ Contract upgrades                                            │
+│                                                                   │
+│  Settings:                                                       │
+│  - Proposal Threshold: 500,000 veTOKEN                          │
+│  - Voting Period: 3 days                                        │
+│  - Quorum: 500,000 veTOKEN                                      │
+│  - Approval: >75%                                               │
+│  - Timelock: 0 days (immediate)                                 │
+│                                                                   │
+│  Requires Guardian approval: ☑                                  │
+│                                                                   │
+└─────────────────────────────────────────────────────────────────┘
+```
+
+## Vote Counting
+
+### Counting Method
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│  Vote Counting Method                                            │
+├─────────────────────────────────────────────────────────────────┤
+│                                                                   │
+│  Method:                                                         │
+│  ● Simple Voting (For/Against/Abstain)                          │
+│  ○ Ranked Choice                                                │
+│  ○ Quadratic Voting                                             │
+│  ○ Conviction Voting                                            │
+│                                                                   │
+│  Abstain Handling:                                               │
+│  ● Count toward quorum only                                     │
+│  ○ Count as neutral vote                                        │
+│  ○ Exclude entirely                                             │
+│                                                                   │
+│  Tie Breaking:                                                   │
+│  ● Proposal fails on tie                                        │
+│  ○ Guardian decides                                             │
+│  ○ Extended voting period                                       │
+│                                                                   │
+└─────────────────────────────────────────────────────────────────┘
+```
+
+### Snapshot Timing
+
+When voting power is calculated.
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│  Snapshot Settings                                               │
+├─────────────────────────────────────────────────────────────────┤
+│                                                                   │
+│  Snapshot Block:                                                 │
+│  ● At proposal creation                                         │
+│  ○ At voting start (after delay)                                │
+│  ○ Custom block height                                          │
+│                                                                   │
+│  Implications:                                                   │
+│  - Voting power is locked at snapshot                           │
+│  - Token transfers after snapshot don't affect vote             │
+│  - Prevents vote buying during active proposals                 │
+│                                                                   │
+└─────────────────────────────────────────────────────────────────┘
+```
+
+## Changing Settings
+
+### Governance-Required Changes
+
+To modify governance settings:
+
+1. **Create Proposal**: Submit a constitutional proposal
+2. **Discussion Period**: Allow community review
+3. **Voting**: Token holders vote on changes
+4. **Timelock**: Changes queue for execution
+5. **Execution**: New settings take effect
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│  Propose Governance Change                                       │
+├─────────────────────────────────────────────────────────────────┤
+│                                                                   │
+│  This change requires a governance proposal.                     │
+│                                                                   │
+│  Proposed Change:                                                │
+│  - Setting: Voting Period                                        │
+│  - Current: 7 days                                               │
+│  - Proposed: 10 days                                             │
+│                                                                   │
+│  Proposal Type: Constitutional                                   │
+│  Expected Timeline: ~30 days                                     │
+│                                                                   │
+│  [Cancel]  [Create Proposal]                                     │
+│                                                                   │
+└─────────────────────────────────────────────────────────────────┘
+```
+
+<Callout type="info">
+**Best Practice**: Make incremental changes to governance parameters. Large changes may have unintended consequences.
+</Callout>
+
+## Recommended Configurations
+
+### Conservative (High Security)
+
+```
+Proposal Threshold: 500,000 tokens (5%)
+Voting Period: 14 days
+Quorum: 20% of supply
+Approval: 67%
+Timelock: 14 days
+```
+
+### Balanced (Recommended)
+
+```
+Proposal Threshold: 100,000 tokens (1%)
+Voting Period: 7 days
+Quorum: 10% of supply
+Approval: 50%+1
+Timelock: 3 days
+```
+
+### Agile (Fast Decisions)
+
+```
+Proposal Threshold: 10,000 tokens (0.1%)
+Voting Period: 3 days
+Quorum: 5% of supply
+Approval: 50%+1
+Timelock: 1 day
+```
+
+## Next Steps
+
+<Cards>
+  <Card title="General Settings" href="/docs/guide/settings/general" icon="settings">
+    Configure basic project information
+  </Card>
+  <Card title="Voting Guide" href="/docs/guide/voting" icon="vote">
+    Learn about the voting process
+  </Card>
+  <Card title="Creating Proposals" href="/docs/guide/resolutions" icon="file-plus">
+    Submit governance proposals
+  </Card>
+</Cards>

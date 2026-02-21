@@ -1,0 +1,292 @@
+---
+title: FAQ
+description: Frequently asked questions about governance and the protocol
+---
+
+# Frequently Asked Questions
+
+Find answers to common questions about governance, tokens, voting, and the platform.
+
+## General
+
+### What is this protocol?
+
+A decentralized governance platform that enables token holders to collectively manage protocol parameters, treasury funds, and community initiatives through on-chain voting.
+
+### How does governance work?
+
+Token holders lock their tokens to receive voting power. They can then vote on proposals, delegate their power to others, or submit their own proposals. Approved proposals are executed after a timelock delay.
+
+### Is this protocol decentralized?
+
+Yes. All governance decisions are made by token holders through on-chain voting. No single party has control over the protocol.
+
+### What blockchain does this run on?
+
+The protocol is deployed on [Network]. See the [Contract Audit](/docs/learn-more/audit) page for deployed contract addresses.
+
+## Tokens
+
+### What is the governance token?
+
+The governance token (TOKEN) is the native token used for voting and governance participation. Holders can lock tokens to receive voting power.
+
+### How do I get tokens?
+
+You can acquire tokens through:
+- **Exchanges**: Purchase on supported DEXs or CEXs
+- **Bonding**: Bond assets for tokens (if enabled)
+- **Earning**: Participate in community programs
+- **Grants**: Apply for community grants
+
+### What is the vote-escrowed token (veTOKEN)?
+
+When you lock TOKEN, you receive veTOKEN representing your voting power. The longer you lock, the more voting power you receive. veTOKEN is non-transferable and decays over time as your lock approaches expiration.
+
+### What is the staked token (sTOKEN)?
+
+sTOKEN represents tokens staked in the protocol to earn rewards. Unlike veTOKEN, staked tokens can be unstaked (subject to cooldown periods).
+
+### Can I transfer my locked tokens?
+
+No. Locked tokens cannot be transferred until the lock expires. This ensures committed governance participation.
+
+## Voting
+
+### How do I vote?
+
+1. Lock tokens to receive voting power
+2. Find an active proposal in the app
+3. Review the proposal details
+4. Cast your vote (For, Against, or Abstain)
+5. Sign the transaction
+
+See the [Voting Guide](/docs/guide/voting) for detailed instructions.
+
+### How much voting power do I have?
+
+Your voting power depends on:
+- **Amount locked**: More tokens = more power
+- **Lock duration**: Longer locks = higher multiplier
+- **Time remaining**: Power decays as lock approaches expiration
+
+Formula: `Voting Power = Locked Amount x Time Multiplier`
+
+### Can I change my vote?
+
+Yes, you can change your vote any time before the voting period ends. After the period closes, votes are final.
+
+### What if I miss a vote?
+
+Missing a vote means your voice isn't counted on that proposal. Consider:
+- **Delegation**: Delegate to someone who votes actively
+- **Notifications**: Enable alerts for new proposals
+- **Calendar**: Track voting deadlines
+
+### What is quorum?
+
+Quorum is the minimum participation required for a valid vote. If quorum isn't reached, the proposal fails regardless of the vote split.
+
+### What happens after a vote passes?
+
+Passed proposals enter a timelock queue. After the timelock period (typically 1-14 days), the proposal can be executed by anyone.
+
+## Delegation
+
+### What is delegation?
+
+Delegation allows you to assign your voting power to another address. The delegate votes on your behalf, but you retain your locked tokens.
+
+### Can I delegate to multiple people?
+
+It depends on the configuration. Some DAOs support split delegation where you can assign different percentages to multiple delegates.
+
+### Can I override my delegate's vote?
+
+Yes. If you vote on a proposal, your vote overrides any delegation for that specific proposal.
+
+### How do I become a delegate?
+
+Anyone can become a delegate. To attract delegations:
+1. Build reputation through active participation
+2. Share your voting philosophy
+3. Communicate your positions on proposals
+4. Maintain a consistent voting record
+
+### Is delegation revocable?
+
+Yes. You can revoke or change your delegation at any time.
+
+## Proposals
+
+### Who can create proposals?
+
+Anyone with sufficient voting power can create proposals. The threshold varies by DAO but typically requires a minimum amount of veTOKEN.
+
+### What can proposals do?
+
+Proposals can:
+- Transfer treasury funds
+- Change protocol parameters
+- Add or remove roles
+- Create sub-DAOs or committees
+- Upgrade contracts
+- Execute arbitrary calls
+
+### How long does the proposal process take?
+
+Typical timeline:
+
+| Stage | Duration |
+|-------|----------|
+| Discussion | 3-7 days |
+| Voting | 7 days |
+| Timelock | 1-14 days |
+| **Total** | **11-28 days** |
+
+### What happens if my proposal fails?
+
+Failed proposals can be:
+- Modified based on feedback and resubmitted
+- Split into smaller, more focused proposals
+- Discussed further in the forum
+
+### Is there a cost to create proposals?
+
+Creating a proposal requires locking a proposal deposit (if configured). This deposit is returned if the proposal passes or reaches quorum.
+
+## Treasury
+
+### How is the treasury managed?
+
+The treasury is managed through governance proposals. Token holders vote on how funds are allocated.
+
+### What assets are in the treasury?
+
+The treasury can hold any ERC-20 tokens. Common assets include:
+- Governance tokens
+- Stablecoins (USDC, DAI)
+- Protocol revenue
+- Partner tokens
+
+### How are treasury funds protected?
+
+- **Multi-sig**: Critical operations require multiple signatures
+- **Timelock**: All transfers have delay periods
+- **Limits**: Spending limits for different roles
+- **Transparency**: All transactions are on-chain
+
+### Can the treasury be drained?
+
+The multi-layer security (governance vote + timelock + multi-sig) makes unauthorized treasury access extremely difficult.
+
+## Technical
+
+### Are the contracts audited?
+
+Yes. All core contracts have been audited by independent security firms. See [Contract Audit](/docs/learn-more/audit) for details.
+
+### Are the contracts upgradeable?
+
+Yes, contracts use a transparent proxy pattern. Upgrades require:
+1. Governance proposal approval
+2. Timelock delay
+3. Multi-sig execution (for critical contracts)
+
+### What wallets are supported?
+
+- MetaMask
+- WalletConnect
+- Coinbase Wallet
+- Ledger
+- Trezor
+
+### Is there a mobile app?
+
+The web application is fully responsive and works on mobile browsers. Mobile wallets with built-in browsers (MetaMask Mobile, Coinbase Wallet) provide the best experience.
+
+### What are the gas costs?
+
+Gas costs depend on network conditions. Typical costs:
+
+| Action | Gas Used | Approximate Cost |
+|--------|----------|------------------|
+| Lock tokens | ~150,000 | Varies |
+| Vote | ~100,000 | Varies |
+| Delegate | ~80,000 | Varies |
+| Create proposal | ~300,000 | Varies |
+
+### Is gasless voting available?
+
+Yes, gasless voting is supported through meta-transactions. See [Gasless Voting](/docs/guide/gasless) for setup instructions.
+
+## Troubleshooting
+
+### My transaction is stuck
+
+1. Check network congestion
+2. Speed up with higher gas
+3. Cancel and retry
+4. Wait for network to clear
+
+### I can't see my voting power
+
+1. Ensure tokens are locked (not just held)
+2. Check if lock has expired
+3. Verify you're on the correct network
+4. Refresh the page
+
+### My vote didn't count
+
+1. Confirm transaction completed successfully
+2. Check you voted during the voting period
+3. Verify voting power at snapshot block
+4. Contact support if issue persists
+
+### I can't connect my wallet
+
+1. Ensure wallet is unlocked
+2. Clear browser cache
+3. Disable conflicting extensions
+4. Try a different browser
+5. Update wallet to latest version
+
+## Community
+
+### How can I get involved?
+
+- **Discord**: Join discussions
+- **Forum**: Participate in governance
+- **GitHub**: Contribute to development
+- **Twitter**: Follow for updates
+- **Committees**: Join working groups
+
+### Where can I get help?
+
+- **Discord**: Community support channel
+- **Forum**: Governance discussions
+- **Documentation**: This site
+- **Email**: Support team
+
+### How can I contribute?
+
+- Vote on proposals
+- Delegate responsibly
+- Submit improvement proposals
+- Contribute to documentation
+- Build integrations
+- Report bugs
+
+## Still Have Questions?
+
+<Cards>
+  <Card title="Discord" href="#" icon="message-circle">
+    Ask the community
+  </Card>
+  <Card title="Forum" href="#" icon="messages">
+    Detailed discussions
+  </Card>
+  <Card title="Support" href="#" icon="mail">
+    Contact the team
+  </Card>
+</Cards>

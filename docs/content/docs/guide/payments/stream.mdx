@@ -1,0 +1,510 @@
+---
+title: Payment Streams
+description: Continuous payments over time using Sablier-style streams
+---
+
+# Payment Streams
+
+Streams provide continuous, real-time payments where tokens flow from treasury to recipient every second. This is ideal for salaries, vesting, and long-term grants.
+
+## Overview
+
+Instead of lump-sum payments:
+
+```
+Traditional:  ●────────────────────────────────────────●
+              Jan 1                                   Dec 31
+              $60,000                                 paid
+
+Stream:       ●═══════════════════════════════════════●
+              Jan 1                                   Dec 31
+              $164.38/day flowing continuously
+```
+
+## Benefits
+
+- **Cash flow management** - Recipients access funds as earned
+- **Reduced counterparty risk** - Cancel anytime, only earned funds transferred
+- **Automation** - No manual monthly payments
+- **Transparency** - Real-time visibility into payment status
+- **Flexibility** - Cliffs, linear, or custom curves
+
+## Creating a Stream
+
+### Via UI
+
+1. Navigate to **Treasury** > **Payments**
+2. Click **"New Stream"**
+3. Configure stream parameters
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│ Create Payment Stream                                        │
+├─────────────────────────────────────────────────────────────┤
+│                                                              │
+│  Recipient:   [0x1234...5678                        ]       │
+│               ENS: developer.eth ✓                          │
+│                                                              │
+│  Token:       [USDC ▼]                                      │
+│                                                              │
+│  Total Amount: [60,000                              ]       │
+│                                                              │
+│  Duration:     [12    ] months                              │
+│                ≈ 365 days                                    │
+│                                                              │
+│  Cliff:        [1     ] month                               │
+│                No withdrawals until cliff completes          │
+│                                                              │
+│  Start:        (•) Immediately                              │
+│                ( ) Custom date: [          ]                │
+│                                                              │
+│  ──────────────────────────────────────────────────────     │
+│  Stream Preview                                              │
+│  ──────────────────────────────────────────────────────     │
+│                                                              │
+│  ●══════════════════════════════════════════════════●       │
+│  │◄─ cliff ─►│◄───────── vesting ─────────────────►│       │
+│  Jan 1       Feb 1                              Dec 31      │
+│  $0          $5,000                             $60,000     │
+│                                                              │
+│  Rate: $164.38/day ($5,000/month)                           │
+│                                                              │
+│  [ Cancel ]                          [ Create Stream ]      │
+│                                                              │
+└─────────────────────────────────────────────────────────────┘
+```
+
+### Via Proposal
+
+```yaml
+Proposal: "Create Development Contractor Stream"
+
+Description: |
+  This proposal creates a 12-month payment stream for our
+  lead developer contractor.
+
+  ## Terms
+  - Total: $60,000 USDC
+  - Duration: 12 months
+  - Cliff: 1 month
+  - Start: Upon execution
+
+  ## Milestones
+  Monthly deliverables tracked in development roadmap.
+
+  ## Cancellation
+  Stream can be cancelled by DAO vote if deliverables not met.
+
+Actions:
+  - type: create_stream
+    token: USDC
+    recipient: 0x1234...5678
+    totalAmount: 60000000000  # 60K USDC (6 decimals)
+    startTime: 0              # Immediately on execution
+    duration: 31536000        # 365 days in seconds
+    cliffDuration: 2592000    # 30 days in seconds
+```
+
+### Via SDK
+
+```typescript
+import { StreamsClient } from '@lux/dao-sdk';
+import { ethers } from 'ethers';
+
+const streams = new StreamsClient(signer);
+
+// Create a 12-month stream with 1-month cliff
+const tx = await streams.createStream({
+  token: usdcAddress,
+  recipient: '0x1234...5678',
+  totalAmount: ethers.parseUnits('60000', 6),
+  startTime: Math.floor(Date.now() / 1000),
+  duration: 365 * 24 * 60 * 60,      // 365 days
+  cliffDuration: 30 * 24 * 60 * 60,  // 30 days
+});
+
+const receipt = await tx.wait();
+const streamId = receipt.events[0].args.streamId;
+
+console.log(`Created stream: ${streamId}`);
+```
+
+## Smart Contract Interface
+
+```solidity
+interface IStreams {
+    struct Stream {
+        address sender;
+        address recipient;
+        address token;
+        uint256 totalAmount;
+        uint256 startTime;
+        uint256 endTime;
+        uint256 cliffTime;
+        uint256 withdrawn;
+        bool cancelled;
+    }
+
+    /// @notice Emitted when stream created
+    event StreamCreated(
+        uint256 indexed streamId,
+        address indexed sender,
+        address indexed recipient,
+        address token,
+        uint256 totalAmount,
+        uint256 startTime,
+        uint256 endTime,
+        uint256 cliffTime
+    );
+
+    /// @notice Emitted on withdrawal
+    event Withdrawal(
+        uint256 indexed streamId,
+        address indexed recipient,
+        uint256 amount
+    );
+
+    /// @notice Emitted when stream cancelled
+    event StreamCancelled(
+        uint256 indexed streamId,
+        uint256 recipientAmount,
+        uint256 senderAmount
+    );
+
+    /// @notice Create a new payment stream
+    function createStream(
+        address token,
+        address recipient,
+        uint256 totalAmount,
+        uint256 startTime,
+        uint256 duration,
+        uint256 cliffDuration
+    ) external returns (uint256 streamId);
+
+    /// @notice Withdraw available funds from stream
+    function withdraw(uint256 streamId) external;
+
+    /// @notice Cancel stream (sender only)
+    function cancel(uint256 streamId) external;
+
+    /// @notice Get withdrawable amount
+    function withdrawable(uint256 streamId) external view returns (uint256);
+
+    /// @notice Get stream details
+    function getStream(uint256 streamId) external view returns (Stream memory);
+}
+```
+
+## Stream Types
+
+### Linear Stream
+
+Constant rate throughout duration:
+
+```
+Amount
+  ^
+  │                              ●
+  │                         ●────
+  │                    ●────
+  │               ●────
+  │          ●────
+  │     ●────
+  │●────
+  └──────────────────────────────► Time
+```
+
+### Linear with Cliff
+
+No withdrawals until cliff, then linear:
+
+```
+Amount
+  ^
+  │                              ●
+  │                         ●────
+  │                    ●────
+  │               ●────
+  │          ●────
+  │     ●────
+  │     │
+  ●─────┘cliff
+  └──────────────────────────────► Time
+```
+
+### Exponential (Advanced)
+
+Custom curves for vesting schedules:
+
+```
+Amount
+  ^
+  │                              ●
+  │                           ●
+  │                        ●
+  │                     ●
+  │                  ●
+  │               ●
+  │            ●
+  │         ●
+  │      ●
+  │   ●
+  │●
+  └──────────────────────────────► Time
+```
+
+```typescript
+// Exponential stream (if supported)
+await streams.createExponentialStream({
+  token: tokenAddress,
+  recipient: recipientAddress,
+  totalAmount: amount,
+  duration: 365 * 24 * 60 * 60,
+  exponent: 2,  // Quadratic curve
+});
+```
+
+## Withdrawing from Streams
+
+### Recipient Withdrawal
+
+Recipients can withdraw earned funds anytime:
+
+```typescript
+// Check withdrawable amount
+const available = await streams.withdrawable(streamId);
+console.log(`Withdrawable: ${ethers.formatUnits(available, 6)} USDC`);
+
+// Withdraw all available
+const tx = await streams.withdraw(streamId);
+await tx.wait();
+```
+
+### Withdrawal UI
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│ Your Streams                                                 │
+├─────────────────────────────────────────────────────────────┤
+│                                                              │
+│  Stream #42: Development Contract                            │
+│  ──────────────────────────────────────────────────────     │
+│                                                              │
+│  ●═══════════════════●░░░░░░░░░░░░░░░░░░░░░░░░░░░░░●       │
+│  Jan 1              Now                          Dec 31     │
+│                                                              │
+│  Progress:  25% (91 days of 365)                            │
+│  Earned:    $15,000.00 USDC                                 │
+│  Withdrawn: $10,000.00 USDC                                 │
+│  Available: $5,000.00 USDC                                  │
+│                                                              │
+│  Rate: $164.38/day                                          │
+│                                                              │
+│                         [ Withdraw $5,000 ]                 │
+│                                                              │
+└─────────────────────────────────────────────────────────────┘
+```
+
+## Cancelling Streams
+
+### When to Cancel
+
+- Contractor leaves early
+- Deliverables not met
+- Budget reallocation needed
+- Mutual agreement
+
+### Cancellation Process
+
+On cancellation:
+1. Recipient receives all earned (vested) funds
+2. Remaining funds return to treasury
+3. Stream marked as cancelled
+
+```typescript
+// Cancel a stream
+const tx = await streams.cancel(streamId);
+const receipt = await tx.wait();
+
+// Check settlement
+const event = receipt.events.find(e => e.event === 'StreamCancelled');
+console.log(`Recipient received: ${event.args.recipientAmount}`);
+console.log(`Returned to treasury: ${event.args.senderAmount}`);
+```
+
+### Cancellation via Proposal
+
+```yaml
+Proposal: "Cancel Stream #42 - Contractor Departure"
+
+Description: |
+  The contractor has given notice and will depart on March 15.
+  This proposal cancels the stream, settling earned funds.
+
+  ## Settlement
+  - Earned (75 days): $12,329.00 USDC → Recipient
+  - Remaining: $47,671.00 USDC → Treasury
+
+Actions:
+  - type: cancel_stream
+    streamId: 42
+```
+
+## Stream Management
+
+### Viewing Active Streams
+
+```typescript
+// Get all streams for treasury
+const activeStreams = await streams.getActiveStreams(treasuryAddress);
+
+for (const stream of activeStreams) {
+  const withdrawable = await streams.withdrawable(stream.id);
+  console.log({
+    id: stream.id,
+    recipient: stream.recipient,
+    total: ethers.formatUnits(stream.totalAmount, 6),
+    withdrawn: ethers.formatUnits(stream.withdrawn, 6),
+    available: ethers.formatUnits(withdrawable, 6),
+    progress: `${Math.round((Date.now() / 1000 - stream.startTime) / (stream.endTime - stream.startTime) * 100)}%`
+  });
+}
+```
+
+### Stream Dashboard
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│ Active Streams                                               │
+├─────────────────────────────────────────────────────────────┤
+│                                                              │
+│  ID    Recipient           Total      Withdrawn  Progress   │
+│  ──────────────────────────────────────────────────────     │
+│  42    0x1234...developer  60K USDC   15K USDC   ████░░ 25% │
+│  43    0x5678...designer   24K USDC   8K USDC    ████░░ 33% │
+│  44    0xABCD...community  12K USDC   0          ██░░░░ 10% │
+│                                                              │
+│  Total Committed: 96,000 USDC                               │
+│  Total Withdrawn: 23,000 USDC                               │
+│  Total Remaining: 73,000 USDC                               │
+│                                                              │
+└─────────────────────────────────────────────────────────────┘
+```
+
+## Advanced Patterns
+
+### Multi-Stream Compensation
+
+Create multiple streams for complex packages:
+
+```yaml
+Actions:
+  # Base salary
+  - type: create_stream
+    token: USDC
+    recipient: 0x1234...
+    totalAmount: 60000000000
+    duration: 31536000
+    cliffDuration: 0
+
+  # Token vesting
+  - type: create_stream
+    token: DAO
+    recipient: 0x1234...
+    totalAmount: 10000000000000000000000
+    duration: 94608000  # 3 years
+    cliffDuration: 31536000  # 1 year cliff
+```
+
+### Milestone-Based Streams
+
+Combine streams with milestone approvals:
+
+```typescript
+// Create stream segments for each milestone
+const milestones = [
+  { amount: 10000, duration: 90 * 24 * 60 * 60 },  // Q1
+  { amount: 15000, duration: 90 * 24 * 60 * 60 },  // Q2
+  { amount: 20000, duration: 90 * 24 * 60 * 60 },  // Q3
+  { amount: 15000, duration: 90 * 24 * 60 * 60 },  // Q4
+];
+
+// Approve each milestone via separate proposals
+// Stream for next milestone created upon approval
+```
+
+### Refueling Streams
+
+Top up streams without creating new ones:
+
+```typescript
+// If supported by implementation
+await streams.topUp(streamId, additionalAmount);
+```
+
+## Calculating Stream Amounts
+
+### Daily Rate
+
+```typescript
+const dailyRate = totalAmount / durationDays;
+// $60,000 / 365 = $164.38/day
+```
+
+### Monthly Equivalent
+
+```typescript
+const monthlyRate = totalAmount / (duration / (30 * 24 * 60 * 60));
+// $60,000 / 12 = $5,000/month
+```
+
+### At Any Point
+
+```typescript
+function streamedAmount(stream: Stream, timestamp: number): bigint {
+  if (timestamp < stream.cliffTime) return 0n;
+  if (timestamp >= stream.endTime) return stream.totalAmount;
+
+  const elapsed = timestamp - stream.startTime;
+  const duration = stream.endTime - stream.startTime;
+
+  return (stream.totalAmount * BigInt(elapsed)) / BigInt(duration);
+}
+```
+
+## Common Errors
+
+| Error | Cause | Solution |
+|-------|-------|----------|
+| `StreamNotFound` | Invalid stream ID | Check stream exists |
+| `CliffNotReached` | Before cliff | Wait for cliff |
+| `NothingToWithdraw` | Already withdrawn | Wait for more to vest |
+| `StreamCancelled` | Already cancelled | Cannot interact |
+| `Unauthorized` | Not sender/recipient | Check permissions |
+
+## Best Practices
+
+### Setting Duration
+
+| Payment Type | Typical Duration |
+|--------------|------------------|
+| Trial period | 1-3 months |
+| Project work | 3-6 months |
+| Annual contract | 12 months |
+| Token vesting | 2-4 years |
+
+### Setting Cliffs
+
+| Scenario | Cliff Recommendation |
+|----------|---------------------|
+| New contractor | 1 month |
+| Proven contributor | None |
+| Token grant | 6-12 months |
+| Founder vesting | 1 year |
+
+### Monitoring
+
+- Track stream progress weekly
+- Review upcoming stream expirations
+- Plan renewals in advance
+- Document cancellation reasons

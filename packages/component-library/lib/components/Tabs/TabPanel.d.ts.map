@@ -1,0 +1,1 @@
+{"version":3,"file":"TabPanel.d.ts","sourceRoot":"","sources":["../../../src/components/Tabs/TabPanel.tsx"],"names":[],"mappings":"AACA,OAAO,KAAK,MAAM,OAAO,CAAC;AAE1B,UAAU,KAAK;IACb,KAAK,EAAE,MAAM,CAAC;IACd,KAAK,EAAE,MAAM,CAAC;CACf;AAED,QAAA,MAAM,QAAQ,EAAE,KAAK,CAAC,EAAE,CAAC,KAAK,CAW7B,CAAC;AAEF,eAAe,QAAQ,CAAC"}

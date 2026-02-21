@@ -1,0 +1,343 @@
+---
+title: Freezing a Node
+description: Temporarily halt child node operations
+---
+
+# Freezing a Node
+
+Parent DAOs can freeze child nodes to temporarily halt all operations. This is a powerful oversight mechanism for emergencies or misconduct.
+
+## Overview
+
+When a node is frozen:
+
+- All proposals are paused
+- Treasury transfers blocked
+- Voting halted
+- Administrative functions disabled
+
+The node remains frozen until explicitly unfrozen by the parent.
+
+## When to Freeze
+
+### Appropriate Uses
+
+- **Security breach** - Suspected compromise of node admin
+- **Misconduct** - Violation of charter or DAO policies
+- **Emergency** - Urgent situation requiring immediate halt
+- **Audit** - Temporary pause during investigation
+- **Transition** - Restructuring or leadership change
+
+### Not Appropriate
+
+- Policy disagreements (use governance instead)
+- Performance issues (address through regular channels)
+- Punitive action without cause
+- Avoiding legitimate proposals
+
+<Callout type="warning">
+Freezing is a serious action. Use only when necessary and document the rationale clearly.
+</Callout>
+
+## Freeze Methods
+
+### Method 1: Via UI (Admin)
+
+If you have admin role on the parent:
+
+1. Navigate to **Organization** > **Hierarchy**
+2. Select the child node
+3. Click **"Freeze Node"**
+4. Confirm the action
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│ Freeze Node: Research Committee                              │
+├─────────────────────────────────────────────────────────────┤
+│                                                              │
+│  ⚠️  This will immediately halt all operations              │
+│                                                              │
+│  Effects:                                                    │
+│  • All active proposals paused                              │
+│  • Treasury transfers blocked                               │
+│  • New proposals cannot be created                          │
+│  • Voting on pending items halted                           │
+│                                                              │
+│  Reason (required):                                          │
+│  ┌─────────────────────────────────────────────────────┐   │
+│  │ Security concern - investigating unauthorized        │   │
+│  │ access to committee admin wallet.                    │   │
+│  └─────────────────────────────────────────────────────┘   │
+│                                                              │
+│  [ Cancel ]                      [ Freeze Node ]            │
+│                                                              │
+└─────────────────────────────────────────────────────────────┘
+```
+
+### Method 2: Via Proposal
+
+For non-emergency situations or when admin prefers governance:
+
+```yaml
+Proposal: "Freeze Research Committee Pending Audit"
+
+Description: |
+  This proposal freezes the Research Committee while an
+  audit of recent grant disbursements is conducted.
+
+  ## Rationale
+  Concerns have been raised about several recent grants
+  that may not align with the committee charter.
+
+  ## Duration
+  Expected freeze: 2 weeks pending audit results
+
+  ## Next Steps
+  1. Audit committee reviews transactions
+  2. Findings presented to parent DAO
+  3. Unfreeze proposal if cleared
+  4. Corrective action if issues found
+
+Actions:
+  - type: freeze
+    childId: 42
+    reason: "Audit of grant disbursements"
+```
+
+### Method 3: Via SDK
+
+```typescript
+import { HierarchyClient } from '@lux/dao-sdk';
+
+const hierarchy = new HierarchyClient(signer);
+
+// Freeze a child node
+const tx = await hierarchy.freeze(
+  childId,
+  'Security concern - investigating unauthorized access'
+);
+
+await tx.wait();
+console.log('Node frozen');
+
+// Check freeze status
+const isFrozen = await hierarchy.isFrozen(childId);
+console.log(`Frozen: ${isFrozen}`);
+```
+
+## Smart Contract Interface
+
+```solidity
+interface IHierarchy {
+    /// @notice Emitted when a node is frozen
+    event NodeFrozen(
+        uint256 indexed nodeId,
+        address indexed freezer,
+        string reason,
+        uint256 timestamp
+    );
+
+    /// @notice Emitted when a node is unfrozen
+    event NodeUnfrozen(
+        uint256 indexed nodeId,
+        address indexed unfreezer,
+        uint256 timestamp
+    );
+
+    /// @notice Freezes a child node
+    /// @param childId The child node to freeze
+    /// @param reason Documented reason for freezing
+    function freeze(uint256 childId, string calldata reason) external;
+
+    /// @notice Unfreezes a previously frozen child
+    /// @param childId The child node to unfreeze
+    function unfreeze(uint256 childId) external;
+
+    /// @notice Returns true if node is frozen
+    function isFrozen(uint256 nodeId) external view returns (bool);
+
+    /// @notice Returns freeze info for a node
+    function freezeInfo(uint256 nodeId) external view returns (
+        bool frozen,
+        address frozenBy,
+        uint256 frozenAt,
+        string memory reason
+    );
+}
+```
+
+## Effects of Freezing
+
+### Immediate Effects
+
+| Operation | Status | Details |
+|-----------|--------|---------|
+| Proposals | Paused | Cannot create new, voting halted |
+| Treasury | Blocked | All transfers disabled |
+| Roles | Locked | Cannot add/remove members |
+| Settings | Locked | Configuration changes blocked |
+| Children | Unaffected | Sub-nodes continue (unless cascaded) |
+
+### What Still Works
+
+- Read-only operations (viewing proposals, balances)
+- Parent administrative functions
+- Event logging
+- Emergency contacts
+
+### Cascade Option
+
+Optionally freeze all descendants:
+
+```typescript
+// Freeze node and all children
+await hierarchy.freezeCascade(childId, 'Parent freeze - cascade');
+```
+
+## Unfreezing a Node
+
+### Via UI
+
+1. Navigate to frozen node
+2. Click **"Unfreeze Node"**
+3. Confirm the action
+
+### Via Proposal
+
+```yaml
+Proposal: "Unfreeze Research Committee - Audit Complete"
+
+Description: |
+  The audit has been completed with no issues found.
+  This proposal unfreezes the Research Committee.
+
+  ## Audit Results
+  - All 15 grants reviewed
+  - No policy violations found
+  - Recommendations for improved documentation
+
+Actions:
+  - type: unfreeze
+    childId: 42
+```
+
+### Via SDK
+
+```typescript
+const tx = await hierarchy.unfreeze(childId);
+await tx.wait();
+console.log('Node unfrozen');
+```
+
+## Freeze Duration
+
+### Recommended Limits
+
+| Situation | Duration | Action |
+|-----------|----------|--------|
+| Security investigation | 1-2 weeks | Unfreeze or escalate |
+| Audit | 2-4 weeks | Unfreeze or restructure |
+| Misconduct | Until resolved | May lead to dissolution |
+| Emergency | 24-72 hours | Quick resolution required |
+
+### Automatic Unfreeze (Optional)
+
+Some implementations support time-limited freezes:
+
+```typescript
+// Freeze for 7 days
+await hierarchy.freezeWithExpiry(
+  childId,
+  'Temporary pause for review',
+  7 * 24 * 60 * 60  // 7 days in seconds
+);
+```
+
+## Monitoring Frozen Nodes
+
+### Dashboard View
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│ Organization Hierarchy                                       │
+├─────────────────────────────────────────────────────────────┤
+│                                                              │
+│  ▼ Root DAO                                                 │
+│    │                                                         │
+│    ├── Treasury Committee         ● Active                  │
+│    │                                                         │
+│    ├── Research Committee         ⏸ Frozen (3 days)        │
+│    │   └── Reason: Audit of grant disbursements             │
+│    │                                                         │
+│    └── Grants Committee           ● Active                  │
+│                                                              │
+└─────────────────────────────────────────────────────────────┘
+```
+
+### Event Monitoring
+
+```typescript
+// Listen for freeze events
+hierarchy.on('NodeFrozen', (nodeId, freezer, reason, timestamp) => {
+  console.log(`Node ${nodeId} frozen by ${freezer}`);
+  console.log(`Reason: ${reason}`);
+
+  // Alert stakeholders
+  notifyAdmin(nodeId, 'frozen', reason);
+});
+
+hierarchy.on('NodeUnfrozen', (nodeId, unfreezer, timestamp) => {
+  console.log(`Node ${nodeId} unfrozen by ${unfreezer}`);
+});
+```
+
+## Best Practices
+
+### Before Freezing
+
+1. **Document the reason** - Clear, specific rationale
+2. **Notify stakeholders** - Inform child node admins
+3. **Set expectations** - Timeline and next steps
+4. **Prepare resolution path** - How to unfreeze
+
+### During Freeze
+
+1. **Regular updates** - Keep affected parties informed
+2. **Active investigation** - Work toward resolution
+3. **Time limit** - Don't leave frozen indefinitely
+4. **Escalate if needed** - Involve higher governance
+
+### After Unfreezing
+
+1. **Post-mortem** - Document lessons learned
+2. **Process improvements** - Prevent recurrence
+3. **Communicate resolution** - Public transparency
+4. **Monitor closely** - Ensure normal operation
+
+## Access Control
+
+| Action | Required Permission |
+|--------|---------------------|
+| Freeze | `ADMIN_ROLE` on parent |
+| Unfreeze | `ADMIN_ROLE` on parent |
+| View freeze status | Any (public) |
+| Emergency freeze | `GUARDIAN_ROLE` |
+
+## Troubleshooting
+
+### Cannot Freeze
+
+| Error | Cause | Solution |
+|-------|-------|----------|
+| `Unauthorized` | Missing admin role | Get proper permissions |
+| `NotChild` | Node is not a child | Check hierarchy |
+| `AlreadyFrozen` | Already frozen | No action needed |
+| `FreezeDisabled` | Config disables freeze | Update child config |
+
+### Cannot Unfreeze
+
+| Error | Cause | Solution |
+|-------|-------|----------|
+| `Unauthorized` | Missing admin role | Get proper permissions |
+| `NotFrozen` | Node is not frozen | No action needed |
+| `TimelockActive` | Waiting period | Wait for timelock |

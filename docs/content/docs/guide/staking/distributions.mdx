@@ -1,0 +1,448 @@
+---
+title: Managing Distributions
+description: Configure and manage token holder distributions
+---
+
+# Managing Distributions
+
+Distributions allow DAOs to share rewards, revenue, and other assets with stakers and token holders. This guide covers setting up and managing distribution mechanisms.
+
+## Distribution Types
+
+### Reward Distributions
+
+Regular rewards for staking participation:
+
+```yaml
+Type: Staking Rewards
+Frequency: Weekly
+Source: Protocol Revenue
+Recipients: All stakers
+Calculation: Pro-rata by stake weight
+```
+
+### Revenue Sharing
+
+Share protocol income with token holders:
+
+```yaml
+Type: Revenue Share
+Frequency: Monthly
+Source: Fee collection
+Recipients: veToken holders
+Calculation: Pro-rata by voting power
+```
+
+### One-Time Airdrops
+
+Distribute tokens for specific events:
+
+```yaml
+Type: Airdrop
+Frequency: One-time
+Source: Treasury allocation
+Recipients: Snapshot of holders
+Calculation: Custom criteria
+```
+
+### Dividend Distributions
+
+Periodic profit sharing:
+
+```yaml
+Type: Dividend
+Frequency: Quarterly
+Source: Net protocol profit
+Recipients: Token holders
+Calculation: Per-token basis
+```
+
+## Setting Up Distributions
+
+### Step 1: Create Distribution Pool
+
+1. Navigate to **DAO Settings** > **Distributions**
+2. Click **Create Pool**
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│ Create Distribution Pool                                     │
+├─────────────────────────────────────────────────────────────┤
+│                                                              │
+│  Name:         [Staking Rewards Pool        ]               │
+│                                                              │
+│  Token:        [LUX ▼]                                      │
+│                                                              │
+│  Recipients:   [○ All token holders                         │
+│                 ● Stakers only                               │
+│                 ○ veToken holders                            │
+│                 ○ Custom list                       ]        │
+│                                                              │
+│  Distribution: [○ Pro-rata by balance                       │
+│                 ● Pro-rata by stake weight                   │
+│                 ○ Equal split                                │
+│                 ○ Custom formula                    ]        │
+│                                                              │
+└─────────────────────────────────────────────────────────────┘
+```
+
+### Step 2: Configure Distribution Schedule
+
+Set up automatic distributions:
+
+```yaml
+schedule:
+  frequency: weekly
+  day: Monday
+  time: 00:00 UTC
+
+  # Or use block-based
+  block_interval: 50400  # ~weekly on ETH
+
+  # Minimum distribution threshold
+  min_amount: 1000 LUX
+```
+
+### Step 3: Fund the Pool
+
+Add tokens to the distribution pool:
+
+**Manual Funding:**
+1. Go to pool dashboard
+2. Click **Add Funds**
+3. Enter amount and confirm
+
+**Automatic Funding:**
+```yaml
+auto_fund:
+  enabled: true
+  source: protocol_fees
+  percentage: 50%
+  frequency: daily
+```
+
+### Step 4: Configure Recipient Criteria
+
+Define who receives distributions:
+
+```yaml
+recipients:
+  type: stakers
+
+  filters:
+    min_stake: 100 LUX
+    min_lock_time: 7 days
+    active_only: true
+
+  exclusions:
+    - treasury_address
+    - team_vesting_contracts
+
+  snapshot:
+    type: block_based
+    block: distribution_block - 1
+```
+
+## Distribution Calculations
+
+### Pro-Rata by Balance
+
+Standard distribution based on token balance:
+
+```
+User Share = (User Balance / Total Supply) × Distribution Amount
+```
+
+**Example:**
+```
+Total Distribution: 10,000 LUX
+User Balance: 1,000 LUX
+Total Supply: 100,000 LUX
+
+User Share = (1,000 / 100,000) × 10,000 = 100 LUX
+```
+
+### Pro-Rata by Stake Weight
+
+Weighted by lock duration:
+
+```
+User Share = (User Stake × Lock Multiplier / Total Weighted Stake) × Distribution Amount
+```
+
+**Example:**
+```
+Total Distribution: 10,000 LUX
+User Stake: 1,000 LUX (locked 180 days, 2x multiplier)
+User Weight: 2,000 weighted LUX
+Total Weighted Stake: 200,000 weighted LUX
+
+User Share = (2,000 / 200,000) × 10,000 = 100 LUX
+```
+
+### Time-Weighted Average
+
+Rewards based on staking duration within period:
+
+```
+User Share = (User Days Staked / Total Stake-Days) × Distribution Amount
+```
+
+### Custom Formulas
+
+Create custom distribution logic:
+
+```solidity
+function calculateShare(
+    address user,
+    uint256 totalDistribution
+) external view returns (uint256) {
+    uint256 stake = stakingContract.balanceOf(user);
+    uint256 lockTime = stakingContract.lockTime(user);
+    uint256 boost = nftContract.getBoost(user);
+
+    uint256 weight = stake * lockTime * boost / 1e18;
+    uint256 totalWeight = getTotalWeight();
+
+    return (weight * totalDistribution) / totalWeight;
+}
+```
+
+## Managing Active Distributions
+
+### Distribution Dashboard
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│ Distribution Dashboard                                       │
+├─────────────────────────────────────────────────────────────┤
+│                                                              │
+│  Active Pools: 3                                            │
+│  Total Distributed (30d): 125,000 LUX                       │
+│  Unique Recipients: 2,456                                   │
+│                                                              │
+│  ┌─────────────────────────────────────────────────────┐   │
+│  │ Pool Name          │ Balance    │ Next Dist │ APY   │   │
+│  ├────────────────────┼────────────┼───────────┼───────┤   │
+│  │ Staking Rewards    │ 50,000 LUX │ 3 days    │ 12.5% │   │
+│  │ Revenue Share      │ 25,000 USDC│ 12 days   │ 5.2%  │   │
+│  │ LP Incentives      │ 30,000 LUX │ 5 days    │ 45.0% │   │
+│  └─────────────────────────────────────────────────────┘   │
+│                                                              │
+└─────────────────────────────────────────────────────────────┘
+```
+
+### Monitoring Distributions
+
+Track distribution health:
+
+```yaml
+metrics:
+  - pool_balance
+  - distribution_rate
+  - recipient_count
+  - average_claim_size
+  - unclaimed_amount
+  - runway_days
+```
+
+### Adjusting Parameters
+
+Modify distribution settings via governance:
+
+1. Create parameter change proposal
+2. Specify new values:
+
+```yaml
+proposal:
+  type: parameter_change
+  target: staking_rewards_pool
+  changes:
+    - param: distribution_rate
+      old: 10000 LUX/week
+      new: 15000 LUX/week
+    - param: min_stake
+      old: 100 LUX
+      new: 50 LUX
+```
+
+## Claiming Distributions
+
+### Automatic Claims
+
+Enable auto-claim for users:
+
+```yaml
+auto_claim:
+  enabled: true
+  threshold: 10 LUX  # Min amount to trigger
+  gas_limit: 100000
+  gas_price_cap: 50 gwei
+```
+
+### Manual Claims
+
+Users claim through dashboard:
+
+1. Go to **My Staking** > **Rewards**
+2. View pending rewards
+3. Click **Claim** or **Compound**
+
+### Batch Claims
+
+Claim from multiple pools:
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│ Claim Rewards                                                │
+├─────────────────────────────────────────────────────────────┤
+│                                                              │
+│  ☑ Staking Rewards       125.50 LUX                         │
+│  ☑ Revenue Share          45.20 USDC                        │
+│  ☑ LP Incentives          89.00 LUX                         │
+│  ☐ Governance Rewards      0.00 LUX                         │
+│                                                              │
+│  ────────────────────────────────────                       │
+│  Total:  214.50 LUX + 45.20 USDC                           │
+│                                                              │
+│  [Claim All]  [Claim Selected]  [Compound LUX]             │
+│                                                              │
+└─────────────────────────────────────────────────────────────┘
+```
+
+## Distribution History
+
+### View Past Distributions
+
+Access historical data:
+
+```yaml
+history:
+  period: last_90_days
+
+  distributions:
+    - date: 2026-01-20
+      pool: staking_rewards
+      amount: 10,000 LUX
+      recipients: 1,234
+      avg_reward: 8.1 LUX
+
+    - date: 2026-01-13
+      pool: staking_rewards
+      amount: 10,000 LUX
+      recipients: 1,198
+      avg_reward: 8.3 LUX
+```
+
+### Export Data
+
+Export distribution records:
+
+- CSV format for accounting
+- JSON for integrations
+- On-chain verification links
+
+## Advanced Distribution Patterns
+
+### Merkle Distributions
+
+Efficient distribution for large recipient lists:
+
+```yaml
+merkle_distribution:
+  root: 0xabc123...
+  total_amount: 1,000,000 LUX
+  recipients: 50,000
+  proof_url: ipfs://Qm...
+
+  # Users claim with Merkle proof
+  claim_window: 90 days
+  unclaimed_return: treasury
+```
+
+### Streaming Distributions
+
+Continuous reward streaming:
+
+```yaml
+stream:
+  type: sablier
+  total: 100,000 LUX
+  duration: 365 days
+  cliff: 0
+  recipients:
+    - address: 0x123...
+      share: 50%
+    - address: 0x456...
+      share: 50%
+```
+
+### Conditional Distributions
+
+Distribute based on conditions:
+
+```yaml
+conditional:
+  trigger: tvl > 10_000_000 USD
+
+  distribution:
+    pool: milestone_rewards
+    amount: 50,000 LUX
+    recipients: stakers
+```
+
+## Troubleshooting
+
+### Common Issues
+
+| Issue | Cause | Solution |
+|-------|-------|----------|
+| No rewards shown | Below minimum stake | Increase stake amount |
+| Distribution delayed | Low gas prices | Increase gas budget |
+| Wrong amount | Snapshot timing | Check snapshot block |
+| Failed claim | Insufficient gas | Increase gas limit |
+
+### Emergency Actions
+
+If distribution issues occur:
+
+1. **Pause distributions** - Stop automatic payouts
+2. **Investigate** - Review logs and calculations
+3. **Fix** - Correct any configuration errors
+4. **Resume** - Re-enable after verification
+
+```yaml
+emergency:
+  pause_distributions: true
+  notify_admins: true
+  snapshot_state: true
+```
+
+## Best Practices
+
+### Do
+
+- Set sustainable reward rates
+- Monitor pool balances
+- Communicate distribution schedules
+- Test distributions on testnet
+- Maintain adequate runway
+
+### Don't
+
+- Promise unsustainable APYs
+- Change schedules without notice
+- Exclude legitimate participants
+- Let pools run empty
+- Ignore unclaimed token buildup
+
+## Next Steps
+
+<Cards>
+  <Card title="Using Staking" href="/docs/guide/staking/using-staking" icon="lock">
+    Token holder staking guide
+  </Card>
+  <Card title="Treasury" href="/docs/guide/treasury" icon="vault">
+    Manage distribution funding
+  </Card>
+</Cards>

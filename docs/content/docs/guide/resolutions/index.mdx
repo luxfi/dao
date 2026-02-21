@@ -1,0 +1,237 @@
+---
+title: Creating a Proposal
+description: How to submit governance proposals
+---
+
+# Creating a Proposal
+
+Proposals (also called Resolutions) are the primary mechanism for governance decisions. This guide covers all proposal types and the creation process.
+
+## Prerequisites
+
+Before creating a proposal:
+
+- Minimum token requirement (typically 10K voting tokens)
+- Connected wallet with sufficient balance
+- Clear understanding of what you're proposing
+- Community discussion (recommended)
+
+## Proposal Types
+
+### Action-Based Proposal
+
+Executable on-chain actions that take effect automatically when passed.
+
+<Cards>
+  <Card title="Action-Based" href="/docs/guide/resolutions/action-based" icon="zap">
+    Treasury transfers, parameter changes, contract calls
+  </Card>
+</Cards>
+
+**Examples:**
+- Transfer funds to a recipient
+- Update protocol parameters
+- Upgrade contracts
+- Add/remove committee members
+
+### From Scratch Proposal
+
+Custom proposals for complex or unique situations.
+
+<Cards>
+  <Card title="From Scratch" href="/docs/guide/resolutions/from-scratch" icon="edit">
+    Build custom proposals with any combination of actions
+  </Card>
+</Cards>
+
+**Examples:**
+- Multi-step treasury operations
+- Complex contract interactions
+- Conditional executions
+
+### Template Proposal
+
+Pre-built templates for common governance actions.
+
+<Cards>
+  <Card title="Templates" href="/docs/guide/resolutions/templates" icon="copy">
+    Use pre-configured proposal templates
+  </Card>
+</Cards>
+
+**Available Templates:**
+- Grant disbursement
+- Committee budget allocation
+- Role creation
+- Parameter adjustment
+
+### dApp Explorer Proposal
+
+Create proposals by interacting with external dApps.
+
+<Cards>
+  <Card title="dApp Explorer" href="/docs/guide/resolutions/dapp-explorer" icon="globe">
+    Propose transactions from any dApp
+  </Card>
+</Cards>
+
+**Supported Actions:**
+- DEX swaps
+- Lending deposits
+- NFT operations
+- Any contract interaction
+
+## Creating a Proposal
+
+### Step 1: Navigate to Proposals
+
+1. Go to your DAO dashboard
+2. Click **"Proposals"** in the sidebar
+3. Click **"New Proposal"**
+
+### Step 2: Choose Proposal Type
+
+Select the type that fits your needs:
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│                    Create New Proposal                       │
+├─────────────────────────────────────────────────────────────┤
+│                                                              │
+│  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐      │
+│  │   Action     │  │    From      │  │   Template   │      │
+│  │   Based      │  │   Scratch    │  │              │      │
+│  └──────────────┘  └──────────────┘  └──────────────┘      │
+│                                                              │
+│  ┌──────────────┐                                           │
+│  │    dApp      │                                           │
+│  │   Explorer   │                                           │
+│  └──────────────┘                                           │
+│                                                              │
+└─────────────────────────────────────────────────────────────┘
+```
+
+### Step 3: Fill in Details
+
+**Required Fields:**
+
+```yaml
+Title: "Fund Research Grant Program Q1 2026"
+
+Description: |
+  This proposal allocates $50,000 from the Research Committee
+  treasury to fund the Q1 2026 grant program.
+
+  ## Rationale
+  The Research Committee has received 15 qualified applications...
+
+  ## Budget Breakdown
+  - Grant awards: $40,000
+  - Administration: $5,000
+  - Review panel: $5,000
+
+Actions:
+  - type: transfer
+    to: 0x...
+    amount: 50000
+    token: USDC
+```
+
+### Step 4: Add Actions
+
+For action-based proposals, specify what happens on execution:
+
+**Transfer Action:**
+```yaml
+- type: transfer
+  recipient: 0x1234...
+  amount: 50000
+  token: USDC
+  description: "Q1 Grant Funding"
+```
+
+**Contract Call Action:**
+```yaml
+- type: contract_call
+  target: 0x5678...
+  function: "updateParameter"
+  args: ["maxSupply", "1000000"]
+```
+
+**Multi-action:**
+```yaml
+actions:
+  - type: transfer
+    recipient: 0xAAA...
+    amount: 25000
+    token: USDC
+  - type: transfer
+    recipient: 0xBBB...
+    amount: 25000
+    token: USDC
+```
+
+### Step 5: Preview and Submit
+
+1. Click **"Preview"** to review
+2. Verify all actions are correct
+3. Click **"Submit Proposal"**
+4. Sign the transaction
+
+## After Submission
+
+### Review Period (3 days)
+
+- Community can review and comment
+- No voting yet
+- Author can provide clarifications
+- Cannot modify proposal
+
+### Voting Period (7 days)
+
+- Token holders vote For/Against/Abstain
+- Track progress on proposal page
+- Engage with community questions
+
+### Post-Voting
+
+**If Passed:**
+- Enters timelock queue
+- After timelock, can be executed
+- See [Executing a Proposal](/docs/guide/voting/execution)
+
+**If Failed:**
+- Can resubmit after 30 days
+- Consider community feedback
+- Modify and try again
+
+## Best Practices
+
+### Do
+
+- ✅ Discuss in forum first
+- ✅ Provide clear rationale
+- ✅ Include detailed budget
+- ✅ Set realistic timelines
+- ✅ Respond to questions
+
+### Don't
+
+- ❌ Submit without discussion
+- ❌ Be vague about intentions
+- ❌ Request excessive funding
+- ❌ Ignore community feedback
+- ❌ Rush the process
+
+## Proposal Checklist
+
+Before submitting:
+
+- [ ] Clear, descriptive title
+- [ ] Detailed description with rationale
+- [ ] Specific, verifiable actions
+- [ ] Budget breakdown (if applicable)
+- [ ] Success metrics defined
+- [ ] Community discussion completed
+- [ ] Reviewed by committee (if applicable)
+- [ ] Wallet connected with required tokens
