@@ -1,0 +1,385 @@
+---
+title: Voting on Proposals
+description: How to cast votes on governance proposals
+---
+
+# Voting on Proposals
+
+Voting is the core mechanism for collective decision-making in the DAO. This guide covers everything you need to participate in governance votes.
+
+## Prerequisites
+
+Before you can vote:
+
+- **Connected wallet** with governance tokens
+- **Voting power** from locked tokens (veTokens) or delegation
+- **Active proposal** in voting period
+
+<Callout type="info">
+Voting power is calculated at the snapshot block when a proposal is created. Tokens acquired after the snapshot cannot be used on that proposal.
+</Callout>
+
+## Voting Options
+
+Every proposal offers three voting choices:
+
+| Option | Meaning | Effect |
+|--------|---------|--------|
+| **For** | Support the proposal | Counts toward approval threshold |
+| **Against** | Oppose the proposal | Counts against approval |
+| **Abstain** | Neither support nor oppose | Counts toward quorum only |
+
+### When to Abstain
+
+Abstain is useful when you:
+- Want to help reach quorum but lack expertise to judge
+- Have a conflict of interest
+- Believe the community should decide without your influence
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│                      Vote Distribution                       │
+├─────────────────────────────────────────────────────────────┤
+│                                                              │
+│  For        ████████████████████░░░░░░░░░░░░░░  52%         │
+│  Against    ██████████████░░░░░░░░░░░░░░░░░░░░  35%         │
+│  Abstain    █████░░░░░░░░░░░░░░░░░░░░░░░░░░░░░  13%         │
+│                                                              │
+│  Total Participation: 2.3M tokens (46% of quorum)           │
+└─────────────────────────────────────────────────────────────┘
+```
+
+## Vote Weight Calculation
+
+Your voting power depends on your token lock configuration:
+
+### Base Formula
+
+```
+Voting Power = Locked Amount × Time Multiplier
+```
+
+### Time Multipliers
+
+| Lock Duration | Multiplier | Example (1000 tokens) |
+|---------------|------------|----------------------|
+| 1 week | 0.02x | 20 votes |
+| 1 month | 0.08x | 80 votes |
+| 6 months | 0.5x | 500 votes |
+| 1 year | 1.0x | 1,000 votes |
+| 4 years | 4.0x | 4,000 votes |
+
+<Callout type="warning">
+Voting power decays linearly as your lock approaches expiration. Re-lock or extend to maintain maximum power.
+</Callout>
+
+### Power Decay Over Time
+
+```
+Voting Power
+    ^
+4x  │████
+    │████████
+    │████████████
+    │████████████████
+1x  │████████████████████
+    │░░░░░░░░░░░░░░░░░░░░████
+    │░░░░░░░░░░░░░░░░░░░░░░░░████
+    └──────────────────────────────> Time
+    Lock                      Expiry
+```
+
+### Delegated Power
+
+If others have delegated to you, their power adds to yours:
+
+```
+Total Voting Power = Your Locked Power + Delegated Power
+```
+
+## Voting Period Mechanics
+
+### Proposal Lifecycle
+
+```
+┌──────────┐    ┌──────────┐    ┌──────────┐    ┌──────────┐
+│  Draft   │───>│  Review  │───>│  Voting  │───>│ Timelock │
+│  7 days  │    │  3 days  │    │  7 days  │    │ 1-14 days│
+└──────────┘    └──────────┘    └──────────┘    └──────────┘
+                                     │
+                                     v
+                              ┌──────────────┐
+                              │  Execution   │
+                              │  or Defeat   │
+                              └──────────────┘
+```
+
+### Voting Period Timeline
+
+| Stage | Duration | What Happens |
+|-------|----------|--------------|
+| **Start** | Block N | Proposal becomes active, voting opens |
+| **Active** | 7 days | Members cast and change votes |
+| **Grace** | 6 hours | Final window before close |
+| **End** | Block N+50400 | Voting closes, result finalized |
+
+### Quorum Requirements
+
+For a vote to be valid, it must reach quorum:
+
+| Proposal Type | Quorum | Approval Threshold |
+|---------------|--------|-------------------|
+| Standard | 1M tokens | >50% For |
+| Constitutional | 5M tokens | >66.7% For |
+| Emergency | 500K tokens | >75% For |
+
+<Callout type="info">
+Abstain votes count toward quorum but not toward the approval calculation.
+</Callout>
+
+### Result Calculation
+
+```
+Approval % = For Votes / (For Votes + Against Votes) × 100
+
+Quorum % = (For + Against + Abstain) / Total Supply × 100
+```
+
+**Example:**
+- For: 600,000 tokens
+- Against: 300,000 tokens
+- Abstain: 100,000 tokens
+- Total Supply: 10,000,000 tokens
+
+```
+Approval = 600,000 / (600,000 + 300,000) = 66.7% ✓
+Quorum = 1,000,000 / 10,000,000 = 10% (need 1M for standard)
+Result: PASSED (if 1M quorum met)
+```
+
+## How to Vote
+
+### Step 1: Find Active Proposals
+
+Navigate to **Governance > Proposals** and filter by status:
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│  Proposals                                    [+ New]       │
+├─────────────────────────────────────────────────────────────┤
+│                                                              │
+│  Filter: [All ▼] [Active ▼] [Treasury ▼]    Search: [____]  │
+│                                                              │
+│  ┌────────────────────────────────────────────────────────┐ │
+│  │ #42 Fund Developer Grants Q1          [ACTIVE]         │ │
+│  │ Ends in 3 days 14 hours              Quorum: 67%       │ │
+│  │ Requested: 50,000 USDC                                 │ │
+│  └────────────────────────────────────────────────────────┘ │
+│                                                              │
+│  ┌────────────────────────────────────────────────────────┐ │
+│  │ #41 Update Staking Parameters         [ACTIVE]         │ │
+│  │ Ends in 1 day 6 hours                Quorum: 89%       │ │
+│  │ Changes: min stake, cooldown                           │ │
+│  └────────────────────────────────────────────────────────┘ │
+│                                                              │
+└─────────────────────────────────────────────────────────────┘
+```
+
+### Step 2: Review Proposal Details
+
+Click a proposal to see full details:
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│  #42: Fund Developer Grants Q1                              │
+├─────────────────────────────────────────────────────────────┤
+│                                                              │
+│  Status: ACTIVE          Ends: Jan 15, 2026 at 14:00 UTC   │
+│  Author: 0x1234...abcd   Type: Treasury Transfer            │
+│                                                              │
+│  ─────────────────────────────────────────────────────────  │
+│                                                              │
+│  ## Summary                                                  │
+│  Allocate 50,000 USDC from treasury to fund developer       │
+│  grants for Q1 2026.                                         │
+│                                                              │
+│  ## Actions                                                  │
+│  1. Transfer 50,000 USDC to Grants Multisig (0x5678...)     │
+│                                                              │
+│  ## Discussion                                               │
+│  - Forum: [View Thread]                                      │
+│  - Discord: #proposal-42                                     │
+│                                                              │
+└─────────────────────────────────────────────────────────────┘
+```
+
+### Step 3: Cast Your Vote
+
+Select your voting choice:
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│  Cast Your Vote                                              │
+├─────────────────────────────────────────────────────────────┤
+│                                                              │
+│  Your Voting Power: 12,500 veTokens                         │
+│  (10,000 locked + 2,500 delegated)                          │
+│                                                              │
+│  ┌─────────────┐  ┌─────────────┐  ┌─────────────┐         │
+│  │     FOR     │  │   AGAINST   │  │   ABSTAIN   │         │
+│  │      ○      │  │      ○      │  │      ○      │         │
+│  └─────────────┘  └─────────────┘  └─────────────┘         │
+│                                                              │
+│  Reason (optional):                                          │
+│  ┌─────────────────────────────────────────────────────────┐ │
+│  │ Supporting this because the grants program has          │ │
+│  │ consistently produced valuable contributions...          │ │
+│  └─────────────────────────────────────────────────────────┘ │
+│                                                              │
+│                              [Cancel]  [Submit Vote]         │
+│                                                              │
+└─────────────────────────────────────────────────────────────┘
+```
+
+### Step 4: Confirm Transaction
+
+1. Click **Submit Vote**
+2. Review the transaction in your wallet
+3. Confirm and sign
+4. Wait for confirmation
+
+<Callout type="info">
+On-chain votes require gas. For gasless voting options, see [Gasless Voting](/docs/guide/gasless).
+</Callout>
+
+## Changing Your Vote
+
+You can change your vote any time before the voting period ends:
+
+1. Navigate to the proposal
+2. Your current vote is displayed
+3. Click **Change Vote**
+4. Select new option
+5. Submit and sign
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│  Your Vote: FOR (cast 2 days ago)              [Change]     │
+│                                                              │
+│  12,500 veTokens committed                                  │
+└─────────────────────────────────────────────────────────────┘
+```
+
+<Callout type="warning">
+Once the voting period ends, votes are final and cannot be changed.
+</Callout>
+
+## Voting Strategies
+
+### Active Participation
+
+- Review all proposals before voting
+- Participate in forum discussions
+- Consider long-term implications
+- Vote on every proposal to maximize influence
+
+### Informed Delegation
+
+If you lack time or expertise:
+- [Delegate to trusted representatives](/docs/guide/voting/delegation)
+- Monitor delegate voting records
+- Revoke if delegates vote against your interests
+
+### Committee Focus
+
+- Join committees aligned with your expertise
+- Focus voting on committee-relevant proposals
+- Abstain on topics outside your knowledge
+
+## Vote Tracking
+
+### Your Voting History
+
+View past votes in **Profile > Voting History**:
+
+| Proposal | Your Vote | Result | Power Used |
+|----------|-----------|--------|------------|
+| #42 Fund Grants | For | Pending | 12,500 |
+| #41 Staking Update | Against | Passed | 12,500 |
+| #40 New Committee | For | Passed | 12,000 |
+
+### Proposal Analytics
+
+Each proposal shows voting analytics:
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│  Voting Progress                                             │
+├─────────────────────────────────────────────────────────────┤
+│                                                              │
+│  Quorum Progress                                             │
+│  ████████████████████████████████░░░░░░░░░░  89% of 1M     │
+│                                                              │
+│  Current Result                                              │
+│  For:     ████████████████████████████░░░░░░  72%           │
+│  Against: ████████████░░░░░░░░░░░░░░░░░░░░░░  28%           │
+│                                                              │
+│  Participation                                               │
+│  Unique Voters: 234                                         │
+│  Avg Vote Size: 3,803 tokens                                │
+│  Largest Vote: 150,000 tokens                               │
+│                                                              │
+└─────────────────────────────────────────────────────────────┘
+```
+
+## Troubleshooting
+
+### "Insufficient Voting Power"
+
+**Causes:**
+- No tokens locked
+- Lock has expired
+- Snapshot taken before your lock
+
+**Solutions:**
+- Lock tokens for future proposals
+- Extend existing lock
+- Request delegation from others
+
+### "Voting Not Available"
+
+**Causes:**
+- Proposal not in voting period
+- Already voted (check history)
+- Wallet not connected
+
+**Solutions:**
+- Check proposal status
+- Connect correct wallet
+- Wait for voting period to start
+
+### "Transaction Failed"
+
+**Causes:**
+- Insufficient gas
+- Network congestion
+- Contract paused
+
+**Solutions:**
+- Increase gas limit
+- Retry during low-traffic periods
+- Check DAO status announcements
+
+## Next Steps
+
+<Cards>
+  <Card title="Delegation" href="/docs/guide/voting/delegation" icon="users">
+    Delegate your voting power to others
+  </Card>
+  <Card title="Execution" href="/docs/guide/voting/execution" icon="play-circle">
+    Execute passed proposals
+  </Card>
+  <Card title="Creating Proposals" href="/docs/guide/resolutions" icon="file-plus">
+    Submit your own proposals
+  </Card>
+</Cards>

@@ -1,0 +1,436 @@
+---
+title: Using Gasless Voting
+description: How to vote without paying gas fees
+---
+
+# Using Gasless Voting
+
+Gasless voting lets you participate in DAO governance without paying transaction fees. This guide explains how to use this feature as a voter.
+
+## What is Gasless Voting?
+
+With gasless voting:
+
+- **You sign** a message with your vote
+- **The DAO pays** the transaction fee
+- **Your vote** is recorded on-chain
+
+No ETH required in your wallet to vote.
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│ Traditional vs Gasless Voting                                │
+├─────────────────────────────────────────────────────────────┤
+│                                                              │
+│  Traditional Voting:                                         │
+│  1. Click Vote                                               │
+│  2. Approve gas fee ($3-10)                                 │
+│  3. Wait for confirmation                                    │
+│  4. Vote recorded                                            │
+│                                                              │
+│  Gasless Voting:                                             │
+│  1. Click Vote                                               │
+│  2. Sign message (free)                                      │
+│  3. Wait for confirmation                                    │
+│  4. Vote recorded                                            │
+│                                                              │
+│  You save: $3-10 per vote                                   │
+│                                                              │
+└─────────────────────────────────────────────────────────────┘
+```
+
+## Checking Eligibility
+
+### Am I Eligible?
+
+Gasless voting may have requirements:
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│ Your Gasless Voting Status                                   │
+├─────────────────────────────────────────────────────────────┤
+│                                                              │
+│  ✓ Gasless voting available for you                         │
+│                                                              │
+│  Requirements Met:                                           │
+│  ✓ Minimum voting power (100+ veLUX)                        │
+│  ✓ DAO membership active                                    │
+│  ✓ Not rate limited                                         │
+│                                                              │
+│  Your Voting Power: 5,000 veLUX                             │
+│  Gasless Votes Today: 2 of 20 allowed                       │
+│                                                              │
+└─────────────────────────────────────────────────────────────┘
+```
+
+### Common Requirements
+
+| Requirement | Typical Threshold |
+|-------------|-------------------|
+| Minimum voting power | 100+ tokens |
+| Membership status | Active member |
+| Rate limit | 10-20 votes/day |
+| Cooldown | 1 minute between votes |
+
+### If You're Not Eligible
+
+If gasless isn't available, you'll see:
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│ Gasless Voting Not Available                                 │
+├─────────────────────────────────────────────────────────────┤
+│                                                              │
+│  ✗ You don't meet the requirements for gasless voting       │
+│                                                              │
+│  Missing:                                                    │
+│  ✗ Minimum voting power (you have 50, need 100 veLUX)       │
+│                                                              │
+│  Options:                                                    │
+│  • Stake more tokens to reach 100 veLUX                     │
+│  • Vote with gas (costs ~$3)                                │
+│                                                              │
+└─────────────────────────────────────────────────────────────┘
+```
+
+## How to Vote Gasless
+
+### Step 1: Find a Proposal
+
+1. Go to **Governance** > **Proposals**
+2. Select an active proposal
+3. Review the proposal details
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│ Proposal #42: Grant $50,000 to Research Committee            │
+├─────────────────────────────────────────────────────────────┤
+│                                                              │
+│  Status:     Active - Voting Open                           │
+│  Ends:       3 days, 4 hours                                │
+│                                                              │
+│  Current Results:                                            │
+│  For:        ████████████████████░░░░ 68%                   │
+│  Against:    ████████░░░░░░░░░░░░░░░░ 32%                   │
+│                                                              │
+│  Quorum:     ██████████████░░░░░░░░░░ 65% reached          │
+│                                                              │
+└─────────────────────────────────────────────────────────────┘
+```
+
+### Step 2: Choose Your Vote
+
+Select For, Against, or Abstain:
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│ Cast Your Vote                                               │
+├─────────────────────────────────────────────────────────────┤
+│                                                              │
+│  Your Voting Power: 5,000 veLUX                             │
+│                                                              │
+│  ┌────────────────┐                                         │
+│  │   ●  FOR       │  ← Selected                             │
+│  └────────────────┘                                         │
+│  ┌────────────────┐                                         │
+│  │   ○  AGAINST   │                                         │
+│  └────────────────┘                                         │
+│  ┌────────────────┐                                         │
+│  │   ○  ABSTAIN   │                                         │
+│  └────────────────┘                                         │
+│                                                              │
+│  Add reason (optional):                                      │
+│  [This initiative aligns with our research goals...   ]     │
+│                                                              │
+│  ⚡ Gasless voting enabled - No gas fee required            │
+│                                                              │
+│  [Submit Vote]                                               │
+│                                                              │
+└─────────────────────────────────────────────────────────────┘
+```
+
+### Step 3: Sign the Vote
+
+Click Submit and sign in your wallet:
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│ MetaMask - Sign Message                                      │
+├─────────────────────────────────────────────────────────────┤
+│                                                              │
+│  dao.example.com requests your signature                    │
+│                                                              │
+│  Message:                                                    │
+│  ─────────────────────────────────                          │
+│  Cast vote on Proposal #42                                  │
+│  Vote: For                                                   │
+│  Reason: This initiative aligns with our research goals     │
+│  ─────────────────────────────────                          │
+│                                                              │
+│  This will not cost any gas fees.                           │
+│  Your vote will be recorded on-chain.                       │
+│                                                              │
+│  [Reject]                              [Sign]               │
+│                                                              │
+└─────────────────────────────────────────────────────────────┘
+```
+
+<Callout type="info">
+Signing is free - you're only approving your vote, not paying for a transaction.
+</Callout>
+
+### Step 4: Wait for Confirmation
+
+Your vote is submitted to the bundler:
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│ Vote Submitted                                               │
+├─────────────────────────────────────────────────────────────┤
+│                                                              │
+│  ⟳ Processing your vote...                                  │
+│                                                              │
+│  Status: Pending                                             │
+│  Estimated time: 15-60 seconds                              │
+│                                                              │
+│  What's happening:                                           │
+│  1. ✓ Vote signed                                           │
+│  2. ✓ Submitted to bundler                                  │
+│  3. ⟳ Waiting for on-chain confirmation                     │
+│  4. ○ Vote recorded                                         │
+│                                                              │
+└─────────────────────────────────────────────────────────────┘
+```
+
+### Step 5: Vote Confirmed
+
+Once confirmed, you'll see:
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│ Vote Recorded!                                               │
+├─────────────────────────────────────────────────────────────┤
+│                                                              │
+│  ✓ Your vote has been recorded on-chain                     │
+│                                                              │
+│  Proposal: #42 - Grant to Research Committee                │
+│  Your Vote: FOR                                              │
+│  Voting Power: 5,000 veLUX                                  │
+│  Gas Paid: $0.00 (sponsored)                                │
+│                                                              │
+│  Transaction: 0xabc123...                                   │
+│  [View on Explorer]                                          │
+│                                                              │
+│  Thank you for participating in governance!                  │
+│                                                              │
+└─────────────────────────────────────────────────────────────┘
+```
+
+## Delegating Gaslessly
+
+You can also delegate your voting power without gas:
+
+### Step 1: Go to Delegation
+
+1. Navigate to **Governance** > **Delegation**
+2. Click **Delegate Votes**
+
+### Step 2: Choose Delegate
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│ Delegate Your Voting Power                                   │
+├─────────────────────────────────────────────────────────────┤
+│                                                              │
+│  Your Voting Power: 5,000 veLUX                             │
+│  Currently Delegated To: Self                               │
+│                                                              │
+│  Delegate To:                                                │
+│  [0xABC...123                                    ]          │
+│                                                              │
+│  Or choose from active delegates:                            │
+│  ┌────────────────────────────────────────────────────┐    │
+│  │ alice.eth        │ 50,000 veLUX │ 95% participation│    │
+│  │ bob.eth          │ 30,000 veLUX │ 88% participation│    │
+│  │ research.eth     │ 25,000 veLUX │ 100% participation│   │
+│  └────────────────────────────────────────────────────┘    │
+│                                                              │
+│  ⚡ Gasless delegation enabled                              │
+│                                                              │
+│  [Cancel]                              [Delegate]           │
+│                                                              │
+└─────────────────────────────────────────────────────────────┘
+```
+
+### Step 3: Sign and Confirm
+
+Same process as voting - sign the message for free.
+
+## Changing Your Vote
+
+Most DAOs allow changing votes before the voting period ends:
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│ Your Current Vote                                            │
+├─────────────────────────────────────────────────────────────┤
+│                                                              │
+│  Proposal #42                                                │
+│  Your Vote: FOR (5,000 veLUX)                               │
+│  Cast: 2 days ago                                           │
+│                                                              │
+│  Voting ends in: 1 day, 4 hours                             │
+│                                                              │
+│  [Change Vote]                                               │
+│                                                              │
+└─────────────────────────────────────────────────────────────┘
+```
+
+<Callout type="warning">
+Changing your vote uses one of your daily gasless vote allowances.
+</Callout>
+
+## Rate Limits
+
+### Understanding Limits
+
+DAOs may limit gasless votes to prevent abuse:
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│ Your Gasless Voting Limits                                   │
+├─────────────────────────────────────────────────────────────┤
+│                                                              │
+│  Daily Votes:     5 / 20 used                               │
+│  ████░░░░░░░░░░░░░░░░ 25%                                  │
+│                                                              │
+│  Resets in: 8 hours                                         │
+│                                                              │
+│  Cooldown: None (ready to vote)                             │
+│                                                              │
+└─────────────────────────────────────────────────────────────┘
+```
+
+### If Rate Limited
+
+If you've hit your limit:
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│ Rate Limit Reached                                           │
+├─────────────────────────────────────────────────────────────┤
+│                                                              │
+│  You've used all 20 gasless votes today.                    │
+│                                                              │
+│  Options:                                                    │
+│  • Wait until limit resets (8 hours)                        │
+│  • Vote with gas (~$3)                                      │
+│                                                              │
+│  [Vote with Gas]                                             │
+│                                                              │
+└─────────────────────────────────────────────────────────────┘
+```
+
+## Viewing Vote History
+
+Track your voting activity:
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│ My Voting History                                            │
+├─────────────────────────────────────────────────────────────┤
+│                                                              │
+│  │ Proposal          │ Vote    │ Power  │ Method   │ Date   │
+│  ├───────────────────┼─────────┼────────┼──────────┼────────│
+│  │ #42 Research Grant│ For     │ 5,000  │ Gasless  │ Today  │
+│  │ #41 Treasury Alloc│ Against │ 5,000  │ Gasless  │ 3d ago │
+│  │ #40 Parameter Upd │ For     │ 4,500  │ Gasless  │ 1w ago │
+│  │ #39 Committee Elec│ Abstain │ 4,500  │ Regular  │ 2w ago │
+│                                                              │
+│  Total Votes: 45                                             │
+│  Gasless Votes: 42 (93%)                                    │
+│  Gas Saved: ~$126                                           │
+│                                                              │
+└─────────────────────────────────────────────────────────────┘
+```
+
+## Troubleshooting
+
+### Common Issues
+
+| Issue | Cause | Solution |
+|-------|-------|----------|
+| "Gasless not available" | Don't meet requirements | Check eligibility requirements |
+| Signature rejected | Wallet issue | Try reconnecting wallet |
+| Vote not confirming | Network congestion | Wait or retry |
+| "Rate limited" | Too many votes | Wait for reset |
+
+### Vote Stuck "Pending"
+
+If your vote is stuck:
+
+1. **Wait** - Bundlers may batch transactions (up to 2 minutes)
+2. **Check Status** - View in your voting history
+3. **Retry** - If failed, try voting again
+4. **Fallback** - Vote with gas as backup
+
+### Wrong Vote Recorded
+
+If your vote appears incorrect:
+
+1. Verify on block explorer
+2. Check if you can change vote
+3. Contact DAO support if persistent issue
+
+## FAQ
+
+### Is gasless voting secure?
+
+Yes. Your vote is:
+- Signed by your wallet (only you can create it)
+- Recorded on-chain (tamper-proof)
+- Verified by smart contracts (can't be spoofed)
+
+### Why do I need to sign?
+
+Signing proves you authorized the vote. Without your signature, no one can vote on your behalf.
+
+### Does the DAO see my private key?
+
+No. Signing uses your private key locally - only the signature leaves your device.
+
+### Can I use gasless on mobile?
+
+Yes, if your mobile wallet supports message signing (most do).
+
+### What if gasless is disabled mid-vote?
+
+Your pending vote will still process. Future votes will require gas.
+
+### Is there a limit to gasless votes?
+
+Yes, typically 10-20 per day to prevent abuse. Check your DAO's specific limits.
+
+## Tips for Best Experience
+
+### Do
+
+- Check eligibility before important votes
+- Sign promptly when wallet prompts
+- Monitor vote confirmation
+- Keep some ETH as backup
+
+### Don't
+
+- Close browser during voting
+- Spam vote attempts
+- Ignore rate limits
+- Assume all DAOs have gasless
+
+## Need Help?
+
+If you encounter issues:
+
+1. Check the [FAQ](/docs/faq)
+2. Visit the DAO's Discord support channel
+3. Contact DAO admins

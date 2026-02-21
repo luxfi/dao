@@ -1,0 +1,446 @@
+---
+title: Setting Up Gasless Voting
+description: Configure gasless voting for your DAO
+---
+
+# Setting Up Gasless Voting
+
+This guide walks DAO administrators through enabling and configuring gasless voting using EIP-4337 account abstraction.
+
+## Prerequisites
+
+Before setting up gasless voting:
+
+- **Admin Role** - DAO admin or governance permissions
+- **Treasury Funds** - ETH/native token for paymaster
+- **Governance Contracts** - Deployed Governor or voting contract
+- **Network Support** - Chain with EIP-4337 support
+
+## Setup Overview
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│ Gasless Voting Setup Steps                                   │
+├─────────────────────────────────────────────────────────────┤
+│                                                              │
+│  1. Enable Gasless Feature                                   │
+│     └── Toggle in DAO settings                              │
+│                                                              │
+│  2. Deploy Paymaster                                         │
+│     └── Create paymaster contract                           │
+│                                                              │
+│  3. Configure Policies                                       │
+│     └── Set eligibility rules                               │
+│                                                              │
+│  4. Fund Paymaster                                           │
+│     └── Deposit ETH for gas sponsorship                     │
+│                                                              │
+│  5. Test and Launch                                          │
+│     └── Verify with test vote                               │
+│                                                              │
+└─────────────────────────────────────────────────────────────┘
+```
+
+## Step 1: Enable Gasless Feature
+
+### Navigate to Settings
+
+1. Go to your DAO dashboard
+2. Click **Settings** in the sidebar
+3. Select **Gasless Voting** tab
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│ DAO Settings                                                 │
+├─────────────────────────────────────────────────────────────┤
+│  [General] [Governance] [Treasury] [Staking] [Gasless]      │
+│                                                ^^^^^^^^      │
+└─────────────────────────────────────────────────────────────┘
+```
+
+### Enable the Feature
+
+Toggle gasless voting on:
+
+```yaml
+gasless_voting:
+  enabled: true
+  network: ethereum  # or your chain
+```
+
+## Step 2: Deploy Paymaster
+
+### Option A: Use Platform Paymaster
+
+Use the built-in managed paymaster:
+
+1. Click **Use Platform Paymaster**
+2. Review terms and fees
+3. Confirm setup
+
+```yaml
+platform_paymaster:
+  type: managed
+  fee: 1% of sponsored gas
+  min_deposit: 0.1 ETH
+  auto_refill: optional
+```
+
+### Option B: Deploy Custom Paymaster
+
+Deploy your own paymaster contract:
+
+1. Click **Deploy Custom Paymaster**
+2. Choose paymaster type:
+
+```yaml
+paymaster_types:
+  - verifying: Standard signature-based
+  - token: Accept ERC-20 for gas
+  - whitelist: Explicit allowlist
+```
+
+3. Configure parameters:
+
+```solidity
+// Example VerifyingPaymaster constructor
+constructor(
+    IEntryPoint _entryPoint,
+    address _verifyingSigner
+) BasePaymaster(_entryPoint) {
+    verifyingSigner = _verifyingSigner;
+}
+```
+
+4. Deploy and verify contract
+
+### Paymaster Contract Addresses
+
+Reference EntryPoint addresses:
+
+| Network | EntryPoint v0.6 | EntryPoint v0.7 |
+|---------|-----------------|-----------------|
+| Ethereum | 0x5FF137D4b0FDCD49DcA30c7CF57E578a026d2789 | 0x0000000071727De22E5E9d8BAf0edAc6f37da032 |
+| Arbitrum | 0x5FF137D4b0FDCD49DcA30c7CF57E578a026d2789 | 0x0000000071727De22E5E9d8BAf0edAc6f37da032 |
+| Optimism | 0x5FF137D4b0FDCD49DcA30c7CF57E578a026d2789 | 0x0000000071727De22E5E9d8BAf0edAc6f37da032 |
+| Lux | 0x5FF137D4b0FDCD49DcA30c7CF57E578a026d2789 | 0x0000000071727De22E5E9d8BAf0edAc6f37da032 |
+
+## Step 3: Configure Policies
+
+### Eligibility Rules
+
+Define who can use gasless voting:
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│ Gasless Eligibility                                          │
+├─────────────────────────────────────────────────────────────┤
+│                                                              │
+│  Minimum Voting Power:                                       │
+│  [100                     ] veLUX                           │
+│                                                              │
+│  Membership Required:                                        │
+│  [● Yes  ○ No]                                              │
+│                                                              │
+│  Allowed Tiers:                                              │
+│  [☑] Member                                                  │
+│  [☑] Contributor                                             │
+│  [☑] Lead                                                    │
+│  [☑] Admin                                                   │
+│                                                              │
+└─────────────────────────────────────────────────────────────┘
+```
+
+### Rate Limiting
+
+Prevent abuse with rate limits:
+
+```yaml
+rate_limits:
+  # Per-user limits
+  votes_per_day: 20
+  votes_per_proposal: 1
+  cooldown_seconds: 60
+
+  # Global limits
+  total_votes_per_hour: 1000
+  max_gas_per_day: 10 ETH
+```
+
+### Sponsored Actions
+
+Choose which actions are gasless:
+
+```yaml
+sponsored_actions:
+  # Core governance
+  cast_vote: true
+  cast_vote_with_reason: true
+  cast_vote_by_sig: true
+
+  # Delegation
+  delegate: true
+  delegate_by_sig: true
+
+  # Not sponsored (prevent spam)
+  propose: false
+  execute: false
+  cancel: false
+```
+
+### Gas Limits
+
+Set maximum gas per operation:
+
+```yaml
+gas_limits:
+  cast_vote:
+    max_gas: 150000
+    max_priority_fee: 2 gwei
+    max_fee: 100 gwei
+
+  delegate:
+    max_gas: 100000
+    max_priority_fee: 2 gwei
+    max_fee: 100 gwei
+```
+
+## Step 4: Fund Paymaster
+
+### Initial Deposit
+
+Fund the paymaster with ETH:
+
+1. Go to **Gasless** > **Paymaster Balance**
+2. Click **Deposit**
+3. Enter amount (minimum 0.1 ETH recommended)
+4. Confirm transaction
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│ Fund Paymaster                                               │
+├─────────────────────────────────────────────────────────────┤
+│                                                              │
+│  Current Balance: 0.00 ETH                                  │
+│  Recommended:     1.00 ETH (for ~300 votes)                 │
+│                                                              │
+│  Deposit Amount: [1.0                      ] ETH            │
+│                                                              │
+│  Estimated Coverage:                                         │
+│  • ~300 votes at current gas prices                         │
+│  • ~2 weeks of normal activity                              │
+│                                                              │
+│  [Cancel]                              [Deposit]            │
+│                                                              │
+└─────────────────────────────────────────────────────────────┘
+```
+
+### Auto-Refill (Optional)
+
+Set up automatic refills from treasury:
+
+```yaml
+auto_refill:
+  enabled: true
+  trigger_balance: 0.5 ETH
+  refill_amount: 2.0 ETH
+  max_refill_per_month: 10 ETH
+  source: dao_treasury
+  requires_approval: false  # or true for governance vote
+```
+
+## Step 5: Test and Launch
+
+### Test Vote
+
+Before going live, test with a sample vote:
+
+1. Create a test proposal (or use testnet)
+2. Connect as an eligible voter
+3. Attempt gasless vote
+4. Verify:
+   - Vote recorded correctly
+   - Gas paid by paymaster
+   - No errors in process
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│ Test Results                                                 │
+├─────────────────────────────────────────────────────────────┤
+│                                                              │
+│  ✓ UserOperation created successfully                       │
+│  ✓ Paymaster validated sponsorship                          │
+│  ✓ Bundler accepted UserOperation                           │
+│  ✓ Vote executed on-chain                                   │
+│  ✓ Gas paid: 0.003 ETH from paymaster                       │
+│                                                              │
+│  Status: Ready for production                                │
+│                                                              │
+└─────────────────────────────────────────────────────────────┘
+```
+
+### Launch Checklist
+
+```yaml
+pre_launch:
+  - [ ] Paymaster deployed and verified
+  - [ ] Policies configured
+  - [ ] Paymaster funded
+  - [ ] Test vote successful
+  - [ ] Documentation updated
+
+launch:
+  - [ ] Enable for all users
+  - [ ] Announce to community
+  - [ ] Monitor first votes
+  - [ ] Support ready
+
+post_launch:
+  - [ ] Track usage metrics
+  - [ ] Monitor paymaster balance
+  - [ ] Gather feedback
+  - [ ] Adjust policies if needed
+```
+
+## Advanced Configuration
+
+### Custom Verification Logic
+
+Implement custom eligibility checks:
+
+```solidity
+contract CustomPaymaster is BasePaymaster {
+    IGovernanceToken public governanceToken;
+    uint256 public minVotingPower;
+
+    function _validatePaymasterUserOp(
+        UserOperation calldata userOp,
+        bytes32 userOpHash,
+        uint256 maxCost
+    ) internal override returns (bytes memory context, uint256 validationData) {
+        // Check minimum voting power
+        uint256 votingPower = governanceToken.getVotes(userOp.sender);
+        require(votingPower >= minVotingPower, "Insufficient voting power");
+
+        // Check if action is governance vote
+        bytes4 selector = bytes4(userOp.callData[:4]);
+        require(
+            selector == IGovernor.castVote.selector ||
+            selector == IGovernor.castVoteWithReason.selector,
+            "Invalid action"
+        );
+
+        return ("", 0);
+    }
+}
+```
+
+### Multi-Paymaster Setup
+
+Use different paymasters for different actions:
+
+```yaml
+paymasters:
+  governance:
+    address: 0xAAA...
+    actions: [cast_vote, delegate]
+    priority: 1
+
+  grants:
+    address: 0xBBB...
+    actions: [claim_grant]
+    priority: 2
+
+fallback:
+  enabled: false  # Require explicit paymaster
+```
+
+### Bundler Configuration
+
+Configure bundler settings:
+
+```yaml
+bundler:
+  # Primary bundler
+  primary:
+    url: https://bundler.example.com
+    api_key: ${BUNDLER_API_KEY}
+
+  # Fallback bundlers
+  fallback:
+    - url: https://backup1.example.com
+    - url: https://backup2.example.com
+
+  # Settings
+  max_fee_per_gas: 100 gwei
+  max_priority_fee: 2 gwei
+  timeout_ms: 30000
+```
+
+## Monitoring
+
+### Dashboard Metrics
+
+Track gasless voting health:
+
+```yaml
+metrics:
+  - paymaster_balance
+  - votes_sponsored_today
+  - average_gas_per_vote
+  - failed_sponsorships
+  - unique_voters
+```
+
+### Alerts
+
+Set up alerts for issues:
+
+```yaml
+alerts:
+  low_balance:
+    threshold: 0.5 ETH
+    notify: [admin_email, discord_webhook]
+
+  high_usage:
+    threshold: 100 votes/hour
+    notify: [admin_email]
+
+  failures:
+    threshold: 5 failures/hour
+    notify: [admin_email, pagerduty]
+```
+
+## Troubleshooting
+
+### Common Issues
+
+| Issue | Cause | Solution |
+|-------|-------|----------|
+| "Paymaster validation failed" | Eligibility not met | Check voter requirements |
+| "Insufficient paymaster balance" | Low funds | Deposit more ETH |
+| "UserOperation reverted" | Invalid calldata | Verify action format |
+| "Bundler rejected" | Gas price too low | Increase gas settings |
+
+### Debug Mode
+
+Enable verbose logging:
+
+```yaml
+debug:
+  enabled: true
+  log_level: debug
+  log_user_operations: true
+  log_paymaster_validation: true
+```
+
+## Next Steps
+
+<Cards>
+  <Card title="Paymaster Management" href="/docs/guide/gasless/paymaster" icon="credit-card">
+    Manage paymaster funds
+  </Card>
+  <Card title="Disabling Gasless" href="/docs/guide/gasless/disabling" icon="x-circle">
+    Turn off gasless voting
+  </Card>
+</Cards>

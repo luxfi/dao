@@ -1,0 +1,512 @@
+---
+title: Airdrops
+description: Distribute tokens to multiple addresses at once
+---
+
+# Airdrops
+
+Airdrops enable efficient distribution of tokens to many recipients in a single transaction. Use airdrops for rewards, governance token distribution, and bulk payments.
+
+## Overview
+
+Airdrops are ideal for:
+
+- Governance token distribution
+- Community rewards
+- Retroactive compensation
+- Bulk refunds
+- Loyalty programs
+
+## Creating an Airdrop
+
+### Via UI
+
+1. Navigate to **Treasury** > **Payments**
+2. Click **"New Airdrop"**
+3. Configure recipients and amounts
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│ New Airdrop                                                  │
+├─────────────────────────────────────────────────────────────┤
+│                                                              │
+│  Token:       [DAO ▼]                                       │
+│                                                              │
+│  Distribution Method:                                        │
+│  (•) Equal amounts                                          │
+│  ( ) Custom amounts                                         │
+│  ( ) Import CSV                                             │
+│                                                              │
+│  Amount per recipient:  [1,000                     ]        │
+│                                                              │
+│  Recipients:                                                 │
+│  ┌─────────────────────────────────────────────────────┐   │
+│  │ 0x1234...5678                               ✓       │   │
+│  │ 0xABCD...EFGH                               ✓       │   │
+│  │ 0x9876...5432                               ✓       │   │
+│  │ contributor.eth                             ✓       │   │
+│  │                                                      │   │
+│  │ + Add address                                        │   │
+│  └─────────────────────────────────────────────────────┘   │
+│                                                              │
+│  Recipients: 4                                               │
+│  Total: 4,000 DAO tokens                                    │
+│  Treasury Balance: 500,000 DAO                              │
+│                                                              │
+│  [ Cancel ]                          [ Create Airdrop ]     │
+│                                                              │
+└─────────────────────────────────────────────────────────────┘
+```
+
+### Custom Amounts
+
+For variable distribution:
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│ Custom Airdrop Amounts                                       │
+├─────────────────────────────────────────────────────────────┤
+│                                                              │
+│  Address                              Amount                 │
+│  ──────────────────────────────────────────────────────     │
+│  0x1234...5678                        2,500                 │
+│  0xABCD...EFGH                        1,500                 │
+│  0x9876...5432                        1,000                 │
+│  contributor.eth                       500                  │
+│                                                              │
+│  Total: 5,500 DAO tokens                                    │
+│                                                              │
+└─────────────────────────────────────────────────────────────┘
+```
+
+### Import from CSV
+
+For large distributions:
+
+```csv
+address,amount
+0x1234567890123456789012345678901234567890,2500
+0xABCDEF1234567890ABCDEF1234567890ABCDEF12,1500
+0x9876543210987654321098765432109876543210,1000
+contributor.eth,500
+```
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│ Import Recipients                                            │
+├─────────────────────────────────────────────────────────────┤
+│                                                              │
+│  ┌─────────────────────────────────────────────────────┐   │
+│  │                                                      │   │
+│  │     📄  Drop CSV file here                          │   │
+│  │         or click to browse                          │   │
+│  │                                                      │   │
+│  └─────────────────────────────────────────────────────┘   │
+│                                                              │
+│  CSV Format:                                                 │
+│  address,amount                                              │
+│  0x1234...,1000                                             │
+│                                                              │
+│  [Download Template]                                         │
+│                                                              │
+└─────────────────────────────────────────────────────────────┘
+```
+
+### Via Proposal
+
+```yaml
+Proposal: "Q1 Community Rewards Airdrop"
+
+Description: |
+  This proposal distributes governance tokens to Q1 contributors.
+
+  ## Criteria
+  - Minimum 10 forum posts
+  - At least 1 accepted proposal
+  - Active governance participation
+
+  ## Distribution
+  - 50 recipients
+  - 50,000 DAO tokens total
+  - Average: 1,000 tokens per recipient
+
+Actions:
+  - type: airdrop
+    token: DAO
+    recipients:
+      - 0x1234...
+      - 0x5678...
+      - 0xABCD...
+      # ... more addresses
+    amounts:
+      - 2500000000000000000000  # 2,500 DAO
+      - 1500000000000000000000  # 1,500 DAO
+      - 1000000000000000000000  # 1,000 DAO
+      # ... matching amounts
+```
+
+### Via SDK
+
+```typescript
+import { PaymentsClient } from '@lux/dao-sdk';
+import { ethers } from 'ethers';
+
+const payments = new PaymentsClient(signer);
+
+// Define recipients and amounts
+const recipients = [
+  '0x1234...5678',
+  '0xABCD...EFGH',
+  '0x9876...5432',
+];
+
+const amounts = [
+  ethers.parseUnits('2500', 18),  // 2,500 tokens
+  ethers.parseUnits('1500', 18),  // 1,500 tokens
+  ethers.parseUnits('1000', 18),  // 1,000 tokens
+];
+
+// Execute airdrop
+const tx = await payments.airdrop(
+  daoTokenAddress,
+  recipients,
+  amounts
+);
+
+await tx.wait();
+console.log(`Airdropped to ${recipients.length} addresses`);
+```
+
+## Smart Contract Interface
+
+```solidity
+interface IPayments {
+    /// @notice Emitted on airdrop
+    event Airdrop(
+        address indexed token,
+        uint256 recipientCount,
+        uint256 totalAmount,
+        bytes32 merkleRoot  // For verification
+    );
+
+    /// @notice Distribute tokens to multiple recipients
+    /// @param token Token to distribute
+    /// @param recipients Array of recipient addresses
+    /// @param amounts Array of amounts (must match recipients length)
+    function airdrop(
+        address token,
+        address[] calldata recipients,
+        uint256[] calldata amounts
+    ) external;
+
+    /// @notice Equal distribution to all recipients
+    /// @param token Token to distribute
+    /// @param recipients Array of recipient addresses
+    /// @param amountEach Amount each recipient receives
+    function airdropEqual(
+        address token,
+        address[] calldata recipients,
+        uint256 amountEach
+    ) external;
+}
+```
+
+## Merkle Airdrops
+
+For very large distributions (1000+ recipients), use Merkle proofs:
+
+### Setup
+
+```typescript
+import { StandardMerkleTree } from '@openzeppelin/merkle-tree';
+
+// Build merkle tree
+const values = recipients.map((addr, i) => [addr, amounts[i].toString()]);
+const tree = StandardMerkleTree.of(values, ['address', 'uint256']);
+
+// Get root for contract
+const merkleRoot = tree.root;
+console.log('Merkle Root:', merkleRoot);
+
+// Generate proofs
+for (const [i, v] of tree.entries()) {
+  const proof = tree.getProof(i);
+  console.log(`${v[0]}: ${JSON.stringify(proof)}`);
+}
+```
+
+### Contract
+
+```solidity
+interface IMerkleAirdrop {
+    /// @notice Initialize airdrop with merkle root
+    function createMerkleAirdrop(
+        address token,
+        uint256 totalAmount,
+        bytes32 merkleRoot,
+        uint256 expiresAt
+    ) external returns (uint256 airdropId);
+
+    /// @notice Claim tokens with merkle proof
+    function claim(
+        uint256 airdropId,
+        address recipient,
+        uint256 amount,
+        bytes32[] calldata proof
+    ) external;
+
+    /// @notice Check if address has claimed
+    function hasClaimed(uint256 airdropId, address recipient)
+        external view returns (bool);
+}
+```
+
+### Claim UI
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│ Claim Airdrop                                                │
+├─────────────────────────────────────────────────────────────┤
+│                                                              │
+│  🎉 You're eligible for the Q1 Rewards Airdrop!             │
+│                                                              │
+│  ┌─────────────────────────────────────────────────────┐   │
+│  │                                                      │   │
+│  │     1,500 DAO                                        │   │
+│  │     tokens available                                 │   │
+│  │                                                      │   │
+│  └─────────────────────────────────────────────────────┘   │
+│                                                              │
+│  Connected: 0x1234...5678                                   │
+│  Status: Unclaimed                                           │
+│  Expires: March 31, 2026                                    │
+│                                                              │
+│                         [ Claim Tokens ]                    │
+│                                                              │
+└─────────────────────────────────────────────────────────────┘
+```
+
+## Airdrop Strategies
+
+### Retroactive Rewards
+
+Reward past contributors:
+
+```yaml
+Criteria:
+  - Governance participation (weighted)
+  - Forum activity (weighted)
+  - Development contributions (weighted)
+  - Community building (weighted)
+
+Calculation:
+  score = (proposals_voted * 10) +
+          (forum_posts * 2) +
+          (PRs_merged * 50) +
+          (events_organized * 100)
+
+  tokens = min(score * 10, max_per_user)
+```
+
+### Proportional Distribution
+
+Based on holdings or activity:
+
+```typescript
+// Proportional to token holdings
+const totalSupply = await token.totalSupply();
+const airdropPool = ethers.parseUnits('100000', 18);
+
+const amounts = await Promise.all(
+  recipients.map(async (addr) => {
+    const balance = await token.balanceOf(addr);
+    return (balance * airdropPool) / totalSupply;
+  })
+);
+```
+
+### Tiered Distribution
+
+Based on levels or tiers:
+
+```typescript
+const tiers = {
+  gold: ethers.parseUnits('5000', 18),
+  silver: ethers.parseUnits('2500', 18),
+  bronze: ethers.parseUnits('1000', 18),
+};
+
+const amounts = recipients.map((addr) => {
+  const tier = getUserTier(addr);
+  return tiers[tier];
+});
+```
+
+## Verification
+
+### Pre-Airdrop Checks
+
+```typescript
+async function verifyAirdrop(
+  token: string,
+  recipients: string[],
+  amounts: bigint[]
+): Promise<void> {
+  // Validate arrays match
+  if (recipients.length !== amounts.length) {
+    throw new Error('Recipients and amounts must match');
+  }
+
+  // Check for duplicates
+  const unique = new Set(recipients);
+  if (unique.size !== recipients.length) {
+    throw new Error('Duplicate recipients found');
+  }
+
+  // Validate addresses
+  for (const addr of recipients) {
+    if (!ethers.isAddress(addr)) {
+      throw new Error(`Invalid address: ${addr}`);
+    }
+  }
+
+  // Check total amount
+  const total = amounts.reduce((a, b) => a + b, 0n);
+  const balance = await treasury.balance(token);
+  if (total > balance) {
+    throw new Error(`Insufficient balance: need ${total}, have ${balance}`);
+  }
+
+  console.log('Airdrop verified:');
+  console.log(`  Recipients: ${recipients.length}`);
+  console.log(`  Total: ${ethers.formatUnits(total, 18)}`);
+}
+```
+
+### Post-Airdrop Verification
+
+```typescript
+// Verify all recipients received tokens
+const receipt = await tx.wait();
+
+for (let i = 0; i < recipients.length; i++) {
+  const balance = await token.balanceOf(recipients[i]);
+  console.log(`${recipients[i]}: ${ethers.formatUnits(balance, 18)}`);
+}
+```
+
+## Gas Optimization
+
+### Batch Size Limits
+
+Large airdrops may exceed gas limits:
+
+```typescript
+const BATCH_SIZE = 200; // Adjust based on gas limits
+
+async function batchAirdrop(
+  token: string,
+  recipients: string[],
+  amounts: bigint[]
+): Promise<void> {
+  for (let i = 0; i < recipients.length; i += BATCH_SIZE) {
+    const batchRecipients = recipients.slice(i, i + BATCH_SIZE);
+    const batchAmounts = amounts.slice(i, i + BATCH_SIZE);
+
+    const tx = await payments.airdrop(token, batchRecipients, batchAmounts);
+    await tx.wait();
+
+    console.log(`Batch ${i / BATCH_SIZE + 1} complete`);
+  }
+}
+```
+
+### Gas Estimates
+
+| Recipients | Estimated Gas | Estimated Cost (at 30 gwei) |
+|------------|--------------|----------------------------|
+| 10 | ~150,000 | ~$3 |
+| 50 | ~400,000 | ~$8 |
+| 100 | ~700,000 | ~$14 |
+| 200 | ~1,200,000 | ~$24 |
+| 500+ | Use Merkle | Varies |
+
+## Airdrop Expiry
+
+For unclaimed airdrops:
+
+```typescript
+// Create airdrop with expiry
+const expiresAt = Math.floor(Date.now() / 1000) + 90 * 24 * 60 * 60; // 90 days
+
+await payments.createMerkleAirdrop(
+  token,
+  totalAmount,
+  merkleRoot,
+  expiresAt
+);
+
+// Reclaim expired funds
+await payments.reclaimExpiredAirdrop(airdropId);
+```
+
+## Common Errors
+
+| Error | Cause | Solution |
+|-------|-------|----------|
+| `ArrayLengthMismatch` | Recipients/amounts don't match | Fix array lengths |
+| `DuplicateRecipient` | Same address twice | Remove duplicates |
+| `InsufficientBalance` | Not enough tokens | Fund treasury |
+| `GasLimitExceeded` | Too many recipients | Use batches or Merkle |
+| `InvalidProof` | Bad Merkle proof | Regenerate proof |
+
+## Security Considerations
+
+### Address Validation
+
+```typescript
+// Filter invalid addresses
+const validRecipients = recipients.filter((addr) => {
+  // Valid format
+  if (!ethers.isAddress(addr)) return false;
+
+  // Not zero address
+  if (addr === ethers.ZeroAddress) return false;
+
+  // Not contract (optional)
+  // if (await provider.getCode(addr) !== '0x') return false;
+
+  return true;
+});
+```
+
+### Sybil Resistance
+
+For community airdrops:
+
+```yaml
+Anti-sybil measures:
+  - Minimum account age
+  - Minimum activity threshold
+  - Identity verification (optional)
+  - Cross-reference with known Sybil lists
+  - Quadratic distribution (sqrt of activity)
+```
+
+## Event Monitoring
+
+```typescript
+// Track airdrop events
+payments.on('Airdrop', (token, count, total, merkleRoot) => {
+  console.log(`Airdrop: ${count} recipients, ${total} tokens`);
+
+  // Log for reporting
+  recordAirdrop({
+    token,
+    recipientCount: count,
+    totalAmount: total,
+    merkleRoot,
+    timestamp: Date.now()
+  });
+});
+```

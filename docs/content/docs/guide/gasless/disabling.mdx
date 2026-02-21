@@ -1,0 +1,410 @@
+---
+title: Disabling Gasless Voting
+description: How to turn off gasless voting for your DAO
+---
+
+# Disabling Gasless Voting
+
+This guide covers how to disable gasless voting, either temporarily or permanently, and the implications for your DAO.
+
+## When to Disable
+
+### Temporary Disable
+
+You might temporarily disable gasless voting for:
+
+- **Maintenance** - Paymaster upgrades or migrations
+- **Budget Constraints** - Treasury needs reallocation
+- **Abuse Prevention** - Responding to spam or attacks
+- **Testing** - Troubleshooting voting issues
+
+### Permanent Disable
+
+Reasons to permanently disable:
+
+- **Cost Reduction** - Gasless not economically viable
+- **Low Adoption** - Users prefer paying their own gas
+- **Migration** - Moving to different voting mechanism
+- **Security** - Concerns about paymaster vulnerabilities
+
+## Disabling Process
+
+### Step 1: Access Settings
+
+1. Go to your DAO dashboard
+2. Navigate to **Settings** > **Gasless Voting**
+3. Locate the enable/disable toggle
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│ Gasless Voting Settings                                      │
+├─────────────────────────────────────────────────────────────┤
+│                                                              │
+│  Status:        ● Enabled                                   │
+│                                                              │
+│  Paymaster:     0x1234...5678                               │
+│  Balance:       5.25 ETH                                    │
+│  Total Votes:   1,234 sponsored                             │
+│                                                              │
+│  [Disable Gasless Voting]                                   │
+│                                                              │
+└─────────────────────────────────────────────────────────────┘
+```
+
+### Step 2: Choose Disable Type
+
+Select temporary or permanent disable:
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│ Disable Gasless Voting                                       │
+├─────────────────────────────────────────────────────────────┤
+│                                                              │
+│  ○ Temporary Pause                                          │
+│    Pause gas sponsorship but keep paymaster funded          │
+│    Can re-enable instantly                                   │
+│                                                              │
+│  ○ Disable with Withdrawal                                   │
+│    Disable and withdraw remaining paymaster funds           │
+│    Requires re-setup to enable again                         │
+│                                                              │
+│  ● Full Disable                                              │
+│    Disable, withdraw funds, and remove paymaster            │
+│    Complete removal of gasless infrastructure               │
+│                                                              │
+└─────────────────────────────────────────────────────────────┘
+```
+
+### Step 3: Handle Pending Operations
+
+Check for in-flight operations:
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│ Pending Operations                                           │
+├─────────────────────────────────────────────────────────────┤
+│                                                              │
+│  ⚠ There are 3 pending gasless votes                        │
+│                                                              │
+│  │ User           │ Proposal │ Status    │ Submitted   │   │
+│  ├────────────────┼──────────┼───────────┼─────────────┤   │
+│  │ 0xABC...123    │ #42      │ Pending   │ 2 min ago   │   │
+│  │ 0xDEF...456    │ #42      │ Pending   │ 1 min ago   │   │
+│  │ 0xGHI...789    │ #43      │ Pending   │ 30 sec ago  │   │
+│                                                              │
+│  Options:                                                    │
+│  ● Wait for pending operations to complete                  │
+│  ○ Force disable (pending operations will fail)             │
+│                                                              │
+└─────────────────────────────────────────────────────────────┘
+```
+
+### Step 4: Confirm Disable
+
+Review impact and confirm:
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│ Confirm Disable                                              │
+├─────────────────────────────────────────────────────────────┤
+│                                                              │
+│  You are about to disable gasless voting.                   │
+│                                                              │
+│  Impact:                                                     │
+│  • Voters will need ETH to pay gas                          │
+│  • Participation may decrease                               │
+│  • Mobile/new users may have difficulty                     │
+│                                                              │
+│  Reversible:      Yes (can re-enable)                       │
+│  Paymaster Funds: 5.25 ETH (will be withdrawn)              │
+│  Withdrawal To:   DAO Treasury                              │
+│                                                              │
+│  ⚠ Notify community before disabling                        │
+│                                                              │
+│  [Cancel]                         [Confirm Disable]         │
+│                                                              │
+└─────────────────────────────────────────────────────────────┘
+```
+
+## Temporary Pause (Recommended First Step)
+
+### Pause Without Withdrawal
+
+Keep funds in place but stop sponsoring:
+
+```yaml
+pause:
+  type: temporary
+  keep_funds: true
+  duration: indefinite  # or set time limit
+  reason: "Maintenance window"
+```
+
+**Benefits:**
+- Instant re-enable
+- No fund movement needed
+- Lower risk
+
+### Pause via Contract
+
+Directly pause the paymaster:
+
+```solidity
+// Pause paymaster sponsorship
+IPaymaster paymaster = IPaymaster(paymasterAddress);
+paymaster.pause();
+
+// Re-enable later
+paymaster.unpause();
+```
+
+### Time-Limited Pause
+
+Set automatic re-enable:
+
+```yaml
+scheduled_pause:
+  start: "2026-02-01T00:00:00Z"
+  end: "2026-02-03T00:00:00Z"
+  reason: "Planned maintenance"
+  notify_users: true
+```
+
+## Full Disable with Withdrawal
+
+### Withdraw Paymaster Funds
+
+1. Disable gasless voting
+2. Withdraw remaining funds
+3. Funds return to treasury or specified address
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│ Withdrawal Summary                                           │
+├─────────────────────────────────────────────────────────────┤
+│                                                              │
+│  Paymaster Balance:    5.25 ETH                             │
+│  Reserved (pending):   0.05 ETH                             │
+│  Available:            5.20 ETH                             │
+│                                                              │
+│  Withdraw To:          DAO Treasury (0xTreas...ury)         │
+│                                                              │
+│  Transaction:          0xabc123... (pending)                │
+│                                                              │
+│  [View on Explorer]                                          │
+│                                                              │
+└─────────────────────────────────────────────────────────────┘
+```
+
+### Governance-Required Disable
+
+For DAOs requiring governance approval:
+
+```yaml
+proposal:
+  title: "Disable Gasless Voting"
+  type: governance_parameter
+  actions:
+    - action: disable_gasless
+    - action: withdraw_paymaster
+      amount: all
+      destination: treasury
+  rationale: |
+    Due to budget constraints, we propose disabling gasless
+    voting and reallocating the 5.25 ETH to the grants program.
+```
+
+## Communication
+
+### Notify Users Before Disabling
+
+<Callout type="warning">
+Always communicate changes to your community before disabling gasless voting.
+</Callout>
+
+**Announcement Template:**
+
+```markdown
+## Gasless Voting Update
+
+We will be disabling gasless voting on [DATE].
+
+**Why:**
+[Reason for disabling]
+
+**What this means:**
+- You will need ETH in your wallet to vote
+- Vote transactions will cost approximately $X
+- All other governance features remain the same
+
+**Timeline:**
+- [Date]: Announcement
+- [Date]: Gasless disabled
+- [Date]: Review decision
+
+**Questions?**
+Join the discussion in #governance
+```
+
+### Update UI Messaging
+
+Ensure the voting interface reflects the change:
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│ Vote on Proposal #42                                         │
+├─────────────────────────────────────────────────────────────┤
+│                                                              │
+│  Grant $50,000 to Research Committee                        │
+│                                                              │
+│  Your Voting Power: 10,000 veLUX                            │
+│                                                              │
+│  ┌────────────┐  ┌────────────┐  ┌────────────┐            │
+│  │    FOR     │  │  AGAINST   │  │  ABSTAIN   │            │
+│  └────────────┘  └────────────┘  └────────────┘            │
+│                                                              │
+│  ℹ Gas Required: ~$3.00 (0.001 ETH)                         │
+│  Your ETH Balance: 0.5 ETH ✓                                │
+│                                                              │
+└─────────────────────────────────────────────────────────────┘
+```
+
+## Re-Enabling Gasless Voting
+
+### From Paused State
+
+If you only paused (no withdrawal):
+
+1. Go to **Settings** > **Gasless**
+2. Click **Resume Gasless Voting**
+3. Confirm
+
+```solidity
+// Or via contract
+paymaster.unpause();
+```
+
+### Full Re-Setup
+
+If you withdrew funds or removed paymaster:
+
+1. Follow the [Setup Guide](/docs/guide/gasless/setup)
+2. Deploy new paymaster (or reuse existing)
+3. Fund the paymaster
+4. Configure policies
+5. Enable gasless voting
+
+## Impact Analysis
+
+### Before Disabling, Consider:
+
+```yaml
+impact_analysis:
+  voter_participation:
+    current_turnout: 45%
+    estimated_after_disable: 30%  # -15%
+    affected_users: ~500 (no ETH balance)
+
+  cost_to_voters:
+    avg_gas_per_vote: 0.003 ETH
+    at_current_prices: ~$9/vote
+
+  alternatives:
+    - provide_voting_eth_faucet
+    - offer_vote_reimbursement
+    - use_offchain_snapshot
+```
+
+### Post-Disable Monitoring
+
+Track metrics after disabling:
+
+```yaml
+monitor:
+  metrics:
+    - voter_turnout
+    - unique_voters
+    - proposal_quorum_rate
+    - user_complaints
+
+  comparison:
+    period: 30 days before vs after
+    alert_threshold: 20% drop in participation
+```
+
+## Alternative Approaches
+
+### Partial Gasless
+
+Instead of full disable, limit gasless:
+
+```yaml
+partial_gasless:
+  eligibility:
+    min_voting_power: 1000 veLUX  # Raise threshold
+    max_votes_per_proposal: 1
+    rate_limit: 5 votes/week
+
+  cap:
+    daily_budget: 0.5 ETH
+    monthly_budget: 10 ETH
+```
+
+### Vote Subsidies
+
+Offer partial reimbursement instead:
+
+```yaml
+vote_subsidy:
+  enabled: true
+  coverage: 50%  # DAO pays half
+  max_per_vote: 0.002 ETH
+  monthly_cap: 5 ETH
+```
+
+### Offchain Voting
+
+Use Snapshot for signaling, onchain for execution:
+
+```yaml
+hybrid_voting:
+  signaling: snapshot (free)
+  binding: onchain (gas required)
+  threshold: constitutional proposals only
+```
+
+## Checklist
+
+### Before Disabling
+
+```yaml
+checklist:
+  - [ ] Analyze participation impact
+  - [ ] Check for pending operations
+  - [ ] Plan fund withdrawal
+  - [ ] Draft community announcement
+  - [ ] Update documentation
+  - [ ] Prepare UI changes
+```
+
+### During Disable
+
+```yaml
+checklist:
+  - [ ] Wait for pending operations
+  - [ ] Pause/disable paymaster
+  - [ ] Withdraw funds (if applicable)
+  - [ ] Verify disable successful
+  - [ ] Publish announcement
+```
+
+### After Disabling
+
+```yaml
+checklist:
+  - [ ] Monitor participation rates
+  - [ ] Respond to user questions
+  - [ ] Track support tickets
+  - [ ] Review metrics weekly
+  - [ ] Evaluate re-enabling if needed
+```

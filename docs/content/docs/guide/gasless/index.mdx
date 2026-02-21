@@ -1,0 +1,354 @@
+---
+title: Gasless Voting Overview
+description: Enable gas-free voting for DAO members
+---
+
+# Gasless Voting Overview
+
+Gasless voting allows DAO members to participate in governance without paying transaction fees. This guide explains how gasless voting works and its benefits.
+
+## What is Gasless Voting?
+
+Gasless voting uses account abstraction (EIP-4337) to sponsor gas fees for voters, removing the barrier of gas costs from governance participation.
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│ Traditional Voting vs Gasless Voting                         │
+├─────────────────────────────────────────────────────────────┤
+│                                                              │
+│  Traditional:                                                │
+│  User → Pay Gas → Submit Vote → Blockchain                  │
+│                                                              │
+│  Gasless:                                                    │
+│  User → Sign Vote → Paymaster Pays Gas → Blockchain         │
+│                                                              │
+└─────────────────────────────────────────────────────────────┘
+```
+
+### Key Benefits
+
+| Benefit | Description |
+|---------|-------------|
+| **Zero Gas Cost** | Voters pay nothing to participate |
+| **Higher Turnout** | Remove financial barrier to voting |
+| **Better UX** | Simple one-click voting |
+| **Inclusive** | Enable participation regardless of ETH balance |
+| **Mobile-Friendly** | Vote from any device without gas management |
+
+## How It Works
+
+### EIP-4337 Account Abstraction
+
+Gasless voting leverages EIP-4337, the account abstraction standard:
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│ EIP-4337 Architecture                                        │
+├─────────────────────────────────────────────────────────────┤
+│                                                              │
+│  ┌─────────┐    ┌───────────────┐    ┌─────────────────┐   │
+│  │  User   │───►│  UserOperation │───►│   Bundler       │   │
+│  │ Wallet  │    │  (signed vote) │    │                 │   │
+│  └─────────┘    └───────────────┘    └────────┬────────┘   │
+│                                               │             │
+│                                               ▼             │
+│  ┌─────────┐    ┌───────────────┐    ┌─────────────────┐   │
+│  │  Vote   │◄───│  EntryPoint   │◄───│   Paymaster     │   │
+│  │Recorded │    │  Contract     │    │   (pays gas)    │   │
+│  └─────────┘    └───────────────┘    └─────────────────┘   │
+│                                                              │
+└─────────────────────────────────────────────────────────────┘
+```
+
+### Components
+
+#### 1. UserOperation
+
+A signed message containing the vote:
+
+```yaml
+UserOperation:
+  sender: voter_address
+  callData: castVote(proposalId, support)
+  signature: voter_signature
+  # Gas fields handled by paymaster
+```
+
+#### 2. Bundler
+
+Aggregates UserOperations and submits to blockchain:
+
+- Collects pending votes
+- Batches for efficiency
+- Submits to EntryPoint contract
+
+#### 3. Paymaster
+
+Sponsors gas fees on behalf of voters:
+
+```yaml
+Paymaster:
+  type: VerifyingPaymaster
+  sponsor: dao_treasury
+  policy: allow_governance_votes
+  limit: max_gas_per_vote
+```
+
+#### 4. EntryPoint
+
+EIP-4337 singleton contract that:
+
+- Validates UserOperations
+- Verifies paymaster approval
+- Executes vote transactions
+- Handles gas accounting
+
+## Gasless Voting Flow
+
+### Step-by-Step Process
+
+```
+1. User clicks "Vote" on proposal
+   └── No wallet popup for gas
+
+2. Wallet prompts for signature
+   └── Signs the vote intention (free)
+
+3. Signed UserOperation sent to Bundler
+   └── Vote queued for processing
+
+4. Bundler submits to EntryPoint
+   └── Paymaster confirms sponsorship
+
+5. EntryPoint executes vote
+   └── Gas paid by Paymaster
+
+6. Vote recorded on-chain
+   └── User notified of success
+```
+
+### User Experience
+
+From the voter's perspective:
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│ Vote on Proposal #42                                         │
+├─────────────────────────────────────────────────────────────┤
+│                                                              │
+│  Grant $50,000 to Research Committee                        │
+│                                                              │
+│  Your Voting Power: 10,000 veLUX                            │
+│                                                              │
+│  ┌────────────┐  ┌────────────┐  ┌────────────┐            │
+│  │    FOR     │  │  AGAINST   │  │  ABSTAIN   │            │
+│  └────────────┘  └────────────┘  └────────────┘            │
+│                                                              │
+│  ⚡ Gasless voting enabled                                  │
+│  No ETH required to vote                                    │
+│                                                              │
+└─────────────────────────────────────────────────────────────┘
+```
+
+## Eligibility and Policies
+
+### Who Can Vote Gasless?
+
+DAOs can configure eligibility:
+
+```yaml
+gasless_policy:
+  # Token-based eligibility
+  min_voting_power: 100 veLUX
+
+  # Membership-based
+  require_membership: true
+  membership_tiers: [member, contributor, lead]
+
+  # Rate limiting
+  votes_per_day: 10
+  cooldown_between_votes: 1 minute
+```
+
+### Supported Actions
+
+Gasless transactions typically cover:
+
+| Action | Gasless | Notes |
+|--------|---------|-------|
+| Cast vote | Yes | All proposal types |
+| Delegate | Yes | One-time setup |
+| Change delegation | Yes | Limited frequency |
+| Create proposal | No | Prevents spam |
+| Execute proposal | No | High gas cost |
+
+## Security Considerations
+
+### Replay Protection
+
+Each UserOperation includes:
+
+- Unique nonce per sender
+- Chain ID binding
+- Expiration timestamp
+
+```yaml
+protection:
+  nonce: auto_increment
+  chainId: bound_to_chain
+  validUntil: block_timestamp + 1_hour
+```
+
+### Paymaster Verification
+
+Paymaster validates before sponsoring:
+
+```solidity
+function validatePaymasterUserOp(
+    UserOperation calldata userOp,
+    bytes32 userOpHash,
+    uint256 maxCost
+) external returns (bytes memory context, uint256 validationData) {
+    // Verify sender is eligible voter
+    require(isEligibleVoter(userOp.sender), "Not eligible");
+
+    // Verify action is governance vote
+    require(isGovernanceAction(userOp.callData), "Invalid action");
+
+    // Check rate limits
+    require(!rateLimited(userOp.sender), "Rate limited");
+
+    // Check paymaster balance
+    require(address(this).balance >= maxCost, "Insufficient funds");
+
+    return (abi.encode(userOp.sender), 0);
+}
+```
+
+### Sybil Resistance
+
+Prevent abuse through:
+
+- Token-gated access
+- Rate limiting
+- Minimum voting power requirements
+- Historical participation requirements
+
+## Cost Analysis
+
+### Gas Costs
+
+Typical gas usage for voting:
+
+| Action | Gas Units | At 30 gwei |
+|--------|-----------|------------|
+| Simple vote | ~100,000 | ~$3.00 |
+| Delegate | ~80,000 | ~$2.40 |
+| Vote + delegate | ~150,000 | ~$4.50 |
+
+### Paymaster Economics
+
+```yaml
+economics:
+  # Per-vote cost
+  avg_gas_per_vote: 100,000
+  gas_price: 30 gwei
+  cost_per_vote: ~0.003 ETH (~$9)
+
+  # Monthly projections (1000 votes)
+  monthly_votes: 1,000
+  monthly_cost: ~3 ETH (~$9,000)
+
+  # Treasury sustainability
+  funding_source: protocol_fees
+  fee_allocation: 5%
+```
+
+## Gasless Voting Dashboard
+
+<Cards>
+  <Card title="Setup Gasless" href="/docs/guide/gasless/setup" icon="settings">
+    Configure gasless voting for your DAO
+  </Card>
+  <Card title="Paymaster" href="/docs/guide/gasless/paymaster" icon="credit-card">
+    Manage paymaster funding
+  </Card>
+  <Card title="Disabling" href="/docs/guide/gasless/disabling" icon="x-circle">
+    Turn off gasless voting
+  </Card>
+  <Card title="Using Gasless" href="/docs/guide/gasless/using" icon="zap">
+    Voter guide for gasless voting
+  </Card>
+</Cards>
+
+## Comparison with Other Approaches
+
+### Meta-Transactions
+
+```yaml
+meta_transactions:
+  pros:
+    - Simpler implementation
+    - Works with EOAs
+  cons:
+    - Requires relayer infrastructure
+    - Custom per-contract implementation
+    - Limited flexibility
+```
+
+### Snapshot (Off-chain)
+
+```yaml
+snapshot:
+  pros:
+    - Completely free
+    - No blockchain interaction
+  cons:
+    - Votes not on-chain
+    - Requires trusted execution
+    - No automatic enforcement
+```
+
+### EIP-4337 (Gasless Voting)
+
+```yaml
+eip_4337:
+  pros:
+    - On-chain votes
+    - Standardized approach
+    - Flexible policies
+    - Works with smart accounts
+  cons:
+    - Requires paymaster funding
+    - More complex setup
+    - Bundler dependency
+```
+
+## Network Support
+
+Gasless voting is available on:
+
+| Network | EntryPoint | Status |
+|---------|------------|--------|
+| Ethereum | 0x5FF1...6197 | Active |
+| Arbitrum | 0x5FF1...6197 | Active |
+| Optimism | 0x5FF1...6197 | Active |
+| Base | 0x5FF1...6197 | Active |
+| Polygon | 0x5FF1...6197 | Active |
+| Lux | 0x5FF1...6197 | Active |
+
+## Getting Started
+
+### For DAO Admins
+
+1. [Set up gasless voting](/docs/guide/gasless/setup)
+2. [Fund the paymaster](/docs/guide/gasless/paymaster)
+3. Configure eligibility policies
+4. Test with a sample proposal
+
+### For Voters
+
+1. [Learn how to vote gasless](/docs/guide/gasless/using)
+2. Connect your wallet
+3. Vote on proposals without gas
+4. Track your voting history

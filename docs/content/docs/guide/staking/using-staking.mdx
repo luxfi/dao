@@ -1,0 +1,429 @@
+---
+title: Using Staking
+description: How to stake tokens and earn rewards as a token holder
+---
+
+# Using Staking
+
+This guide explains how token holders can stake their tokens, earn rewards, and participate in governance through the staking system.
+
+## Getting Started
+
+### Prerequisites
+
+Before staking, you'll need:
+
+1. **Governance Tokens** - LUX or your DAO's token
+2. **Connected Wallet** - MetaMask, WalletConnect, etc.
+3. **Native Token for Gas** - ETH, LUX, etc. for transaction fees
+
+### Accessing the Staking Page
+
+1. Go to your DAO's dashboard
+2. Click **Staking** in the navigation
+3. Connect your wallet if not already connected
+
+## Staking Your Tokens
+
+### Step 1: Choose Lock Duration
+
+Select how long to lock your tokens:
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│ Select Lock Duration                                         │
+├─────────────────────────────────────────────────────────────┤
+│                                                              │
+│  ┌──────────┐  ┌──────────┐  ┌──────────┐  ┌──────────┐   │
+│  │ 30 Days  │  │ 90 Days  │  │ 180 Days │  │ 1 Year   │   │
+│  │          │  │          │  │          │  │          │   │
+│  │ 1.0x APY │  │ 1.5x APY │  │ 2.0x APY │  │ 3.0x APY │   │
+│  │ ~8%      │  │ ~12%     │  │ ~16%     │  │ ~24%     │   │
+│  └──────────┘  └──────────┘  └──────────┘  └──────────┘   │
+│                                                              │
+│  Current Selection: 180 Days                                │
+│  Unlock Date: July 30, 2026                                 │
+│                                                              │
+└─────────────────────────────────────────────────────────────┘
+```
+
+**Longer locks provide:**
+- Higher APY multiplier
+- More voting power
+- Greater governance influence
+
+### Step 2: Enter Stake Amount
+
+Choose how many tokens to stake:
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│ Stake Amount                                                 │
+├─────────────────────────────────────────────────────────────┤
+│                                                              │
+│  Amount:  [1,000                    ] LUX                   │
+│                                                              │
+│  Wallet Balance:    5,000 LUX                               │
+│  Minimum Stake:     100 LUX                                 │
+│                                                              │
+│  [25%]  [50%]  [75%]  [MAX]                                │
+│                                                              │
+└─────────────────────────────────────────────────────────────┘
+```
+
+### Step 3: Review and Confirm
+
+Review your stake details before confirming:
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│ Confirm Stake                                                │
+├─────────────────────────────────────────────────────────────┤
+│                                                              │
+│  Stake Amount:      1,000 LUX                               │
+│  Lock Duration:     180 days                                │
+│  Unlock Date:       July 30, 2026                           │
+│                                                              │
+│  You Will Receive:                                          │
+│  • 2,000 veLUX (voting power)                               │
+│  • ~16% APY (~160 LUX/year)                                 │
+│  • Governance voting rights                                  │
+│                                                              │
+│  Early Exit Penalty: 20%                                    │
+│                                                              │
+│  [Cancel]                           [Confirm Stake]         │
+│                                                              │
+└─────────────────────────────────────────────────────────────┘
+```
+
+### Step 4: Approve and Stake
+
+1. Click **Confirm Stake**
+2. If first time: Approve token spending
+3. Confirm the stake transaction
+4. Wait for confirmation
+
+```
+Transaction Progress:
+✓ Token approval confirmed
+✓ Stake transaction submitted
+⟳ Waiting for confirmation...
+✓ Stake successful!
+
+Your Position:
+• 1,000 LUX staked
+• 2,000 veLUX received
+• Rewards accruing
+```
+
+## Managing Your Stake
+
+### View Your Position
+
+Access your staking dashboard:
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│ My Staking Position                                          │
+├─────────────────────────────────────────────────────────────┤
+│                                                              │
+│  Total Staked:     1,000 LUX                                │
+│  Voting Power:     2,000 veLUX                              │
+│  Lock Expires:     July 30, 2026 (180 days)                 │
+│                                                              │
+│  ────────────────────────────────────────────               │
+│                                                              │
+│  Pending Rewards:                                            │
+│  • Staking:        12.50 LUX                                │
+│  • Revenue Share:   5.25 USDC                               │
+│                                                              │
+│  Total Earned:     125.00 LUX + 52.00 USDC                  │
+│                                                              │
+│  [Claim Rewards]  [Compound]  [Extend Lock]                 │
+│                                                              │
+└─────────────────────────────────────────────────────────────┘
+```
+
+### Claiming Rewards
+
+Claim accumulated rewards:
+
+1. Go to your staking position
+2. Click **Claim Rewards**
+3. Choose what to claim:
+   - All rewards
+   - Specific token
+   - Partial amount
+4. Confirm transaction
+
+**Claim Options:**
+
+| Option | Description |
+|--------|-------------|
+| Claim All | Withdraw all pending rewards to wallet |
+| Compound | Re-stake LUX rewards automatically |
+| Claim Selected | Choose specific reward tokens |
+
+### Compounding Rewards
+
+Automatically re-stake your rewards:
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│ Compound Rewards                                             │
+├─────────────────────────────────────────────────────────────┤
+│                                                              │
+│  Available to Compound: 125.00 LUX                          │
+│                                                              │
+│  Compound into:                                              │
+│  ● Existing position (180 days remaining)                   │
+│  ○ New position (select lock duration)                      │
+│                                                              │
+│  After Compounding:                                          │
+│  • Staked: 1,000 → 1,125 LUX                               │
+│  • veLUX:  2,000 → 2,250 veLUX                             │
+│                                                              │
+│  [Compound Now]                                              │
+│                                                              │
+└─────────────────────────────────────────────────────────────┘
+```
+
+### Extending Lock
+
+Increase your lock duration for higher rewards:
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│ Extend Lock                                                  │
+├─────────────────────────────────────────────────────────────┤
+│                                                              │
+│  Current Lock:  180 days (expires July 30)                  │
+│                                                              │
+│  Extend To:                                                  │
+│  ○ 270 days (+90 days)  → 2.5x APY                         │
+│  ● 365 days (+185 days) → 3.0x APY                         │
+│  ○ 730 days (+550 days) → 4.0x APY                         │
+│                                                              │
+│  New Unlock Date: January 30, 2027                          │
+│  New veLUX:       1,000 → 3,000 veLUX                       │
+│                                                              │
+│  [Extend Lock]                                               │
+│                                                              │
+└─────────────────────────────────────────────────────────────┘
+```
+
+### Adding to Stake
+
+Increase your staked amount:
+
+1. Click **Add Stake** on your position
+2. Enter additional amount
+3. Review updated position
+4. Confirm transaction
+
+<Callout type="info">
+Adding to an existing stake typically resets the lock timer to your original lock duration.
+</Callout>
+
+## Withdrawing Stake
+
+### After Lock Expires
+
+Once your lock period ends:
+
+1. Go to your staking position
+2. Click **Withdraw**
+3. Choose amount (partial or full)
+4. Confirm transaction
+5. Tokens return to your wallet
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│ Withdraw Stake                                               │
+├─────────────────────────────────────────────────────────────┤
+│                                                              │
+│  ✓ Lock period complete                                     │
+│                                                              │
+│  Available to Withdraw: 1,125 LUX                           │
+│  (includes compounded rewards)                               │
+│                                                              │
+│  Withdraw Amount: [1,125            ] LUX                   │
+│                                                              │
+│  [25%]  [50%]  [75%]  [MAX]                                │
+│                                                              │
+│  Note: Withdrawing ends your staking rewards                │
+│                                                              │
+│  [Cancel]                              [Withdraw]           │
+│                                                              │
+└─────────────────────────────────────────────────────────────┘
+```
+
+### Early Exit (Before Lock Expires)
+
+If you need to withdraw early:
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│ Early Withdrawal                                             │
+├─────────────────────────────────────────────────────────────┤
+│                                                              │
+│  ⚠ Warning: Your tokens are still locked                    │
+│                                                              │
+│  Lock Expires:      July 30, 2026 (150 days remaining)      │
+│  Early Exit Penalty: 20%                                    │
+│                                                              │
+│  Staked Amount:     1,000 LUX                               │
+│  Penalty:           200 LUX                                 │
+│  You Will Receive:  800 LUX                                 │
+│                                                              │
+│  Pending rewards will be forfeited: 12.50 LUX              │
+│                                                              │
+│  [Cancel]                    [Accept Penalty & Withdraw]    │
+│                                                              │
+└─────────────────────────────────────────────────────────────┘
+```
+
+<Callout type="warning">
+Early withdrawal incurs a penalty. Consider carefully before exiting early.
+</Callout>
+
+## Voting with Staked Tokens
+
+### Voting Power
+
+Your veLUX balance determines voting power:
+
+```yaml
+Base Formula: 1 LUX staked × lock_multiplier = veLUX
+
+Example:
+  1,000 LUX × 2.0x (180 day lock) = 2,000 veLUX voting power
+```
+
+### Vote on Proposals
+
+1. Go to **Governance** > **Proposals**
+2. Select an active proposal
+3. Cast your vote (For/Against/Abstain)
+4. Confirm transaction
+
+Your vote is weighted by your veLUX balance at the snapshot block.
+
+### Delegate Voting Power
+
+Delegate your votes to another address:
+
+1. Go to **Staking** > **Delegation**
+2. Enter delegate address
+3. Confirm delegation
+
+```yaml
+delegation:
+  from: your_address
+  to: delegate_address
+  power: 2,000 veLUX
+  revocable: true
+```
+
+## Reward Calculations
+
+### APY Calculation
+
+```
+Base APY = (Annual Rewards / Total Staked) × 100
+
+Your APY = Base APY × Lock Multiplier
+
+Example:
+  Base APY: 8%
+  Lock Multiplier: 2.0x (180 days)
+  Your APY: 16%
+```
+
+### Reward Accrual
+
+Rewards accrue continuously:
+
+```
+Daily Reward = (Your Stake × Your APY) / 365
+
+Example:
+  Stake: 1,000 LUX
+  APY: 16%
+  Daily: (1,000 × 0.16) / 365 = 0.438 LUX/day
+```
+
+### Checking Pending Rewards
+
+View your accrued rewards anytime:
+
+```
+Pending Rewards:
+• Staking Rewards:  12.50 LUX (claimable)
+• Revenue Share:     5.25 USDC (claimable)
+• Locked Rewards:   25.00 LUX (vesting)
+
+Total Earned (All Time):
+• LUX Rewards:     125.00 LUX
+• USDC Revenue:     52.00 USDC
+```
+
+## Best Practices
+
+### Do
+
+- Choose lock duration based on your timeline
+- Compound regularly to maximize returns
+- Monitor APY changes
+- Participate in governance votes
+- Diversify across lock periods if needed
+
+### Don't
+
+- Lock more than you can afford
+- Ignore early exit penalties
+- Miss voting opportunities
+- Let rewards sit unclaimed too long
+- Panic withdraw during market dips
+
+## Troubleshooting
+
+### Common Issues
+
+| Issue | Possible Cause | Solution |
+|-------|---------------|----------|
+| Can't stake | Insufficient balance | Check wallet balance |
+| Can't withdraw | Lock not expired | Wait for unlock date |
+| No rewards showing | Just staked | Wait for next distribution |
+| Transaction failed | Low gas | Increase gas limit |
+| Wrong veLUX amount | Lock duration | Verify multiplier |
+
+### Getting Help
+
+If you encounter issues:
+
+1. Check the [FAQ](/docs/faq)
+2. Visit the community Discord
+3. Contact support
+
+## Quick Reference
+
+### Lock Multipliers
+
+| Duration | APY Multiplier | Voting Multiplier |
+|----------|---------------|-------------------|
+| 30 days | 1.0x | 1.0x |
+| 90 days | 1.5x | 1.25x |
+| 180 days | 2.0x | 1.5x |
+| 365 days | 3.0x | 2.0x |
+| 730 days | 4.0x | 2.5x |
+
+### Key Actions
+
+| Action | Gas Cost | Time |
+|--------|----------|------|
+| Stake | ~150k gas | Instant |
+| Claim | ~100k gas | Instant |
+| Compound | ~200k gas | Instant |
+| Withdraw | ~120k gas | Instant |
+| Extend lock | ~100k gas | Instant |

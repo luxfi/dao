@@ -1,0 +1,28 @@
+{
+  "name": "@luxdao/component-library",
+  "version": "4.0.0",
+  "description": "Lux DAO Component Library - Material-UI v5 components for Lux ecosystem",
+  "files": [
+    "lib",
+    "README.md"
+  ],
+  "main": "lib/index.js",
+  "types": "lib/index.d.ts",
+  "dependencies": {
+    "@react-spring/web": "^9.5.5"
+  },
+  "peerDependencies": {
+    "@emotion/react": "^11.10.4",
+    "@emotion/styled": "^11.10.4",
+    "@mui/material": "^5.11.0",
+    "react": "^17.0.0 || ^18.0.0",
+    "react-dom": "^17.0.0 || ^18.0.0",
+    "react-router-dom": "^6.5.0"
+  },
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/luxfi/dao.git",
+    "directory": "packages/component-library"
+  }
+}

@@ -1,0 +1,434 @@
+---
+title: Transfers
+description: Send one-time payments from treasury
+---
+
+# Transfers
+
+Transfers are the simplest form of payment - sending tokens from the DAO treasury to a single recipient.
+
+## Overview
+
+Use transfers for:
+
+- Invoice payments
+- Grant disbursements
+- Expense reimbursements
+- One-time rewards
+- Any immediate, single-recipient payment
+
+## Creating a Transfer
+
+### Via UI
+
+1. Navigate to **Treasury** > **Payments**
+2. Click **"New Transfer"**
+3. Fill in transfer details
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│ New Transfer                                                 │
+├─────────────────────────────────────────────────────────────┤
+│                                                              │
+│  Token:       [USDC ▼]                                      │
+│                                                              │
+│  Recipient:   [0x1234...5678                        ]       │
+│               ENS: contributor.eth ✓                        │
+│                                                              │
+│  Amount:      [5,000                                ]       │
+│               ≈ $5,000.00 USD                               │
+│                                                              │
+│  Memo:        [Invoice #1234 - Q1 Development      ]       │
+│               [Milestone completion                 ]       │
+│                                                              │
+│  Treasury Balance: 125,000 USDC                              │
+│                                                              │
+│  [ Cancel ]                          [ Create Transfer ]    │
+│                                                              │
+└─────────────────────────────────────────────────────────────┘
+```
+
+### Via Proposal
+
+For amounts requiring governance approval:
+
+```yaml
+Proposal: "Pay Development Invoice #1234"
+
+Description: |
+  This proposal pays Invoice #1234 for Q1 development work.
+
+  ## Work Completed
+  - Feature A implementation
+  - Bug fixes (12 issues)
+  - Documentation updates
+
+  ## Invoice Details
+  - Vendor: Development Team
+  - Invoice: #1234
+  - Amount: $5,000 USDC
+  - Due: January 31, 2026
+
+Actions:
+  - type: transfer
+    token: USDC
+    to: 0x1234...5678
+    amount: 5000000000  # 5K USDC (6 decimals)
+    memo: "Invoice #1234 - Q1 Development Milestone"
+```
+
+### Via SDK
+
+```typescript
+import { TreasuryClient } from '@lux/dao-sdk';
+import { ethers } from 'ethers';
+
+const treasury = new TreasuryClient(signer);
+
+// Simple transfer
+const tx = await treasury.transfer(
+  '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48', // USDC
+  '0x1234...5678',                                // Recipient
+  ethers.parseUnits('5000', 6),                   // Amount
+  'Invoice #1234 - Q1 Development Milestone'      // Memo
+);
+
+await tx.wait();
+console.log('Transfer complete');
+```
+
+## Smart Contract Interface
+
+```solidity
+interface ITreasury {
+    /// @notice Emitted on transfer
+    event Transfer(
+        address indexed token,
+        address indexed to,
+        uint256 amount,
+        string memo,
+        address indexed executor
+    );
+
+    /// @notice Transfer tokens from treasury
+    /// @param token Token address (address(0) for native)
+    /// @param to Recipient address
+    /// @param amount Amount to transfer
+    /// @param memo Description of payment
+    function transfer(
+        address token,
+        address to,
+        uint256 amount,
+        string calldata memo
+    ) external;
+
+    /// @notice Get treasury balance
+    function balance(address token) external view returns (uint256);
+}
+```
+
+## Transfer with Native Token
+
+For ETH or native chain token:
+
+```typescript
+// Transfer native token (ETH)
+await treasury.transfer(
+  ethers.ZeroAddress,  // Use zero address for native
+  recipientAddress,
+  ethers.parseEther('1.5'),
+  'Infrastructure costs reimbursement'
+);
+```
+
+## Approval Workflows
+
+### Direct Transfer (Small Amounts)
+
+For amounts within role spending limits:
+
+```
+Contributor → Lead Approval → Transfer
+```
+
+```typescript
+// Check if amount is within direct transfer limit
+const limit = await treasury.spendingLimit(signerAddress);
+if (amount <= limit) {
+  await treasury.transfer(token, to, amount, memo);
+} else {
+  console.log('Amount exceeds limit - create proposal');
+}
+```
+
+### Proposal-Based Transfer (Large Amounts)
+
+For amounts requiring governance:
+
+```
+Proposer → Voting → Timelock → Execution
+```
+
+```yaml
+# Proposal flow
+1. Submit proposal with transfer action
+2. Community votes (7 days)
+3. If passed, enters timelock (3 days)
+4. Anyone can execute after timelock
+```
+
+### Multi-Sig Transfer (Emergency/Fast)
+
+For urgent payments with multi-sig:
+
+```
+Signer 1 → Signer 2 → Signer 3 → Transfer
+```
+
+```typescript
+// Using Safe multi-sig
+const safeTx = await safe.createTransaction({
+  to: treasury.address,
+  data: treasury.interface.encodeFunctionData('transfer', [
+    token, recipient, amount, memo
+  ]),
+  value: 0
+});
+
+// Collect signatures
+await safe.signTransaction(safeTx); // Signer 1
+// ... other signers ...
+
+// Execute when threshold met
+await safe.executeTransaction(safeTx);
+```
+
+## Scheduled Transfers
+
+For future-dated payments:
+
+```typescript
+// Schedule transfer for specific time
+const futureTime = Math.floor(Date.now() / 1000) + 7 * 24 * 60 * 60; // 7 days
+
+await treasury.scheduleTransfer(
+  token,
+  recipient,
+  amount,
+  memo,
+  futureTime
+);
+```
+
+Or via proposal with custom execution time:
+
+```yaml
+Proposal: "Scheduled Payment - Q2 Start"
+
+Actions:
+  - type: transfer
+    token: USDC
+    to: 0x1234...
+    amount: 25000000000
+    memo: "Q2 Budget Release"
+    executeAfter: 1712188800  # April 1, 2026
+```
+
+## Recurring Transfers
+
+For regular payments, consider:
+
+1. **Streams** - Continuous payment over time
+2. **Scheduled Proposals** - Quarterly bulk approvals
+3. **Role-Based Streams** - Automatic for role holders
+
+Example quarterly approval:
+
+```yaml
+Proposal: "Q2 Contributor Payments"
+
+Description: |
+  Pre-approved monthly payments for Q2 contributors.
+
+Actions:
+  # April
+  - type: scheduled_transfer
+    token: USDC
+    to: 0xAAA...
+    amount: 5000000000
+    executeAfter: 1712188800
+
+  # May
+  - type: scheduled_transfer
+    token: USDC
+    to: 0xAAA...
+    amount: 5000000000
+    executeAfter: 1714780800
+
+  # June
+  - type: scheduled_transfer
+    token: USDC
+    to: 0xAAA...
+    amount: 5000000000
+    executeAfter: 1717459200
+```
+
+## Transfer Verification
+
+### Pre-Transfer Checks
+
+```typescript
+async function verifyTransfer(
+  token: string,
+  to: string,
+  amount: bigint
+): Promise<boolean> {
+  // 1. Verify recipient address
+  if (!ethers.isAddress(to)) {
+    throw new Error('Invalid recipient address');
+  }
+
+  // 2. Check treasury balance
+  const balance = await treasury.balance(token);
+  if (balance < amount) {
+    throw new Error('Insufficient treasury balance');
+  }
+
+  // 3. Check spending limits
+  const limit = await treasury.spendingLimit(signer.address);
+  if (amount > limit) {
+    throw new Error('Amount exceeds spending limit');
+  }
+
+  // 4. Verify recipient is not blacklisted
+  const isBlocked = await treasury.isBlocked(to);
+  if (isBlocked) {
+    throw new Error('Recipient is blocked');
+  }
+
+  return true;
+}
+```
+
+### Post-Transfer Verification
+
+```typescript
+// Verify transfer completed
+const receipt = await tx.wait();
+
+// Check event
+const event = receipt.logs.find(
+  log => log.topics[0] === treasury.interface.getEvent('Transfer').topicHash
+);
+
+if (event) {
+  const decoded = treasury.interface.decodeEventLog('Transfer', event.data, event.topics);
+  console.log(`Transferred ${decoded.amount} to ${decoded.to}`);
+}
+
+// Verify balances changed
+const newBalance = await treasury.balance(token);
+console.log(`Treasury balance: ${newBalance}`);
+```
+
+## Memo Best Practices
+
+Include useful information in memos:
+
+```typescript
+// Good memos
+'Invoice #1234 - Q1 Development Milestone 2'
+'Grant #56 - Research Project Phase 1'
+'Reimbursement - ETHDenver travel (Alice)'
+'Bounty - Bug #789 critical fix'
+
+// Bad memos
+''              // Empty
+'payment'       // Too vague
+'asdf'          // Meaningless
+```
+
+## Handling Errors
+
+### Common Errors
+
+| Error | Cause | Solution |
+|-------|-------|----------|
+| `InsufficientBalance` | Treasury lacks funds | Fund treasury first |
+| `ExceedsSpendingLimit` | Above your limit | Get approval or use proposal |
+| `InvalidRecipient` | Bad address format | Verify address |
+| `RecipientBlocked` | Blocked address | Contact admin |
+| `TransferFailed` | Token transfer reverted | Check token contract |
+
+### Error Handling
+
+```typescript
+try {
+  await treasury.transfer(token, to, amount, memo);
+} catch (error) {
+  if (error.message.includes('InsufficientBalance')) {
+    console.error('Treasury needs funding');
+  } else if (error.message.includes('ExceedsSpendingLimit')) {
+    console.error('Create a proposal for this amount');
+  } else {
+    console.error('Transfer failed:', error.message);
+  }
+}
+```
+
+## Transfer Events
+
+Track transfers for reporting:
+
+```typescript
+// Historical transfers
+const filter = treasury.filters.Transfer();
+const events = await treasury.queryFilter(filter, fromBlock, toBlock);
+
+for (const event of events) {
+  console.log({
+    token: event.args.token,
+    to: event.args.to,
+    amount: event.args.amount.toString(),
+    memo: event.args.memo,
+    executor: event.args.executor,
+    block: event.blockNumber
+  });
+}
+```
+
+## Multi-Token Transfers
+
+Send multiple tokens in one proposal:
+
+```yaml
+Proposal: "Contributor Compensation Package"
+
+Actions:
+  # USDC payment
+  - type: transfer
+    token: USDC
+    to: 0x1234...
+    amount: 5000000000
+    memo: "Monthly stipend"
+
+  # Governance tokens
+  - type: transfer
+    token: DAO
+    to: 0x1234...
+    amount: 10000000000000000000000  # 10K tokens
+    memo: "Performance bonus"
+```
+
+## Security Checklist
+
+Before executing a transfer:
+
+- [ ] Verify recipient address (check twice)
+- [ ] Confirm token is correct
+- [ ] Validate amount (check decimals)
+- [ ] Review memo for accuracy
+- [ ] Ensure sufficient balance
+- [ ] Check spending limits
+- [ ] Get required approvals
+- [ ] Simulate transaction first

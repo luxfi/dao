@@ -1,0 +1,453 @@
+---
+title: Paymaster Management
+description: Fill and withdraw from the gasless voting paymaster
+---
+
+# Paymaster Management
+
+The paymaster is the account that sponsors gas fees for gasless voting. This guide covers funding, monitoring, and managing your paymaster balance.
+
+## Understanding the Paymaster
+
+### What is a Paymaster?
+
+A paymaster is a smart contract that pays gas fees on behalf of users. In EIP-4337 account abstraction:
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│ Paymaster Flow                                               │
+├─────────────────────────────────────────────────────────────┤
+│                                                              │
+│  [User] ──► Signs Vote (free)                               │
+│                  │                                           │
+│                  ▼                                           │
+│  [Bundler] ──► Checks Paymaster                             │
+│                  │                                           │
+│                  ▼                                           │
+│  [Paymaster] ──► Validates & Approves                       │
+│                  │                                           │
+│                  ▼                                           │
+│  [EntryPoint] ──► Executes Vote                             │
+│                  │                                           │
+│                  ▼                                           │
+│  [Paymaster] ──► Gas Deducted from Balance                  │
+│                                                              │
+└─────────────────────────────────────────────────────────────┘
+```
+
+### Paymaster Balance
+
+The paymaster holds ETH (or native token) to pay for gas:
+
+```yaml
+paymaster:
+  address: 0x1234...5678
+  balance: 5.25 ETH
+  deposited: 10.00 ETH
+  spent: 4.75 ETH
+  pending: 0.00 ETH  # Reserved for in-flight operations
+```
+
+## Viewing Paymaster Status
+
+### Dashboard Overview
+
+Access paymaster status from your DAO dashboard:
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│ Paymaster Status                                             │
+├─────────────────────────────────────────────────────────────┤
+│                                                              │
+│  Balance:          5.25 ETH                                 │
+│  Status:           ● Active                                 │
+│                                                              │
+│  ┌─────────────────────────────────────────────────────┐   │
+│  │ Balance Health                                       │   │
+│  │ ██████████████████░░░░░░░░ 52.5%                    │   │
+│  └─────────────────────────────────────────────────────┘   │
+│                                                              │
+│  Estimated Runway:                                           │
+│  • ~1,750 votes at current gas prices                       │
+│  • ~5 weeks at current usage                                │
+│                                                              │
+│  Today's Usage:    12 votes (0.036 ETH)                     │
+│  This Week:        84 votes (0.252 ETH)                     │
+│  This Month:       312 votes (0.936 ETH)                    │
+│                                                              │
+│  [Deposit]  [Withdraw]  [View History]                      │
+│                                                              │
+└─────────────────────────────────────────────────────────────┘
+```
+
+### Balance Alerts
+
+Configure alerts for low balance:
+
+```yaml
+alerts:
+  warning:
+    threshold: 1.0 ETH
+    message: "Paymaster balance low"
+    notify: [email, discord]
+
+  critical:
+    threshold: 0.25 ETH
+    message: "Paymaster critically low"
+    notify: [email, discord, sms]
+    action: pause_gasless  # Optional auto-pause
+```
+
+## Depositing Funds
+
+### Manual Deposit
+
+Add funds to the paymaster:
+
+1. Go to **Settings** > **Gasless** > **Paymaster**
+2. Click **Deposit**
+3. Enter amount
+4. Confirm transaction
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│ Deposit to Paymaster                                         │
+├─────────────────────────────────────────────────────────────┤
+│                                                              │
+│  Current Balance:    5.25 ETH                               │
+│                                                              │
+│  Deposit Amount:     [2.0                    ] ETH          │
+│                                                              │
+│  [0.5 ETH]  [1 ETH]  [2 ETH]  [5 ETH]                      │
+│                                                              │
+│  New Balance:        7.25 ETH                               │
+│                                                              │
+│  Source:                                                     │
+│  ● Connected Wallet (0x1234...5678)                         │
+│  ○ DAO Treasury (requires proposal)                         │
+│                                                              │
+│  [Cancel]                              [Deposit]            │
+│                                                              │
+└─────────────────────────────────────────────────────────────┘
+```
+
+### Deposit via EntryPoint
+
+Deposits go through the EIP-4337 EntryPoint contract:
+
+```solidity
+// Deposit to paymaster via EntryPoint
+IEntryPoint entryPoint = IEntryPoint(0x5FF1...6197);
+entryPoint.depositTo{value: 2 ether}(paymasterAddress);
+```
+
+### Treasury Deposit
+
+Fund from DAO treasury:
+
+**Option 1: Admin Action (if permitted)**
+
+1. Admin initiates transfer from treasury
+2. Funds deposited to paymaster
+
+**Option 2: Governance Proposal**
+
+```yaml
+proposal:
+  title: "Fund Gasless Paymaster"
+  actions:
+    - type: transfer
+      from: treasury
+      to: paymaster
+      amount: 5 ETH
+  rationale: "Maintain gasless voting for Q1 2026"
+```
+
+### Auto-Refill
+
+Configure automatic refills:
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│ Auto-Refill Settings                                         │
+├─────────────────────────────────────────────────────────────┤
+│                                                              │
+│  Auto-Refill:       [● Enabled  ○ Disabled]                 │
+│                                                              │
+│  Trigger When:      Balance falls below                     │
+│                     [1.0                    ] ETH           │
+│                                                              │
+│  Refill Amount:     [3.0                    ] ETH           │
+│                                                              │
+│  Monthly Cap:       [10.0                   ] ETH           │
+│                                                              │
+│  Source:            [DAO Treasury ▼]                        │
+│                                                              │
+│  Approval:                                                   │
+│  ○ Automatic (no proposal needed)                           │
+│  ● Requires admin approval                                   │
+│  ○ Requires governance proposal                              │
+│                                                              │
+│  [Save Settings]                                             │
+│                                                              │
+└─────────────────────────────────────────────────────────────┘
+```
+
+## Withdrawing Funds
+
+### When to Withdraw
+
+You may need to withdraw funds:
+
+- Migrating to new paymaster
+- Reallocating treasury funds
+- Disabling gasless voting
+- Emergency fund recovery
+
+### Withdrawal Process
+
+1. Go to **Settings** > **Gasless** > **Paymaster**
+2. Click **Withdraw**
+3. Enter amount or select "Withdraw All"
+4. Confirm transaction
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│ Withdraw from Paymaster                                      │
+├─────────────────────────────────────────────────────────────┤
+│                                                              │
+│  Current Balance:    5.25 ETH                               │
+│  Pending Operations: 0.05 ETH (reserved)                    │
+│  Available:          5.20 ETH                               │
+│                                                              │
+│  Withdraw Amount:    [5.20                   ] ETH          │
+│                                                              │
+│  [25%]  [50%]  [75%]  [MAX]                                │
+│                                                              │
+│  Destination:        [0x1234...5678         ]               │
+│  ○ Connected Wallet                                          │
+│  ● DAO Treasury                                              │
+│  ○ Custom Address                                            │
+│                                                              │
+│  ⚠ Warning: Withdrawing all funds will disable gasless     │
+│             voting until refunded.                           │
+│                                                              │
+│  [Cancel]                              [Withdraw]           │
+│                                                              │
+└─────────────────────────────────────────────────────────────┘
+```
+
+### Withdrawal via Contract
+
+Direct contract interaction:
+
+```solidity
+// Paymaster owner withdraws funds
+IPaymaster paymaster = IPaymaster(paymasterAddress);
+paymaster.withdrawTo(recipient, amount);
+```
+
+<Callout type="warning">
+Only the paymaster owner can withdraw funds. Ensure proper access control.
+</Callout>
+
+### Governance-Required Withdrawal
+
+For DAOs requiring governance approval:
+
+```yaml
+proposal:
+  title: "Withdraw Paymaster Funds"
+  type: treasury_withdrawal
+  actions:
+    - type: paymaster_withdraw
+      amount: 5 ETH
+      destination: treasury
+  rationale: "Reallocate unused gasless funds to grants"
+```
+
+## Monitoring Usage
+
+### Usage Analytics
+
+Track how funds are being used:
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│ Paymaster Analytics                                          │
+├─────────────────────────────────────────────────────────────┤
+│                                                              │
+│  Period: Last 30 Days                                        │
+│                                                              │
+│  Total Sponsored:    312 votes                              │
+│  Total Gas Spent:    0.936 ETH                              │
+│  Average per Vote:   0.003 ETH                              │
+│                                                              │
+│  ┌─────────────────────────────────────────────────────┐   │
+│  │ Daily Usage (ETH)                                    │   │
+│  │                                                      │   │
+│  │     ▄                                               │   │
+│  │   ▄ █     ▄                   ▄                     │   │
+│  │   █ █   ▄ █ ▄     ▄   ▄     ▄ █                     │   │
+│  │ ▄ █ █ ▄ █ █ █ ▄ ▄ █ ▄ █ ▄ ▄ █ █ ▄                   │   │
+│  │ █ █ █ █ █ █ █ █ █ █ █ █ █ █ █ █ █                   │   │
+│  │ ─────────────────────────────────                   │   │
+│  │ 1     5     10    15    20    25    30             │   │
+│  └─────────────────────────────────────────────────────┘   │
+│                                                              │
+│  Top Users:                                                  │
+│  1. 0xABC...123  - 45 votes (0.135 ETH)                    │
+│  2. 0xDEF...456  - 38 votes (0.114 ETH)                    │
+│  3. 0xGHI...789  - 32 votes (0.096 ETH)                    │
+│                                                              │
+└─────────────────────────────────────────────────────────────┘
+```
+
+### Cost Breakdown
+
+Understand where gas is going:
+
+```yaml
+cost_breakdown:
+  by_action:
+    cast_vote: 85%
+    cast_vote_with_reason: 10%
+    delegate: 5%
+
+  by_proposal_type:
+    standard: 60%
+    constitutional: 25%
+    emergency: 15%
+
+  by_gas_price:
+    low_traffic: 40%    # < 30 gwei
+    normal: 45%         # 30-60 gwei
+    high_traffic: 15%   # > 60 gwei
+```
+
+### Estimating Runway
+
+Calculate how long funds will last:
+
+```yaml
+runway_calculation:
+  current_balance: 5.25 ETH
+  avg_daily_spend: 0.03 ETH
+  estimated_days: 175
+
+  scenarios:
+    low_activity:     # 10 votes/day
+      daily_cost: 0.03 ETH
+      runway: 175 days
+
+    normal_activity:  # 25 votes/day
+      daily_cost: 0.075 ETH
+      runway: 70 days
+
+    high_activity:    # 50 votes/day
+      daily_cost: 0.15 ETH
+      runway: 35 days
+```
+
+## Paymaster Security
+
+### Access Control
+
+Secure your paymaster:
+
+```yaml
+access_control:
+  owner: dao_multisig
+  admin: dao_admin_role
+
+  permissions:
+    deposit: [owner, admin, anyone]
+    withdraw: [owner]
+    pause: [owner, admin]
+    update_policy: [owner]
+```
+
+### Spending Limits
+
+Prevent runaway spending:
+
+```yaml
+spending_limits:
+  per_user:
+    daily: 0.1 ETH
+    weekly: 0.5 ETH
+    monthly: 2.0 ETH
+
+  global:
+    daily: 5 ETH
+    weekly: 20 ETH
+    monthly: 50 ETH
+```
+
+### Emergency Pause
+
+Pause sponsorship in emergencies:
+
+1. Go to **Settings** > **Gasless**
+2. Click **Emergency Pause**
+3. Confirm action
+
+```solidity
+// Or via contract
+paymaster.pause();
+```
+
+## Troubleshooting
+
+### Common Issues
+
+| Issue | Cause | Solution |
+|-------|-------|----------|
+| Deposit not showing | Transaction pending | Wait for confirmation |
+| Cannot withdraw | Funds reserved | Wait for pending operations |
+| Balance incorrect | Sync delay | Refresh dashboard |
+| Auto-refill failed | Treasury insufficient | Add treasury funds |
+
+### Verifying Paymaster Balance
+
+Check balance directly on-chain:
+
+```javascript
+const entryPoint = new ethers.Contract(
+  "0x5FF137D4b0FDCD49DcA30c7CF57E578a026d2789",
+  entryPointAbi,
+  provider
+);
+
+const balance = await entryPoint.balanceOf(paymasterAddress);
+console.log("Paymaster balance:", ethers.utils.formatEther(balance));
+```
+
+## Best Practices
+
+### Do
+
+- Maintain 2-4 weeks runway minimum
+- Set up low-balance alerts
+- Monitor usage patterns
+- Use auto-refill for consistent funding
+- Keep withdrawal access secure
+
+### Don't
+
+- Let balance reach zero
+- Ignore usage spikes
+- Give withdrawal access broadly
+- Rely solely on manual refills
+- Forget to pause before migration
+
+## Next Steps
+
+<Cards>
+  <Card title="Disabling Gasless" href="/docs/guide/gasless/disabling" icon="x-circle">
+    Turn off gasless voting
+  </Card>
+  <Card title="Using Gasless" href="/docs/guide/gasless/using" icon="zap">
+    Voter experience guide
+  </Card>
+</Cards>

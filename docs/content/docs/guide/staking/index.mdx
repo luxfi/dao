@@ -1,0 +1,209 @@
+---
+title: Staking Overview
+description: Stake tokens to earn rewards and participate in governance
+---
+
+# Staking Overview
+
+Staking allows token holders to lock their tokens in exchange for rewards, enhanced voting power, and governance participation. This guide covers the staking system and its benefits.
+
+## What is Staking?
+
+Staking is the process of locking tokens in a smart contract to:
+
+- **Earn Rewards** - Receive a share of protocol revenue or inflation
+- **Gain Voting Power** - Lock tokens for vote-escrowed governance tokens
+- **Support the Network** - Contribute to protocol security and decentralization
+- **Access Benefits** - Unlock premium features or reduced fees
+
+## How Staking Works
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│                    Staking Flow                              │
+├─────────────────────────────────────────────────────────────┤
+│                                                              │
+│   [Deposit Tokens] ──► [Staking Contract] ──► [Receive veTokens]
+│                              │                               │
+│                              ▼                               │
+│                    [Accumulate Rewards]                      │
+│                              │                               │
+│                              ▼                               │
+│              [Claim Rewards] or [Compound]                   │
+│                                                              │
+└─────────────────────────────────────────────────────────────┘
+```
+
+### Staking Mechanics
+
+1. **Deposit** - Lock tokens for a chosen duration
+2. **Receive veTokens** - Get vote-escrowed tokens representing your stake
+3. **Earn Rewards** - Accumulate rewards over time
+4. **Participate** - Vote on proposals with your veTokens
+5. **Withdraw** - Unlock tokens after the lock period ends
+
+## Staking Models
+
+### Fixed Lock Period
+
+Lock tokens for a predetermined duration with fixed rewards.
+
+| Lock Period | APY Boost | Early Exit |
+|-------------|-----------|------------|
+| 30 days | 1.0x | 10% penalty |
+| 90 days | 1.5x | 15% penalty |
+| 180 days | 2.0x | 20% penalty |
+| 365 days | 3.0x | 25% penalty |
+
+### Flexible Staking
+
+No lock period with instant withdrawal capability.
+
+- Lower rewards than locked staking
+- Instant liquidity
+- Good for short-term participants
+
+### Vote-Escrow (veToken) Model
+
+Lock tokens to receive voting power that decays over time.
+
+```yaml
+Lock Duration: 4 years maximum
+Voting Power: Linear decay to 0 at unlock
+Rewards: Proportional to voting power
+```
+
+**Example:**
+```
+Lock 1,000 tokens for 4 years → 1,000 veTokens
+After 2 years → 500 veTokens remaining
+After 4 years → 0 veTokens (tokens unlocked)
+```
+
+## Benefits of Staking
+
+### For Token Holders
+
+- **Passive Income** - Earn rewards without active trading
+- **Governance Rights** - Vote on protocol decisions
+- **Fee Discounts** - Reduced fees on protocol services
+- **Priority Access** - Early access to new features
+
+### For DAOs
+
+- **Reduced Circulating Supply** - Less sell pressure
+- **Aligned Incentives** - Long-term holder commitment
+- **Governance Participation** - Active voter base
+- **Treasury Revenue** - Staking fees to treasury
+
+## Reward Sources
+
+Staking rewards can come from multiple sources:
+
+### Protocol Revenue
+
+```yaml
+Sources:
+  - Trading fees: 50% to stakers
+  - Lending interest: 30% to stakers
+  - NFT royalties: 25% to stakers
+  - Service fees: Variable
+```
+
+### Inflation
+
+```yaml
+Annual Emission: 5% of total supply
+Distribution:
+  - Stakers: 80%
+  - Treasury: 15%
+  - Development: 5%
+```
+
+### External Incentives
+
+Partner protocols may provide additional rewards:
+
+- Liquidity mining programs
+- Ecosystem grants
+- Partnership distributions
+
+## Staking Dashboard
+
+<Cards>
+  <Card title="Setup Staking" href="/docs/guide/staking/setup" icon="settings">
+    Configure staking for your DAO
+  </Card>
+  <Card title="Distributions" href="/docs/guide/staking/distributions" icon="pie-chart">
+    Manage reward distributions
+  </Card>
+  <Card title="Using Staking" href="/docs/guide/staking/using-staking" icon="lock">
+    Guide for token holders
+  </Card>
+</Cards>
+
+## Quick Stats Example
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│ Staking Overview                                             │
+├─────────────────────────────────────────────────────────────┤
+│                                                              │
+│  Total Staked:     45,000,000 LUX (45% of supply)           │
+│  Current APY:      12.5%                                     │
+│  Total Stakers:    8,234                                     │
+│  Rewards Paid:     2,500,000 LUX                            │
+│                                                              │
+│  ┌─────────────────────────────────────────────────────┐   │
+│  │ Lock Distribution                                    │   │
+│  │ ████████████████████░░░░ 30 days: 20%               │   │
+│  │ ██████████████░░░░░░░░░░ 90 days: 35%               │   │
+│  │ ██████████░░░░░░░░░░░░░░ 180 days: 25%              │   │
+│  │ ████████░░░░░░░░░░░░░░░░ 365 days: 20%              │   │
+│  └─────────────────────────────────────────────────────┘   │
+│                                                              │
+└─────────────────────────────────────────────────────────────┘
+```
+
+## Security Considerations
+
+<Callout type="warning">
+Before staking, understand the risks:
+</Callout>
+
+### Smart Contract Risk
+
+- Contracts are audited but not risk-free
+- Funds are locked for the duration
+- Upgrades require governance approval
+
+### Impermanent Loss
+
+For liquidity staking:
+- Token price changes may affect value
+- Consider price volatility before staking
+
+### Slashing Risk
+
+Some staking systems include slashing for:
+- Malicious behavior
+- Downtime (for validator staking)
+- Protocol violations
+
+## Getting Started
+
+### Prerequisites
+
+1. **Governance Tokens** - Acquire tokens to stake
+2. **Connected Wallet** - MetaMask, WalletConnect, etc.
+3. **Gas for Transactions** - ETH/native token for fees
+
+### First Steps
+
+1. Navigate to the staking page
+2. Choose lock duration
+3. Enter amount to stake
+4. Review and confirm transaction
+5. Start earning rewards
+
+See [Using Staking](/docs/guide/staking/using-staking) for detailed instructions.

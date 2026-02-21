@@ -1,0 +1,448 @@
+---
+title: Delegation
+description: How to delegate and manage voting power
+---
+
+# Delegation
+
+Delegation allows token holders to assign their voting power to trusted representatives without transferring ownership of their tokens. This enables participation even when you lack time or expertise to vote on every proposal.
+
+## What is Delegation?
+
+Delegation transfers your **voting power** (not your tokens) to another address called a **delegate**. The delegate can then vote on your behalf.
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│                    Delegation Flow                           │
+├─────────────────────────────────────────────────────────────┤
+│                                                              │
+│   You (Delegator)           Delegate                        │
+│   ┌─────────────┐          ┌─────────────┐                 │
+│   │ 10,000 veT  │────────> │ Receives    │                 │
+│   │ Keep tokens │  Power   │ +10,000 VP  │                 │
+│   │ Lose VP     │          │ Can vote    │                 │
+│   └─────────────┘          └─────────────┘                 │
+│                                                              │
+│   Your tokens stay in your wallet.                          │
+│   Only voting power moves.                                  │
+│                                                              │
+└─────────────────────────────────────────────────────────────┘
+```
+
+### Key Properties
+
+| Property | Delegator | Delegate |
+|----------|-----------|----------|
+| Token ownership | Keeps tokens | No tokens received |
+| Voting power | Loses VP | Gains VP |
+| Can re-delegate | Yes, anytime | Only their own tokens |
+| Staking rewards | Still receives | No additional rewards |
+| Can revoke | Yes, anytime | Cannot prevent revoke |
+
+<Callout type="info">
+Delegation is non-custodial. Your tokens never leave your wallet. Only voting power is assigned.
+</Callout>
+
+## How to Delegate
+
+### Step 1: Navigate to Delegation
+
+Go to **Governance > Delegation** or **Profile > Voting Power**.
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│  Your Voting Power                                           │
+├─────────────────────────────────────────────────────────────┤
+│                                                              │
+│  Locked Tokens:     10,000 veTokens                         │
+│  Lock Expires:      Jan 15, 2027                            │
+│  Base Power:        10,000 VP                               │
+│                                                              │
+│  Current Delegation: Self (you vote directly)               │
+│                                                              │
+│                     [Delegate to Someone]                    │
+│                                                              │
+└─────────────────────────────────────────────────────────────┘
+```
+
+### Step 2: Find a Delegate
+
+Browse delegates or enter an address directly:
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│  Find a Delegate                                             │
+├─────────────────────────────────────────────────────────────┤
+│                                                              │
+│  Search: [________________________] or [Enter Address]       │
+│                                                              │
+│  Sort by: [Voting Power ▼]  [Participation ▼]              │
+│                                                              │
+│  ┌────────────────────────────────────────────────────────┐ │
+│  │ ◉ alice.eth                                             │ │
+│  │   Voting Power: 2.4M VP    Participation: 98%          │ │
+│  │   Delegators: 156          Proposals Voted: 42/43      │ │
+│  │   Statement: "I vote for sustainable growth..."        │ │
+│  │                                      [View Profile]    │ │
+│  └────────────────────────────────────────────────────────┘ │
+│                                                              │
+│  ┌────────────────────────────────────────────────────────┐ │
+│  │ ◯ bob.eth                                               │ │
+│  │   Voting Power: 890K VP    Participation: 95%          │ │
+│  │   Delegators: 89           Proposals Voted: 40/43      │ │
+│  │   Statement: "Treasury security is my priority..."     │ │
+│  │                                      [View Profile]    │ │
+│  └────────────────────────────────────────────────────────┘ │
+│                                                              │
+└─────────────────────────────────────────────────────────────┘
+```
+
+### Step 3: Review Delegate Profile
+
+Before delegating, review the delegate's track record:
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│  Delegate Profile: alice.eth                                 │
+├─────────────────────────────────────────────────────────────┤
+│                                                              │
+│  Voting Power:     2,400,000 VP                             │
+│  Self-Owned:       500,000 VP                               │
+│  Delegated:        1,900,000 VP                             │
+│  Delegators:       156 addresses                            │
+│                                                              │
+│  ─────────────────────────────────────────────────────────  │
+│                                                              │
+│  Delegate Statement:                                         │
+│  "I believe in sustainable protocol growth. I vote for      │
+│   treasury diversification, careful spending, and           │
+│   long-term value creation over short-term gains."          │
+│                                                              │
+│  ─────────────────────────────────────────────────────────  │
+│                                                              │
+│  Voting History (last 10 proposals):                         │
+│                                                              │
+│  #42 Fund Grants Q1         FOR      ✓ Passed               │
+│  #41 Staking Update         AGAINST  ✗ Passed               │
+│  #40 New Committee          FOR      ✓ Passed               │
+│  #39 Parameter Change       FOR      ✓ Passed               │
+│  #38 Emergency Pause        FOR      ✓ Passed               │
+│  ...                                                         │
+│                                                              │
+│  Participation Rate: 98% (42/43 proposals)                  │
+│                                                              │
+│                             [Delegate to alice.eth]          │
+│                                                              │
+└─────────────────────────────────────────────────────────────┘
+```
+
+### Step 4: Confirm Delegation
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│  Confirm Delegation                                          │
+├─────────────────────────────────────────────────────────────┤
+│                                                              │
+│  Delegate To: alice.eth                                      │
+│  Your Power:  10,000 VP                                      │
+│                                                              │
+│  ⚠ This will transfer your voting power to alice.eth.       │
+│    They will vote on proposals on your behalf.              │
+│    You can revoke this at any time.                         │
+│                                                              │
+│                           [Cancel]  [Confirm Delegation]     │
+│                                                              │
+└─────────────────────────────────────────────────────────────┘
+```
+
+### Step 5: Sign Transaction
+
+1. Click **Confirm Delegation**
+2. Approve the transaction in your wallet
+3. Wait for confirmation
+4. Delegation is now active
+
+## Finding Good Delegates
+
+### Evaluation Criteria
+
+| Criterion | What to Look For |
+|-----------|------------------|
+| **Participation Rate** | >90% proposals voted |
+| **Voting Alignment** | Votes match your values |
+| **Communication** | Clear delegate statement |
+| **Track Record** | Consistent over time |
+| **Availability** | Active in governance forums |
+
+### Red Flags
+
+- ❌ Low participation (<70%)
+- ❌ No delegate statement
+- ❌ Erratic voting patterns
+- ❌ No forum presence
+- ❌ Votes against stated principles
+
+### Delegate Discovery
+
+**Official Delegate Registry:**
+- Go to **Governance > Delegates**
+- Filter by participation, power, or focus area
+
+**Community Resources:**
+- Governance forum delegate threads
+- Discord #delegates channel
+- Weekly delegate AMAs
+
+## Delegate Responsibilities
+
+If you accept delegated power, you have responsibilities:
+
+### Required
+
+- ✅ Vote on all proposals (or abstain with reason)
+- ✅ Maintain public delegate statement
+- ✅ Be accessible to delegators
+
+### Recommended
+
+- ✅ Explain voting rationale publicly
+- ✅ Participate in forum discussions
+- ✅ Attend governance calls
+- ✅ Respond to delegator questions
+- ✅ Update statement if views change
+
+### Setting Up as a Delegate
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│  Become a Delegate                                           │
+├─────────────────────────────────────────────────────────────┤
+│                                                              │
+│  Display Name: [____________________]                        │
+│                                                              │
+│  Delegate Statement:                                         │
+│  ┌─────────────────────────────────────────────────────────┐ │
+│  │ Describe your governance philosophy, priorities,        │ │
+│  │ and how you plan to vote...                              │ │
+│  │                                                          │ │
+│  │ Markdown supported.                                      │ │
+│  └─────────────────────────────────────────────────────────┘ │
+│                                                              │
+│  Focus Areas (select up to 3):                               │
+│  [x] Treasury    [ ] Technical    [x] Grants                │
+│  [ ] Security    [x] Community    [ ] Protocol              │
+│                                                              │
+│  Contact:                                                    │
+│  Twitter:  [@__________]                                    │
+│  Discord:  [__________#____]                                │
+│  Forum:    [__________________]                             │
+│                                                              │
+│                                    [Save Delegate Profile]  │
+│                                                              │
+└─────────────────────────────────────────────────────────────┘
+```
+
+## Revoking Delegation
+
+You can revoke delegation at any time to reclaim your voting power.
+
+### How to Revoke
+
+1. Go to **Governance > Delegation**
+2. View your current delegation
+3. Click **Revoke Delegation**
+4. Confirm and sign
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│  Your Current Delegation                                     │
+├─────────────────────────────────────────────────────────────┤
+│                                                              │
+│  Delegated To: alice.eth                                     │
+│  Since:        Jan 1, 2026                                   │
+│  Your Power:   10,000 VP                                     │
+│                                                              │
+│  Delegate Stats:                                             │
+│  - Voted 42/43 proposals since delegation                   │
+│  - Your power used: 42 times                                 │
+│                                                              │
+│                       [Change Delegate]  [Revoke]           │
+│                                                              │
+└─────────────────────────────────────────────────────────────┘
+```
+
+### When to Revoke
+
+Consider revoking if:
+- Delegate votes against your interests repeatedly
+- Delegate becomes inactive
+- You want to vote on important proposals yourself
+- Delegate's views have changed
+
+<Callout type="warning">
+Revocation takes effect immediately. If there's an active vote, you may want to wait until after to avoid missing that proposal.
+</Callout>
+
+### Re-Delegation
+
+After revoking, you can:
+1. **Self-delegate** - Vote directly yourself
+2. **Delegate to someone else** - Choose a new delegate
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│  Delegation Revoked                                          │
+├─────────────────────────────────────────────────────────────┤
+│                                                              │
+│  Your voting power is now:                                   │
+│  ○ Self-delegated (vote yourself)                           │
+│                                                              │
+│  Would you like to delegate to someone new?                  │
+│                                                              │
+│         [Keep Self-Delegation]  [Find New Delegate]         │
+│                                                              │
+└─────────────────────────────────────────────────────────────┘
+```
+
+## Advanced Delegation
+
+### Partial Delegation
+
+Some DAOs support splitting voting power among multiple delegates:
+
+```yaml
+Total Power: 100,000 VP
+
+Delegation Split:
+  - alice.eth: 50,000 VP (50%)
+  - bob.eth: 30,000 VP (30%)
+  - self: 20,000 VP (20%)
+```
+
+<Callout type="info">
+Partial delegation is not available in all DAOs. Check your DAO's governance settings.
+</Callout>
+
+### Delegation Chains
+
+Delegation is **not transitive**. If Alice delegates to Bob, and Bob delegates to Carol:
+
+```
+You → Alice → Bob → Carol
+
+Result:
+- Your power goes to Alice only
+- Alice's power goes to Bob only
+- Bob's power goes to Carol only
+- Carol cannot vote with your power
+```
+
+### Time-Locked Delegation
+
+Some DAOs allow time-locked delegation that cannot be revoked for a period:
+
+```yaml
+Delegation:
+  to: alice.eth
+  power: 10,000 VP
+  lock_until: "2026-06-01"
+  revokable: false (until lock expires)
+```
+
+## Delegation Tracking
+
+### Your Delegations
+
+View who you've delegated to:
+
+| Delegate | Power | Since | Actions |
+|----------|-------|-------|---------|
+| alice.eth | 10,000 VP | Jan 1, 2026 | [Revoke] |
+
+### Your Delegators
+
+View who has delegated to you:
+
+| Delegator | Power | Since |
+|-----------|-------|-------|
+| 0x1234...abcd | 5,000 VP | Dec 15, 2025 |
+| 0x5678...efgh | 2,500 VP | Jan 5, 2026 |
+| **Total** | **7,500 VP** | - |
+
+### Delegation History
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│  Delegation History                                          │
+├─────────────────────────────────────────────────────────────┤
+│                                                              │
+│  Jan 15, 2026  Revoked from bob.eth                         │
+│  Jan 10, 2026  Delegated 10,000 VP to bob.eth               │
+│  Dec 1, 2025   Revoked from alice.eth                       │
+│  Oct 15, 2025  Delegated 8,000 VP to alice.eth              │
+│  Sep 1, 2025   Initial self-delegation                      │
+│                                                              │
+└─────────────────────────────────────────────────────────────┘
+```
+
+## Delegation Best Practices
+
+### For Delegators
+
+1. **Research thoroughly** before delegating
+2. **Monitor delegate activity** regularly
+3. **Engage with delegates** when you disagree
+4. **Revoke promptly** if delegate doesn't represent you
+5. **Re-evaluate periodically** (quarterly recommended)
+
+### For Delegates
+
+1. **Vote consistently** with stated principles
+2. **Communicate rationale** for each vote
+3. **Stay accessible** to delegators
+4. **Update statement** when views change
+5. **Notify delegators** of significant decisions
+
+## Troubleshooting
+
+### "Cannot Delegate - No Voting Power"
+
+**Causes:**
+- No tokens locked
+- Lock has expired
+
+**Solution:**
+- Lock tokens first, then delegate
+
+### "Delegation Not Updating"
+
+**Causes:**
+- Transaction pending
+- Network congestion
+
+**Solution:**
+- Check transaction status
+- Wait for confirmation
+
+### "Cannot Vote After Delegating"
+
+**Expected behavior** - your power is with your delegate.
+
+**To vote yourself:**
+1. Revoke delegation
+2. Wait for transaction to confirm
+3. You can now vote directly
+
+## Next Steps
+
+<Cards>
+  <Card title="Voting" href="/docs/guide/voting" icon="check-square">
+    Learn how to cast votes
+  </Card>
+  <Card title="Execution" href="/docs/guide/voting/execution" icon="play-circle">
+    Execute passed proposals
+  </Card>
+  <Card title="Creating Proposals" href="/docs/guide/resolutions" icon="file-plus">
+    Submit your own proposals
+  </Card>
+</Cards>

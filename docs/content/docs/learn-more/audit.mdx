@@ -1,0 +1,284 @@
+---
+title: Contract Audit
+description: Security audits and smart contract verification
+---
+
+# Contract Audit
+
+Security is paramount for any governance protocol. This page provides information about our security audits, verified contracts, and ongoing security measures.
+
+## Audit Status
+
+<Callout type="info">
+All core smart contracts have been audited by independent security firms before mainnet deployment.
+</Callout>
+
+### Audit Summary
+
+| Audit | Firm | Date | Status | Report |
+|-------|------|------|--------|--------|
+| Core Contracts v1.0 | Security Firm | Q1 2026 | Completed | [View Report](#) |
+| Governance Module | Security Firm | Q1 2026 | Completed | [View Report](#) |
+| Staking Contracts | Security Firm | Q1 2026 | Completed | [View Report](#) |
+| Treasury Module | Security Firm | Q2 2026 | In Progress | Pending |
+
+### Audit Scope
+
+The following contracts were included in the security audit:
+
+```
+Audited Contracts
+├── Governance
+│   ├── Governor.sol
+│   ├── Timelock.sol
+│   ├── ProposalRegistry.sol
+│   └── VotingModule.sol
+├── Token
+│   ├── GovernanceToken.sol
+│   ├── VoteEscrow.sol
+│   └── StakingRewards.sol
+├── Treasury
+│   ├── Treasury.sol
+│   ├── PaymentRouter.sol
+│   └── StreamingPayments.sol
+└── Access
+    ├── AccessControl.sol
+    ├── RoleManager.sol
+    └── Multisig.sol
+```
+
+## Findings Summary
+
+### Critical Findings
+
+| Finding | Severity | Status |
+|---------|----------|--------|
+| None identified | Critical | N/A |
+
+### High Findings
+
+| Finding | Severity | Status |
+|---------|----------|--------|
+| None identified | High | N/A |
+
+### Medium Findings
+
+| Finding | Description | Status |
+|---------|-------------|--------|
+| M-01 | Potential reentrancy in payment flow | Resolved |
+| M-02 | Integer overflow in vote calculation | Resolved |
+
+### Low Findings
+
+| Finding | Description | Status |
+|---------|-------------|--------|
+| L-01 | Missing event emissions | Resolved |
+| L-02 | Inconsistent error messages | Resolved |
+| L-03 | Gas optimization suggestions | Implemented |
+
+### Informational
+
+| Finding | Description | Status |
+|---------|-------------|--------|
+| I-01 | Documentation improvements | Addressed |
+| I-02 | Test coverage recommendations | Implemented |
+
+## Verified Contracts
+
+All deployed contracts are verified on block explorers. You can review the source code directly:
+
+### Mainnet Contracts
+
+| Contract | Address | Verified |
+|----------|---------|----------|
+| Governor | `0x...` | [View](#) |
+| Timelock | `0x...` | [View](#) |
+| Token | `0x...` | [View](#) |
+| VoteEscrow | `0x...` | [View](#) |
+| Treasury | `0x...` | [View](#) |
+| Staking | `0x...` | [View](#) |
+
+### Testnet Contracts
+
+| Contract | Address | Verified |
+|----------|---------|----------|
+| Governor | `0x...` | [View](#) |
+| Timelock | `0x...` | [View](#) |
+| Token | `0x...` | [View](#) |
+| VoteEscrow | `0x...` | [View](#) |
+| Treasury | `0x...` | [View](#) |
+| Staking | `0x...` | [View](#) |
+
+## Security Measures
+
+### Smart Contract Security
+
+1. **Access Controls**
+   - Role-based permission system
+   - Multi-signature requirements for critical operations
+   - Timelock delays on governance actions
+
+2. **Reentrancy Protection**
+   - ReentrancyGuard on all external calls
+   - Check-effects-interactions pattern
+   - Pull-over-push payment patterns
+
+3. **Integer Safety**
+   - SafeMath operations (Solidity 0.8+)
+   - Overflow/underflow checks
+   - Decimal precision handling
+
+4. **Upgrade Safety**
+   - Transparent proxy pattern
+   - Storage layout compatibility checks
+   - Upgrade timelocks
+
+### Operational Security
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│                    Security Architecture                         │
+├─────────────────────────────────────────────────────────────────┤
+│                                                                   │
+│  User Action                                                      │
+│       │                                                          │
+│       ▼                                                          │
+│  ┌──────────┐    ┌──────────┐    ┌──────────┐    ┌──────────┐  │
+│  │ Frontend │───▶│   RPC    │───▶│ Contract │───▶│ Timelock │  │
+│  │   Auth   │    │  Guard   │    │  Access  │    │  Delay   │  │
+│  └──────────┘    └──────────┘    └──────────┘    └──────────┘  │
+│                                                                   │
+│  Multi-layer Protection:                                         │
+│  1. Frontend validation and rate limiting                        │
+│  2. RPC endpoint security and monitoring                         │
+│  3. Smart contract access controls                               │
+│  4. Timelock delays for execution                                │
+│                                                                   │
+└─────────────────────────────────────────────────────────────────┘
+```
+
+### Monitoring
+
+- **Real-time Alerts**: Automated monitoring for unusual activity
+- **Transaction Monitoring**: All governance transactions tracked
+- **Health Checks**: Regular contract state verification
+- **Incident Response**: Documented procedures for security incidents
+
+## Bug Bounty Program
+
+We maintain an active bug bounty program to encourage responsible disclosure of security vulnerabilities.
+
+### Scope
+
+| Category | In Scope |
+|----------|----------|
+| Smart Contracts | All deployed contracts |
+| Infrastructure | RPC endpoints, APIs |
+| Frontend | Web application |
+
+### Rewards
+
+| Severity | Reward Range |
+|----------|--------------|
+| Critical | $10,000 - $50,000 |
+| High | $5,000 - $10,000 |
+| Medium | $1,000 - $5,000 |
+| Low | $100 - $1,000 |
+
+### Submission Process
+
+1. **Discovery**: Find a potential vulnerability
+2. **Document**: Create detailed report with reproduction steps
+3. **Submit**: Send to security team via secure channel
+4. **Review**: Team reviews and validates finding
+5. **Reward**: Bounty paid upon confirmation
+
+<Callout type="warning">
+**Responsible Disclosure**: Please do not publicly disclose vulnerabilities before they are patched. Contact the security team directly.
+</Callout>
+
+### Contact
+
+For security issues, contact:
+- **Email**: security@dao.vote
+- **PGP Key**: Available on request
+
+## Audit Reports
+
+### Full Audit Report
+
+Download the complete audit report:
+
+<Cards>
+  <Card title="Core Audit Report" href="#" icon="file-text">
+    Full audit report (PDF)
+  </Card>
+  <Card title="Governance Audit" href="#" icon="file-text">
+    Governance module audit (PDF)
+  </Card>
+</Cards>
+
+### Report Contents
+
+The audit reports include:
+
+1. **Executive Summary**: High-level findings and recommendations
+2. **Methodology**: Audit approach and tools used
+3. **Findings**: Detailed vulnerability descriptions
+4. **Recommendations**: Suggested fixes and improvements
+5. **Resolution**: Team responses and fixes applied
+
+## Third-Party Integrations
+
+Security considerations for integrated services:
+
+| Integration | Purpose | Security Review |
+|-------------|---------|-----------------|
+| RPC Providers | Blockchain access | Provider SLA reviewed |
+| Oracles | Price feeds | Contract audited |
+| Bridges | Cross-chain | Bridge audit reviewed |
+| Frontend Hosting | Web application | Security hardened |
+
+## Ongoing Security
+
+Security is an ongoing process, not a one-time audit:
+
+- **Continuous Monitoring**: 24/7 transaction monitoring
+- **Regular Reviews**: Quarterly security assessments
+- **Upgrade Process**: All upgrades go through security review
+- **Community Reporting**: Incentivized vulnerability disclosure
+
+## FAQ
+
+### Are the contracts upgradeable?
+
+Yes, contracts use the transparent proxy pattern. Upgrades require governance approval and timelock delay.
+
+### How are admin keys secured?
+
+Admin functions are controlled by multi-signature wallets requiring multiple approvals. No single party can make changes.
+
+### What happens if a vulnerability is found?
+
+1. Pause affected functionality (if possible)
+2. Deploy fix through governance
+3. Post-mortem analysis
+4. Bug bounty payment (if applicable)
+
+### How often are audits conducted?
+
+Major updates undergo full audit. Minor changes are reviewed internally with periodic external assessments.
+
+## Next Steps
+
+<Cards>
+  <Card title="Try the App" href="/docs/learn-more/app" icon="external-link">
+    Start using the governance platform
+  </Card>
+  <Card title="FAQ" href="/docs/learn-more/faq" icon="help-circle">
+    Common questions and answers
+  </Card>
+  <Card title="User Guide" href="/docs/guide" icon="book">
+    Complete documentation
+  </Card>
+</Cards>

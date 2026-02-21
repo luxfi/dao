@@ -1,0 +1,404 @@
+---
+title: Multisig Operations
+description: Sign and manage multi-signature proposals
+---
+
+# Multisig Operations
+
+Multi-signature (multisig) wallets require multiple parties to approve transactions before execution. This guide covers how to sign proposals and manage multisig operations.
+
+## Overview
+
+Multisig adds an extra layer of security by requiring `M-of-N` signatures:
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│                     Multisig Flow                                │
+├─────────────────────────────────────────────────────────────────┤
+│                                                                   │
+│   ┌──────────┐    ┌──────────┐    ┌──────────┐    ┌──────────┐  │
+│   │ Propose  │───▶│  Sign    │───▶│ Threshold│───▶│ Execute  │  │
+│   │          │    │  (M/N)   │    │   Met    │    │          │  │
+│   └──────────┘    └──────────┘    └──────────┘    └──────────┘  │
+│                                                                   │
+│   Example: 3-of-5 multisig                                       │
+│   - 5 total signers                                              │
+│   - 3 signatures required to execute                             │
+│   - Any 3 of the 5 can approve                                  │
+│                                                                   │
+└─────────────────────────────────────────────────────────────────┘
+```
+
+## Multisig Types
+
+### Treasury Multisig
+
+Controls treasury funds and large transfers:
+
+| Parameter | Value |
+|-----------|-------|
+| Signers | 5 |
+| Threshold | 3-of-5 |
+| Use | Treasury transfers > $10K |
+| Timelock | 24 hours |
+
+### Operations Multisig
+
+For day-to-day operational transactions:
+
+| Parameter | Value |
+|-----------|-------|
+| Signers | 3 |
+| Threshold | 2-of-3 |
+| Use | Small transfers, routine ops |
+| Timelock | None |
+
+### Emergency Multisig
+
+For urgent security actions:
+
+| Parameter | Value |
+|-----------|-------|
+| Signers | 7 |
+| Threshold | 4-of-7 |
+| Use | Pause contracts, emergency actions |
+| Timelock | None |
+
+## Signing a Proposal
+
+### Step 1: View Pending Proposals
+
+Navigate to **Governance > Multisig** to see proposals awaiting your signature:
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│  Pending Signatures                                              │
+├─────────────────────────────────────────────────────────────────┤
+│                                                                   │
+│  ┌─────────────────────────────────────────────────────────────┐ │
+│  │ #MS-42: Transfer 50,000 USDC to Grants Committee           │ │
+│  │                                                              │ │
+│  │ Status: Awaiting Signatures (2/3)                           │ │
+│  │ Submitted: 2 hours ago by 0x1234...abcd                     │ │
+│  │ Expires: in 5 days                                          │ │
+│  │                                                              │ │
+│  │ Signers:                                                     │ │
+│  │ ✓ 0x1234...abcd (Proposer)                                  │ │
+│  │ ✓ 0x5678...efgh                                             │ │
+│  │ ○ 0x9abc...ijkl (You)                                       │ │
+│  │                                                              │ │
+│  │                              [View Details]  [Sign]          │ │
+│  └─────────────────────────────────────────────────────────────┘ │
+│                                                                   │
+└─────────────────────────────────────────────────────────────────┘
+```
+
+### Step 2: Review Proposal Details
+
+Before signing, carefully review:
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│  Proposal #MS-42 Details                                         │
+├─────────────────────────────────────────────────────────────────┤
+│                                                                   │
+│  Type: Treasury Transfer                                         │
+│  Amount: 50,000 USDC                                             │
+│  Recipient: 0xGRANTS...COMMITTEE                                 │
+│                                                                   │
+│  ─────────────────────────────────────────────────────────────  │
+│                                                                   │
+│  Transaction Details:                                            │
+│  ┌─────────────────────────────────────────────────────────────┐ │
+│  │ Contract: 0xTREASURY...ADDRESS                              │ │
+│  │ Function: transfer(address,uint256)                         │ │
+│  │ Parameters:                                                  │ │
+│  │   - to: 0xGRANTS...COMMITTEE                                │ │
+│  │   - amount: 50000000000 (50,000 USDC)                       │ │
+│  └─────────────────────────────────────────────────────────────┘ │
+│                                                                   │
+│  Simulation Result: ✓ Success                                    │
+│  Gas Estimate: 150,000                                           │
+│                                                                   │
+│  Associated Governance Proposal: #42 (Passed)                    │
+│                                                                   │
+└─────────────────────────────────────────────────────────────────┘
+```
+
+<Callout type="warning">
+**Always verify transaction details before signing.** Check:
+- Correct recipient address
+- Correct amount and token
+- Transaction simulation succeeded
+- Associated governance approval (if required)
+</Callout>
+
+### Step 3: Sign the Transaction
+
+1. Click **Sign**
+2. Review the signature request in your wallet
+3. Confirm the signature
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│  Sign Proposal                                                   │
+├─────────────────────────────────────────────────────────────────┤
+│                                                                   │
+│  You are signing:                                                │
+│  Proposal #MS-42: Transfer 50,000 USDC                          │
+│                                                                   │
+│  This signature:                                                 │
+│  - Does NOT execute the transaction                             │
+│  - Adds your approval to the proposal                           │
+│  - Is required for threshold to be met                          │
+│                                                                   │
+│  Current Signatures: 2/3                                         │
+│  After Your Signature: 3/3 (Ready to Execute)                   │
+│                                                                   │
+│                              [Cancel]  [Sign Proposal]           │
+│                                                                   │
+└─────────────────────────────────────────────────────────────────┘
+```
+
+### Step 4: Execution
+
+Once the threshold is met, anyone can execute:
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│  Proposal Ready for Execution                                    │
+├─────────────────────────────────────────────────────────────────┤
+│                                                                   │
+│  #MS-42: Transfer 50,000 USDC                                    │
+│                                                                   │
+│  Status: ✓ Threshold Met (3/3 signatures)                       │
+│                                                                   │
+│  Signers:                                                        │
+│  ✓ 0x1234...abcd - Signed 2 hours ago                           │
+│  ✓ 0x5678...efgh - Signed 1 hour ago                            │
+│  ✓ 0x9abc...ijkl - Signed just now                              │
+│                                                                   │
+│  Timelock: None                                                  │
+│                                                                   │
+│                                            [Execute Transaction] │
+│                                                                   │
+└─────────────────────────────────────────────────────────────────┘
+```
+
+## Creating a Multisig Proposal
+
+### Requirements
+
+To create a multisig proposal, you must be:
+- An authorized signer on the multisig
+- Or have a passed governance proposal requiring multisig execution
+
+### Step 1: Initiate Proposal
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│  Create Multisig Proposal                                        │
+├─────────────────────────────────────────────────────────────────┤
+│                                                                   │
+│  Multisig: Treasury (3-of-5)                                     │
+│                                                                   │
+│  Transaction Type:                                               │
+│  ┌─────┐ ┌─────────┐ ┌────────┐ ┌──────────┐                   │
+│  │Token│ │   ETH   │ │Contract│ │  Custom  │                   │
+│  │Trans│ │ Transfer│ │  Call  │ │   Data   │                   │
+│  └─────┘ └─────────┘ └────────┘ └──────────┘                   │
+│                                                                   │
+│  Token Transfer Details:                                         │
+│  Token:     [USDC ▼]                                            │
+│  Amount:    [50000_____]                                         │
+│  Recipient: [0x_________]                                        │
+│                                                                   │
+│  Governance Reference (optional):                                │
+│  [Proposal #42 ▼]                                               │
+│                                                                   │
+│  Note:                                                           │
+│  [Q1 Grants Committee funding per governance vote___]           │
+│                                                                   │
+│                              [Cancel]  [Create Proposal]         │
+│                                                                   │
+└─────────────────────────────────────────────────────────────────┘
+```
+
+### Step 2: Simulate Transaction
+
+Before creating, the system simulates the transaction:
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│  Transaction Simulation                                          │
+├─────────────────────────────────────────────────────────────────┤
+│                                                                   │
+│  ✓ Simulation Successful                                         │
+│                                                                   │
+│  State Changes:                                                  │
+│  - Treasury USDC Balance: 500,000 → 450,000 (-50,000)           │
+│  - Grants USDC Balance: 0 → 50,000 (+50,000)                    │
+│                                                                   │
+│  Events Emitted:                                                 │
+│  - Transfer(treasury, grants, 50000000000)                      │
+│                                                                   │
+│  Gas Estimate: 150,000                                           │
+│                                                                   │
+└─────────────────────────────────────────────────────────────────┘
+```
+
+### Step 3: Submit and Sign
+
+The proposal is created with your signature as the first approval.
+
+## Managing Signers
+
+### Viewing Signers
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│  Treasury Multisig (3-of-5)                                      │
+├─────────────────────────────────────────────────────────────────┤
+│                                                                   │
+│  Signers:                                                        │
+│                                                                   │
+│  │ Address         │ Name      │ Added      │ Signatures │      │
+│  │─────────────────│───────────│────────────│────────────│      │
+│  │ 0x1234...abcd   │ Alice     │ Jan 2025   │ 42         │      │
+│  │ 0x5678...efgh   │ Bob       │ Jan 2025   │ 38         │      │
+│  │ 0x9abc...ijkl   │ Carol     │ Feb 2025   │ 35         │      │
+│  │ 0xdef0...mnop   │ Dave      │ Mar 2025   │ 29         │      │
+│  │ 0x1357...qrst   │ Eve       │ Apr 2025   │ 22         │      │
+│                                                                   │
+│  Configuration:                                                  │
+│  - Threshold: 3 signatures required                             │
+│  - Total Signers: 5                                              │
+│  - Change Threshold: Requires governance vote                   │
+│                                                                   │
+└─────────────────────────────────────────────────────────────────┘
+```
+
+### Adding/Removing Signers
+
+Signer changes require governance approval:
+
+1. Submit governance proposal to add/remove signer
+2. Community votes on proposal
+3. If passed, multisig configuration updated after timelock
+
+<Callout type="info">
+Changing multisig signers is a significant governance action. Proposals typically require higher quorum and longer discussion periods.
+</Callout>
+
+## Security Best Practices
+
+### For Signers
+
+1. **Verify Everything**
+   - Check recipient addresses character by character
+   - Verify amounts match governance approvals
+   - Review transaction simulation results
+
+2. **Use Hardware Wallets**
+   - Store signing keys on hardware wallets
+   - Never expose private keys
+   - Enable all security features
+
+3. **Communicate Securely**
+   - Coordinate with other signers through secure channels
+   - Verify urgent requests through multiple channels
+   - Be suspicious of unusual or rushed requests
+
+4. **Maintain Availability**
+   - Respond to signing requests promptly
+   - Notify team if you'll be unavailable
+   - Have backup plans for extended absences
+
+### For the DAO
+
+1. **Signer Distribution**
+   - Geographic distribution
+   - Organizational distribution
+   - Timezone coverage
+
+2. **Regular Audits**
+   - Review signer list quarterly
+   - Remove inactive signers
+   - Verify signer key security
+
+3. **Emergency Procedures**
+   - Document key recovery processes
+   - Define emergency contact chains
+   - Regular drills and tests
+
+## Troubleshooting
+
+### "Signature Invalid"
+
+**Causes:**
+- Signed with wrong address
+- Transaction data changed since signing
+- Signature expired
+
+**Solutions:**
+- Verify connected wallet matches signer address
+- Re-sign the proposal
+- Check proposal hasn't been modified
+
+### "Threshold Not Met"
+
+**Causes:**
+- Not enough signers have signed
+- Signatures expired
+- Signer removed after signing
+
+**Solutions:**
+- Contact remaining signers
+- Check signature expiration
+- Verify current signer list
+
+### "Execution Failed"
+
+**Causes:**
+- Contract state changed since simulation
+- Insufficient gas
+- External dependency failed
+
+**Solutions:**
+- Re-simulate transaction
+- Increase gas limit
+- Check external contract states
+- Create new proposal if needed
+
+## Integration with Governance
+
+Multisig operations typically follow governance approval:
+
+```
+┌────────────────────────────────────────────────────────────────┐
+│                                                                  │
+│  Governance Proposal              Multisig Execution            │
+│  ─────────────────────────────    ──────────────────────────    │
+│                                                                  │
+│  1. Proposal Created              4. MS Proposal Created        │
+│  2. Community Votes               5. Signers Review             │
+│  3. Proposal Passes               6. Collect Signatures         │
+│       │                           7. Execute Transaction        │
+│       └───────────────────────────────▶                         │
+│                                                                  │
+└────────────────────────────────────────────────────────────────┘
+```
+
+## Next Steps
+
+<Cards>
+  <Card title="Token Setup" href="/docs/guide/token-setup" icon="coins">
+    Configure tokens for your multisig project
+  </Card>
+  <Card title="Settings" href="/docs/guide/settings" icon="settings">
+    Manage project settings
+  </Card>
+  <Card title="Treasury" href="/docs/guide/treasury" icon="vault">
+    Treasury management guide
+  </Card>
+</Cards>

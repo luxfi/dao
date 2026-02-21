@@ -1,0 +1,318 @@
+---
+title: From Scratch Proposals
+description: Build custom proposals with any combination of actions
+---
+
+# From Scratch Proposals
+
+From Scratch proposals give you complete flexibility to create custom governance actions. Use this when templates don't cover your needs.
+
+## When to Use
+
+- Complex multi-step operations
+- Custom contract interactions
+- Novel governance actions
+- Combining different action types
+
+## Creating a From Scratch Proposal
+
+### Step 1: Start New Proposal
+
+1. Navigate to Proposals → New Proposal
+2. Select "From Scratch"
+
+### Step 2: Add Title and Description
+
+```yaml
+Title: "Comprehensive Q1 Operations Package"
+
+Description: |
+  This proposal combines multiple operational needs into a single
+  governance action for efficiency.
+
+  ## Components
+  1. Treasury rebalancing
+  2. New role creation
+  3. Parameter updates
+  4. Grant disbursements
+```
+
+### Step 3: Build Action List
+
+Click "Add Action" to build your proposal:
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│ Proposal Actions                                             │
+├─────────────────────────────────────────────────────────────┤
+│                                                              │
+│  1. [Transfer] 50,000 USDC → Research Committee       [×]   │
+│  2. [Transfer] 30,000 USDC → Culture Committee        [×]   │
+│  3. [Contract] updateQuorum(2000000)                  [×]   │
+│  4. [Role] Create "Grant Reviewer" role               [×]   │
+│                                                              │
+│  [+ Add Action]                                             │
+│                                                              │
+│  ─────────────────────────────────────────────────────────  │
+│  Execution Order: Sequential (1 → 2 → 3 → 4)                │
+│                                                              │
+└─────────────────────────────────────────────────────────────┘
+```
+
+### Step 4: Configure Each Action
+
+**Action Configuration Panel:**
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│ Configure Action                                             │
+├─────────────────────────────────────────────────────────────┤
+│                                                              │
+│  Type:     [Custom Contract Call ▼]                         │
+│                                                              │
+│  Target Contract:                                           │
+│  [0x1234567890abcdef1234567890abcdef12345678    ]          │
+│                                                              │
+│  Function:                                                  │
+│  [updateQuorum(uint256)                          ]          │
+│                                                              │
+│  Parameters:                                                │
+│  ┌─────────────────────────────────────────────────────┐   │
+│  │ uint256 newQuorum: [2000000                     ]   │   │
+│  └─────────────────────────────────────────────────────┘   │
+│                                                              │
+│  Value (ETH): [0                                  ]         │
+│                                                              │
+│  [Validate] [Add to Proposal]                               │
+│                                                              │
+└─────────────────────────────────────────────────────────────┘
+```
+
+### Step 5: Reorder Actions
+
+Drag and drop to change execution order:
+
+```
+Actions execute in order. Earlier actions affect later ones.
+
+Example:
+1. First, transfer funds TO the multisig
+2. Then, the multisig can USE those funds
+
+Not:
+1. Multisig tries to use funds (FAILS - no balance)
+2. Transfer funds (too late)
+```
+
+### Step 6: Add ABI (if needed)
+
+For custom contracts, paste the ABI:
+
+```json
+[
+  {
+    "name": "updateQuorum",
+    "type": "function",
+    "inputs": [
+      {
+        "name": "newQuorum",
+        "type": "uint256"
+      }
+    ],
+    "outputs": []
+  }
+]
+```
+
+### Step 7: Simulate and Submit
+
+1. Click "Simulate All Actions"
+2. Review state changes
+3. Fix any errors
+4. Submit proposal
+
+## Complex Examples
+
+### Example 1: Treasury Rebalancing
+
+Swap tokens and reallocate:
+
+```yaml
+actions:
+  # Step 1: Swap ETH to stablecoins
+  - type: contract_call
+    target: uniswap_router
+    function: swapExactETHForTokens
+    args:
+      - 95000000  # minOut (95 USDC per ETH)
+      - ["WETH", "USDC"]
+      - treasury
+      - deadline
+    value: 10 ETH
+
+  # Step 2: Deposit to yield strategy
+  - type: contract_call
+    target: aave_pool
+    function: deposit
+    args:
+      - USDC
+      - 500000000000  # 500K USDC
+      - treasury
+      - 0
+
+  # Step 3: Update allocation record
+  - type: contract_call
+    target: treasury_tracker
+    function: recordAllocation
+    args:
+      - "aave_usdc"
+      - 500000000000
+```
+
+### Example 2: Committee Setup
+
+Create a new committee with all configurations:
+
+```yaml
+actions:
+  # Step 1: Deploy committee Safe
+  - type: contract_call
+    target: safe_factory
+    function: createProxy
+    args:
+      - safe_singleton
+      - setup_data
+
+  # Step 2: Create committee role
+  - type: contract_call
+    target: roles_registry
+    function: createRole
+    args:
+      - "Infrastructure Committee"
+      - ["create_proposal", "manage_treasury", "approve_grants"]
+
+  # Step 3: Assign initial members
+  - type: contract_call
+    target: roles_registry
+    function: grantRole
+    args:
+      - infrastructure_role_id
+      - [member1, member2, member3]
+
+  # Step 4: Fund the committee
+  - type: transfer
+    to: new_committee_safe
+    amount: 100000
+    token: USDC
+
+  # Step 5: Set budget limits
+  - type: contract_call
+    target: treasury_controller
+    function: setCommitteeBudget
+    args:
+      - new_committee_safe
+      - 12  # 12% of WT
+      - 12000  # $12K monthly
+```
+
+### Example 3: Emergency Response
+
+Quick action package for incidents:
+
+```yaml
+actions:
+  # Step 1: Pause affected contracts
+  - type: contract_call
+    target: bond_depository
+    function: pause
+    args: []
+
+  # Step 2: Emergency withdrawal
+  - type: contract_call
+    target: treasury
+    function: emergencyWithdraw
+    args:
+      - emergency_multisig
+      - affected_tokens
+
+  # Step 3: Notify downstream
+  - type: contract_call
+    target: notification_registry
+    function: broadcastAlert
+    args:
+      - "SECURITY_INCIDENT"
+      - incident_hash
+```
+
+## Advanced Features
+
+### Conditional Logic
+
+Use helper contracts for conditions:
+
+```yaml
+- type: contract_call
+  target: conditional_executor
+  function: executeIf
+  args:
+    - condition_contract
+    - "checkBalance(address,uint256)"
+    - [treasury, 100000]
+    - action_calldata
+```
+
+### Batching with Multicall
+
+Execute many calls efficiently:
+
+```yaml
+- type: contract_call
+  target: multicall3
+  function: aggregate3
+  args:
+    - [
+        { target: contract1, calldata: data1 },
+        { target: contract2, calldata: data2 },
+        { target: contract3, calldata: data3 }
+      ]
+```
+
+### Time-Delayed Actions
+
+Schedule future execution:
+
+```yaml
+- type: contract_call
+  target: timelock_controller
+  function: schedule
+  args:
+    - target
+    - value
+    - calldata
+    - predecessor
+    - salt
+    - delay  # Execute after this delay
+```
+
+## Best Practices
+
+### Planning
+
+1. **Map dependencies** - Understand action order
+2. **Calculate gas** - Complex proposals cost more
+3. **Test thoroughly** - Use testnets
+4. **Document clearly** - Explain each action
+
+### Safety
+
+1. **Validate addresses** - Triple-check all targets
+2. **Use checksums** - Prevent typos
+3. **Simulate first** - Never skip simulation
+4. **Review ABI** - Ensure correct function signatures
+
+### Communication
+
+1. **Detailed descriptions** - Explain every action
+2. **Technical appendix** - Include raw calldata
+3. **Risk assessment** - Note potential issues
+4. **Rollback plan** - How to reverse if needed

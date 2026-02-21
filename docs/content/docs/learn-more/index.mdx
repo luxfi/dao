@@ -1,0 +1,121 @@
+---
+title: Learn More
+description: Additional resources, audits, and frequently asked questions
+---
+
+# Learn More
+
+Explore additional resources to deepen your understanding of the protocol and governance system.
+
+## Resources
+
+<Cards>
+  <Card title="Try the App" href="/docs/learn-more/app" icon="external-link">
+    Launch the governance application and start participating
+  </Card>
+  <Card title="Contract Audit" href="/docs/learn-more/audit" icon="shield-check">
+    Review security audits and smart contract verification
+  </Card>
+  <Card title="FAQ" href="/docs/learn-more/faq" icon="help-circle">
+    Answers to frequently asked questions
+  </Card>
+</Cards>
+
+## Quick Links
+
+### Documentation
+
+| Resource | Description |
+|----------|-------------|
+| [User Guide](/docs/guide) | Complete guide to using the platform |
+| [Governance](/docs/governance) | Technical governance documentation |
+| [Proposals](/docs/guide/resolutions) | How to create and manage proposals |
+
+### External Resources
+
+| Resource | Link |
+|----------|------|
+| GitHub | View source code and contribute |
+| Discord | Join the community |
+| Forum | Discuss governance proposals |
+| Twitter | Follow for updates |
+
+## Protocol Overview
+
+### Architecture
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│                        Governance Layer                          │
+├─────────────────────────────────────────────────────────────────┤
+│                                                                   │
+│  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐           │
+│  │   Proposals  │  │    Voting    │  │   Timelock   │           │
+│  │   Registry   │  │   Contract   │  │   Executor   │           │
+│  └──────────────┘  └──────────────┘  └──────────────┘           │
+│                                                                   │
+├─────────────────────────────────────────────────────────────────┤
+│                         Token Layer                              │
+├─────────────────────────────────────────────────────────────────┤
+│                                                                   │
+│  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐           │
+│  │  Governance  │  │   Staking    │  │  Vote Escrow │           │
+│  │    Token     │  │   Contract   │  │   (veToken)  │           │
+│  └──────────────┘  └──────────────┘  └──────────────┘           │
+│                                                                   │
+├─────────────────────────────────────────────────────────────────┤
+│                        Treasury Layer                            │
+├─────────────────────────────────────────────────────────────────┤
+│                                                                   │
+│  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐           │
+│  │   Treasury   │  │   Payments   │  │  Streaming   │           │
+│  │    Vault     │  │   Router     │  │   Module     │           │
+│  └──────────────┘  └──────────────┘  └──────────────┘           │
+│                                                                   │
+└─────────────────────────────────────────────────────────────────┘
+```
+
+### Key Features
+
+- **Decentralized Governance**: Token holders control protocol parameters
+- **Vote Escrow Model**: Lock tokens for voting power that decays over time
+- **Flexible Proposals**: Support for treasury transfers, parameter changes, and upgrades
+- **Hierarchical DAOs**: Create sub-DAOs and working groups with delegated authority
+- **Gasless Voting**: Vote without paying gas fees via meta-transactions
+- **Streaming Payments**: Continuous payment streams for contributors
+
+## Security
+
+The protocol prioritizes security through:
+
+1. **Audited Contracts**: All smart contracts undergo professional security audits
+2. **Timelocks**: Governance actions have mandatory delay periods
+3. **Multi-sig Controls**: Critical operations require multiple signatures
+4. **Bug Bounty**: Active program rewarding vulnerability disclosure
+
+<Callout type="info">
+For detailed security information, see the [Contract Audit](/docs/learn-more/audit) page.
+</Callout>
+
+## Community
+
+Join the community to participate in governance discussions:
+
+- **Discord**: Real-time chat and support
+- **Forum**: Long-form governance discussions
+- **Twitter**: Announcements and updates
+- **GitHub**: Technical contributions and issues
+
+## Need Help?
+
+<Cards>
+  <Card title="FAQ" href="/docs/learn-more/faq" icon="help-circle">
+    Check common questions and answers
+  </Card>
+  <Card title="Discord" href="#" icon="message-circle">
+    Get help from the community
+  </Card>
+  <Card title="Support" href="#" icon="mail">
+    Contact the team directly
+  </Card>
+</Cards>

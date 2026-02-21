@@ -1,0 +1,249 @@
+---
+title: Project Settings
+description: Configure and manage your DAO project settings
+---
+
+# Project Settings
+
+This guide covers how to configure and manage settings for your DAO project. Settings control governance parameters, token configurations, access permissions, and more.
+
+## Overview
+
+Project settings are organized into categories:
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│                      Settings Overview                           │
+├─────────────────────────────────────────────────────────────────┤
+│                                                                   │
+│  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐           │
+│  │   General    │  │  Governance  │  │    Tokens    │           │
+│  │   Settings   │  │   Settings   │  │   Settings   │           │
+│  └──────────────┘  └──────────────┘  └──────────────┘           │
+│                                                                   │
+│  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐           │
+│  │    Access    │  │  Treasury    │  │  Integrations│           │
+│  │   Control    │  │   Settings   │  │              │           │
+│  └──────────────┘  └──────────────┘  └──────────────┘           │
+│                                                                   │
+└─────────────────────────────────────────────────────────────────┘
+```
+
+## Settings Categories
+
+<Cards>
+  <Card title="General Settings" href="/docs/guide/settings/general" icon="settings">
+    Project name, description, links, and branding
+  </Card>
+  <Card title="Governance Settings" href="/docs/guide/settings/governance" icon="vote">
+    Voting periods, thresholds, and quorum requirements
+  </Card>
+</Cards>
+
+## Accessing Settings
+
+### Admin Access
+
+To modify settings, you need admin permissions:
+
+1. Navigate to **Project > Settings**
+2. Select the category you want to modify
+3. Make changes and save
+4. Changes may require governance approval
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│  Project Settings                          [Admin Required]      │
+├─────────────────────────────────────────────────────────────────┤
+│                                                                   │
+│  ┌─────────────────────────────────────────────────────────────┐ │
+│  │ Navigation                                                   │ │
+│  │                                                              │ │
+│  │ ▸ General                                                    │ │
+│  │ ▸ Governance                                                 │ │
+│  │ ▸ Tokens                                                     │ │
+│  │ ▸ Access Control                                             │ │
+│  │ ▸ Treasury                                                   │ │
+│  │ ▸ Integrations                                               │ │
+│  │ ▸ Advanced                                                   │ │
+│  │                                                              │ │
+│  └─────────────────────────────────────────────────────────────┘ │
+│                                                                   │
+│  Select a category to view and modify settings                   │
+│                                                                   │
+└─────────────────────────────────────────────────────────────────┘
+```
+
+### Permission Levels
+
+| Level | Can View | Can Modify | Requires Vote |
+|-------|----------|------------|---------------|
+| Member | Yes | No | N/A |
+| Contributor | Yes | Limited | No |
+| Admin | Yes | Yes | Some settings |
+| Owner | Yes | Yes | Critical settings |
+
+## Settings Change Process
+
+### Immediate Changes
+
+Some settings can be changed immediately by admins:
+
+- Project name and description
+- External links
+- Notification preferences
+- Display settings
+
+### Governance-Required Changes
+
+Critical settings require governance approval:
+
+```
+┌────────────────────────────────────────────────────────────────┐
+│                                                                  │
+│  Settings Change Flow                                            │
+│  ───────────────────                                            │
+│                                                                  │
+│  1. Admin proposes change                                        │
+│  2. System creates governance proposal                           │
+│  3. Token holders vote                                           │
+│  4. If passed, change enters timelock                            │
+│  5. After timelock, change is applied                            │
+│                                                                  │
+│  Timeline: 7-14 days typical                                     │
+│                                                                  │
+└────────────────────────────────────────────────────────────────┘
+```
+
+Settings requiring governance:
+
+- Voting period changes
+- Quorum threshold changes
+- Token configurations
+- Access control modifications
+- Treasury parameters
+
+## Settings Summary
+
+### General Settings
+
+| Setting | Description | Requires Vote |
+|---------|-------------|---------------|
+| Project Name | Display name | No |
+| Description | Project description | No |
+| Logo | Project logo/avatar | No |
+| Links | Website, social links | No |
+| Contact | Support email | No |
+
+### Governance Settings
+
+| Setting | Description | Requires Vote |
+|---------|-------------|---------------|
+| Voting Period | How long votes are open | Yes |
+| Timelock Delay | Delay before execution | Yes |
+| Proposal Threshold | Tokens needed to propose | Yes |
+| Quorum | Minimum participation | Yes |
+
+### Token Settings
+
+| Setting | Description | Requires Vote |
+|---------|-------------|---------------|
+| Governance Token | Token used for voting | Yes |
+| Lock Parameters | Min/max lock durations | Yes |
+| Multipliers | Time-based multipliers | Yes |
+
+### Treasury Settings
+
+| Setting | Description | Requires Vote |
+|---------|-------------|---------------|
+| Spending Limits | Per-transaction limits | Yes |
+| Approved Tokens | Tokens treasury can hold | Yes |
+| Reserve Requirements | Minimum reserves | Yes |
+
+## Best Practices
+
+### Before Changing Settings
+
+1. **Understand Impact**
+   - How will this affect governance?
+   - Are there unintended consequences?
+   - Have similar changes been made elsewhere?
+
+2. **Communicate**
+   - Discuss changes in forum/Discord
+   - Gather community feedback
+   - Build consensus before proposing
+
+3. **Test First**
+   - Use testnet when possible
+   - Simulate changes
+   - Review with other admins
+
+### Making Changes
+
+1. **Document Rationale**
+   - Why is this change needed?
+   - What problem does it solve?
+   - What alternatives were considered?
+
+2. **Propose Conservatively**
+   - Make incremental changes
+   - Avoid changing multiple settings at once
+   - Allow time to observe effects
+
+3. **Monitor After**
+   - Watch for unexpected behavior
+   - Gather feedback
+   - Be ready to adjust
+
+## Troubleshooting
+
+### "Permission Denied"
+
+**Causes:**
+- Insufficient role permissions
+- Settings require governance vote
+- Connected with wrong wallet
+
+**Solutions:**
+- Verify your role level
+- Check if setting requires proposal
+- Connect with admin wallet
+
+### "Change Not Applied"
+
+**Causes:**
+- Change pending governance vote
+- In timelock queue
+- Transaction failed
+
+**Solutions:**
+- Check proposal status
+- Wait for timelock to expire
+- Retry the transaction
+
+### "Invalid Value"
+
+**Causes:**
+- Value out of allowed range
+- Incorrect format
+- Conflicts with other settings
+
+**Solutions:**
+- Check allowed ranges
+- Use correct format (numbers, addresses, etc.)
+- Resolve conflicts with related settings
+
+## Next Steps
+
+<Cards>
+  <Card title="General Settings" href="/docs/guide/settings/general" icon="settings">
+    Configure basic project information
+  </Card>
+  <Card title="Governance Settings" href="/docs/guide/settings/governance" icon="vote">
+    Set voting parameters and thresholds
+  </Card>
+  <Card title="Multisig" href="/docs/guide/multisig" icon="key">
+    Multi-signature operations
+  </Card>
+</Cards>

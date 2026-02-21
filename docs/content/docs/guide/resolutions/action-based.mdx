@@ -1,0 +1,302 @@
+---
+title: Action-Based Proposals
+description: Create proposals with executable on-chain actions
+---
+
+# Action-Based Proposals
+
+Action-based proposals contain specific on-chain transactions that execute automatically when the proposal passes and timelock completes.
+
+## Overview
+
+When you create an action-based proposal, you're defining exact transactions that will run on the blockchain. This provides:
+
+- **Transparency** - Everyone can see exactly what will happen
+- **Automation** - No manual intervention required
+- **Trustless Execution** - Code executes as written
+
+## Common Action Types
+
+### Treasury Transfer
+
+Send tokens from the DAO treasury to a recipient.
+
+```yaml
+Action: Transfer
+To: 0x1234...5678
+Amount: 10,000 USDC
+Memo: "Q1 Development Grant"
+```
+
+**UI Steps:**
+1. Select "Transfer" action
+2. Choose token from treasury
+3. Enter recipient address
+4. Enter amount
+5. Add optional memo
+
+### Parameter Update
+
+Change a protocol parameter.
+
+```yaml
+Action: Update Parameter
+Contract: Governor
+Parameter: votingPeriod
+Old Value: 7 days
+New Value: 5 days
+```
+
+**Configurable Parameters:**
+- Voting period
+- Quorum threshold
+- Proposal threshold
+- Timelock delay
+
+### Role Management
+
+Add or remove role members.
+
+```yaml
+Action: Grant Role
+Role: Committee Lead
+Address: 0xABCD...
+Permissions: [create_proposal, manage_budget]
+```
+
+**Role Actions:**
+- Grant role to address
+- Revoke role from address
+- Create new role
+- Update role permissions
+
+### Contract Upgrade
+
+Upgrade a protocol contract (if upgradeable).
+
+```yaml
+Action: Upgrade Contract
+Proxy: 0x1111...
+New Implementation: 0x2222...
+Initialize: initializeV2()
+```
+
+<Callout type="warning">
+Contract upgrades are high-risk operations. Ensure thorough testing and auditing before proposing.
+</Callout>
+
+## Creating an Action-Based Proposal
+
+### Step 1: Select Action Type
+
+From the proposal creation screen:
+
+1. Click "Action Based"
+2. Choose action category:
+   - Treasury
+   - Governance
+   - Roles
+   - Custom
+
+### Step 2: Configure Action
+
+**For Treasury Transfer:**
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│ Transfer from Treasury                                       │
+├─────────────────────────────────────────────────────────────┤
+│                                                              │
+│  Token:      [USDC ▼]                                       │
+│                                                              │
+│  Recipient:  [0x1234...5678                    ]            │
+│                                                              │
+│  Amount:     [50,000                           ]            │
+│                                                              │
+│  Available:  125,000 USDC                                   │
+│                                                              │
+│  ┌─────────────────────────────────────────────────────┐   │
+│  │ + Add Another Transfer                               │   │
+│  └─────────────────────────────────────────────────────┘   │
+│                                                              │
+└─────────────────────────────────────────────────────────────┘
+```
+
+### Step 3: Add Multiple Actions
+
+You can chain multiple actions in a single proposal:
+
+```yaml
+actions:
+  # Action 1: Fund the grant program
+  - type: transfer
+    to: grant_multisig
+    amount: 40000
+    token: USDC
+
+  # Action 2: Fund administration
+  - type: transfer
+    to: admin_wallet
+    amount: 5000
+    token: USDC
+
+  # Action 3: Update grant limit
+  - type: parameter
+    contract: grants
+    function: setMaxGrant
+    args: [10000]
+```
+
+### Step 4: Simulate Execution
+
+Before submitting, simulate the proposal:
+
+1. Click "Simulate"
+2. Review expected state changes
+3. Verify no errors
+4. Check gas estimates
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│ Simulation Results                                           │
+├─────────────────────────────────────────────────────────────┤
+│                                                              │
+│  ✓ Action 1: Transfer 40,000 USDC to 0x1234...              │
+│    • Treasury balance: 125,000 → 85,000 USDC               │
+│    • Recipient balance: 0 → 40,000 USDC                    │
+│                                                              │
+│  ✓ Action 2: Transfer 5,000 USDC to 0x5678...               │
+│    • Treasury balance: 85,000 → 80,000 USDC                │
+│                                                              │
+│  ✓ Action 3: Update maxGrant parameter                      │
+│    • Old value: 5,000                                       │
+│    • New value: 10,000                                      │
+│                                                              │
+│  Estimated gas: 245,000                                     │
+│  Status: ✓ All actions valid                                │
+│                                                              │
+└─────────────────────────────────────────────────────────────┘
+```
+
+### Step 5: Add Description
+
+Write a clear description explaining:
+
+```markdown
+## Summary
+This proposal funds the Q1 2026 Research Grant Program.
+
+## Actions
+1. Transfer $40,000 USDC to grant multisig (0x1234...)
+2. Transfer $5,000 USDC to admin wallet (0x5678...)
+3. Increase maximum individual grant from $5K to $10K
+
+## Rationale
+The Research Committee received 15 qualified applications totaling
+$120,000 in requests. This funding allows us to support the top
+applicants while increasing flexibility for exceptional proposals.
+
+## Budget
+- Grant awards: $40,000
+- Administration: $5,000
+- Total: $45,000
+
+## Success Metrics
+- Fund at least 5 grants
+- Publish research summaries within 6 months
+- 80% completion rate
+```
+
+### Step 6: Submit
+
+1. Review all actions
+2. Click "Submit Proposal"
+3. Confirm in wallet
+4. Pay gas fee
+
+## Execution Details
+
+When a proposal passes:
+
+1. **Timelock starts** - 3-14 days depending on type
+2. **Queue** - Actions queued for execution
+3. **Execution window** - Anyone can trigger execution
+4. **On-chain** - Transactions execute atomically
+
+### Atomic Execution
+
+All actions in a proposal execute together:
+- If any action fails, all revert
+- No partial execution
+- Guaranteed consistency
+
+### Who Can Execute?
+
+After timelock expires:
+- Any wallet can call `execute()`
+- No special permissions required
+- Gas paid by executor
+- Often automated by keepers
+
+## Advanced Actions
+
+### Batch Transfers
+
+Send to multiple recipients:
+
+```yaml
+- type: batch_transfer
+  token: USDC
+  transfers:
+    - to: 0xAAA...
+      amount: 10000
+    - to: 0xBBB...
+      amount: 15000
+    - to: 0xCCC...
+      amount: 25000
+```
+
+### Streaming Payments
+
+Set up Sablier streams:
+
+```yaml
+- type: create_stream
+  recipient: 0x1234...
+  token: USDC
+  total: 60000
+  duration: 365 days
+  cliff: 30 days
+```
+
+### Cross-Chain Actions
+
+Execute on other chains (if supported):
+
+```yaml
+- type: cross_chain
+  target_chain: arbitrum
+  action:
+    type: transfer
+    to: 0x1234...
+    amount: 10000
+    token: USDC
+```
+
+## Error Handling
+
+### Common Errors
+
+| Error | Cause | Solution |
+|-------|-------|----------|
+| Insufficient balance | Treasury lacks funds | Reduce amount or fund treasury |
+| Invalid recipient | Bad address format | Verify address |
+| Simulation failed | Action would revert | Check parameters |
+| Gas estimation failed | Complex transaction | Simplify or split |
+
+### Troubleshooting
+
+1. **Check token balance** - Ensure treasury has sufficient funds
+2. **Verify addresses** - Double-check all recipient addresses
+3. **Test on testnet** - Try actions on testnet first
+4. **Review permissions** - Ensure DAO has required permissions

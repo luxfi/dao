@@ -1,0 +1,290 @@
+---
+title: Project Hierarchy
+description: Create and manage sub-DAOs with parent-child relationships
+---
+
+# Project Hierarchy
+
+DAOs can create sub-organizations (child nodes) to delegate authority, organize working groups, and manage specialized functions while maintaining oversight from the parent.
+
+## Overview
+
+The hierarchy system enables:
+
+- **Delegation** - Parent DAOs delegate specific responsibilities to sub-DAOs
+- **Autonomy** - Child nodes operate independently within defined boundaries
+- **Oversight** - Parent retains control mechanisms (freeze, clawback)
+- **Scalability** - Large organizations decompose into manageable units
+
+## Hierarchy Structure
+
+```
+                    ┌─────────────────┐
+                    │   Root DAO      │
+                    │  (Top-level)    │
+                    └────────┬────────┘
+                             │
+            ┌────────────────┼────────────────┐
+            │                │                │
+    ┌───────▼──────┐ ┌───────▼──────┐ ┌───────▼──────┐
+    │  Treasury    │ │  Grants      │ │  Research    │
+    │  Committee   │ │  Committee   │ │  Committee   │
+    └───────┬──────┘ └───────┬──────┘ └──────────────┘
+            │                │
+    ┌───────▼──────┐ ┌───────▼──────┐
+    │  Audit       │ │  Regional    │
+    │  Working Grp │ │  Chapter     │
+    └──────────────┘ └──────────────┘
+```
+
+## Key Concepts
+
+### Parent-Child Relationships
+
+| Aspect | Parent | Child |
+|--------|--------|-------|
+| Creation | Creates child nodes | Created by parent |
+| Funding | Allocates budget | Receives allocation |
+| Governance | Sets boundaries | Operates within limits |
+| Control | Can freeze/clawback | Subject to parent rules |
+| Proposals | Can override child | Escalates major decisions |
+
+### Node Types
+
+**Root DAO**
+- Top-level governance entity
+- No parent (fully sovereign)
+- Controls all descendant nodes
+
+**Committee**
+- Specialized working group
+- Has defined scope and budget
+- Reports to parent
+
+**Working Group**
+- Temporary or permanent team
+- Task-specific mandate
+- Minimal bureaucracy
+
+**Regional Chapter**
+- Geographic organization
+- Local autonomy
+- Coordinates with siblings
+
+## Smart Contract Interface
+
+### IHierarchy
+
+```solidity
+interface IHierarchy {
+    /// @notice Creates a new child node under the caller's DAO
+    /// @param name Display name for the child
+    /// @param admin Initial admin address
+    /// @param config Governance configuration
+    /// @return childId The ID of the created child node
+    function createChild(
+        string calldata name,
+        address admin,
+        NodeConfig calldata config
+    ) external returns (uint256 childId);
+
+    /// @notice Freezes a child node, halting all operations
+    /// @param childId The child to freeze
+    function freeze(uint256 childId) external;
+
+    /// @notice Unfreezes a previously frozen child
+    /// @param childId The child to unfreeze
+    function unfreeze(uint256 childId) external;
+
+    /// @notice Recalls funds from a child node to parent treasury
+    /// @param childId The child to recall from
+    /// @param token Token address (address(0) for native)
+    /// @param amount Amount to recall
+    function clawback(
+        uint256 childId,
+        address token,
+        uint256 amount
+    ) external;
+
+    /// @notice Returns the parent of a node
+    function parent(uint256 nodeId) external view returns (uint256);
+
+    /// @notice Returns all children of a node
+    function children(uint256 nodeId) external view returns (uint256[] memory);
+
+    /// @notice Returns true if node is frozen
+    function isFrozen(uint256 nodeId) external view returns (bool);
+}
+```
+
+### NodeConfig
+
+```solidity
+struct NodeConfig {
+    // Governance
+    uint256 votingPeriod;      // Duration of voting in seconds
+    uint256 quorum;            // Minimum participation required
+    uint256 threshold;         // Approval threshold (basis points)
+
+    // Permissions
+    bool canCreateChildren;    // Can this node create sub-nodes
+    bool canTransferExternal;  // Can transfer outside hierarchy
+    uint256 spendingLimit;     // Max single transaction (0 = unlimited)
+
+    // Control
+    bool parentCanFreeze;      // Parent can freeze this node
+    bool parentCanClawback;    // Parent can recall funds
+    uint256 clawbackDelay;     // Delay before clawback executes
+}
+```
+
+## Hierarchy Operations
+
+<Cards>
+  <Card title="Create Sub-DAO" href="/docs/guide/hierarchy/node-creation" icon="plus-circle">
+    Spawn child nodes for delegation
+  </Card>
+  <Card title="Freeze Node" href="/docs/guide/hierarchy/freezing" icon="pause-circle">
+    Temporarily halt child operations
+  </Card>
+  <Card title="Clawback Funds" href="/docs/guide/hierarchy/clawback" icon="rotate-ccw">
+    Recall funds from child treasury
+  </Card>
+</Cards>
+
+## Common Patterns
+
+### Grants Program
+
+```yaml
+Structure:
+  - Grants Committee (parent)
+    - Review Panel (evaluates applications)
+    - Disbursement (handles payments)
+    - Monitoring (tracks outcomes)
+
+Delegation:
+  - Committee approves grants > $10K
+  - Review Panel handles < $10K
+  - Disbursement executes all payments
+```
+
+### Regional Organization
+
+```yaml
+Structure:
+  - Global DAO (parent)
+    - North America Chapter
+    - Europe Chapter
+    - Asia-Pacific Chapter
+
+Autonomy:
+  - Local events and community
+  - Regional partnerships
+  - Local treasury management
+
+Coordination:
+  - Global initiatives
+  - Cross-regional projects
+  - Shared resources
+```
+
+### Treasury Management
+
+```yaml
+Structure:
+  - Treasury DAO (parent)
+    - Investment Committee
+    - Operations Budget
+    - Emergency Reserve
+
+Controls:
+  - Investment: 30-day clawback delay
+  - Operations: No clawback (autonomous)
+  - Reserve: Instant clawback (parent-controlled)
+```
+
+## Best Practices
+
+### Do
+
+- Define clear mandates for each child
+- Set appropriate spending limits
+- Document escalation procedures
+- Regular oversight and reporting
+- Test governance before funding
+
+### Don't
+
+- Create overly deep hierarchies (3 levels max recommended)
+- Give children unlimited spending
+- Disable all parent controls
+- Create duplicate responsibilities
+- Neglect monitoring
+
+## Security Considerations
+
+<Callout type="warning">
+Parent control mechanisms are powerful. Ensure proper governance before enabling freeze and clawback capabilities.
+</Callout>
+
+### Access Control
+
+| Action | Required Permission |
+|--------|---------------------|
+| Create child | `ADMIN_ROLE` on parent |
+| Freeze child | `ADMIN_ROLE` on parent |
+| Clawback | Proposal + timelock |
+| Unfreeze | `ADMIN_ROLE` on parent |
+
+### Risk Mitigation
+
+1. **Multi-sig for parent admin** - Prevent single-point failures
+2. **Timelock on clawback** - Give child time to respond
+3. **Clear termination criteria** - Define when freeze/clawback is appropriate
+4. **Audit trail** - Log all hierarchy operations
+
+## Integration Examples
+
+### Creating a Committee via Proposal
+
+```yaml
+Proposal: "Create Research Committee"
+
+Actions:
+  - type: create_child
+    name: "Research Committee"
+    admin: 0x1234...
+    config:
+      votingPeriod: 604800  # 7 days
+      quorum: 1000000       # 1M tokens
+      threshold: 5000       # 50%
+      canCreateChildren: false
+      canTransferExternal: true
+      spendingLimit: 50000000000  # $50K USDC
+      parentCanFreeze: true
+      parentCanClawback: true
+      clawbackDelay: 259200  # 3 days
+
+  - type: transfer
+    to: research_committee
+    amount: 100000
+    token: USDC
+```
+
+### Querying Hierarchy
+
+```typescript
+import { HierarchyClient } from '@lux/dao-sdk';
+
+const hierarchy = new HierarchyClient(provider);
+
+// Get all children of root DAO
+const children = await hierarchy.children(ROOT_DAO_ID);
+
+// Check if node is frozen
+const frozen = await hierarchy.isFrozen(childId);
+
+// Get parent chain to root
+const ancestors = await hierarchy.getAncestors(nodeId);
+```

@@ -1,0 +1,420 @@
+---
+title: Token Setup
+description: Configure tokens for your multisig or governance project
+---
+
+# Token Setup
+
+This guide covers how to set up and configure tokens for your multisig project or DAO. Proper token configuration is essential for governance functionality.
+
+## Overview
+
+A typical DAO token system includes:
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│                       Token Architecture                         │
+├─────────────────────────────────────────────────────────────────┤
+│                                                                   │
+│  ┌─────────────────────────────────────────────────────────────┐ │
+│  │                    Governance Token (TOKEN)                  │ │
+│  │                  Base ERC-20/SPL token                       │ │
+│  └───────────────────────────┬─────────────────────────────────┘ │
+│                              │                                    │
+│              ┌───────────────┼───────────────┐                   │
+│              ▼               ▼               ▼                   │
+│  ┌──────────────────┐ ┌──────────────┐ ┌──────────────────┐     │
+│  │  Vote Escrow     │ │   Staking    │ │    Treasury      │     │
+│  │   (veTOKEN)      │ │   (sTOKEN)   │ │    Holdings      │     │
+│  │                  │ │              │ │                  │     │
+│  │ Lock for voting  │ │ Stake for    │ │ Protocol-owned   │     │
+│  │ power            │ │ rewards      │ │ liquidity        │     │
+│  └──────────────────┘ └──────────────┘ └──────────────────┘     │
+│                                                                   │
+└─────────────────────────────────────────────────────────────────┘
+```
+
+## Token Types
+
+### Governance Token
+
+The primary token used for voting and governance.
+
+| Property | Description |
+|----------|-------------|
+| Symbol | TOKEN (customize for your project) |
+| Standard | ERC-20 (EVM) / SPL (Solana) |
+| Decimals | 18 (EVM) / 9 (Solana) |
+| Supply | Fixed or inflationary |
+| Transferable | Yes |
+
+### Vote-Escrowed Token (veToken)
+
+Non-transferable token representing locked voting power.
+
+| Property | Description |
+|----------|-------------|
+| Symbol | veTOKEN |
+| Standard | Non-standard (contract-specific) |
+| Transferable | No |
+| Decay | Linear decay toward unlock |
+
+### Staked Token (sToken)
+
+Receipt token for staked governance tokens.
+
+| Property | Description |
+|----------|-------------|
+| Symbol | sTOKEN |
+| Standard | ERC-20 |
+| Transferable | Configurable |
+| Represents | Staked position + rewards |
+
+## Setup for Multisig Projects
+
+### Step 1: Configure Governance Token
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│  Governance Token Configuration                                  │
+├─────────────────────────────────────────────────────────────────┤
+│                                                                   │
+│  Token Address: [0x_________________________________]            │
+│                                                                   │
+│  OR                                                              │
+│                                                                   │
+│  ☐ Deploy new token                                             │
+│                                                                   │
+│  Token Details (auto-detected):                                  │
+│  - Name: Example Token                                           │
+│  - Symbol: TOKEN                                                 │
+│  - Decimals: 18                                                  │
+│  - Total Supply: 100,000,000 TOKEN                              │
+│                                                                   │
+│  Treasury Holdings: 25,000,000 TOKEN (25%)                       │
+│                                                                   │
+│                              [Verify]  [Continue]                │
+│                                                                   │
+└─────────────────────────────────────────────────────────────────┘
+```
+
+### Step 2: Configure Vote Escrow
+
+Enable token locking for voting power:
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│  Vote Escrow Configuration                                       │
+├─────────────────────────────────────────────────────────────────┤
+│                                                                   │
+│  ☑ Enable vote escrow (locking for voting power)                │
+│                                                                   │
+│  Lock Parameters:                                                │
+│                                                                   │
+│  Minimum Lock: [1___] weeks                                     │
+│  Maximum Lock: [208_] weeks (4 years)                           │
+│                                                                   │
+│  Voting Power Multiplier:                                        │
+│  │ Lock Duration │ Multiplier │ Example (1000 TOKEN) │          │
+│  │───────────────│────────────│──────────────────────│          │
+│  │ 1 week        │ 0.005x     │ 5 veTOKEN            │          │
+│  │ 1 month       │ 0.02x      │ 20 veTOKEN           │          │
+│  │ 6 months      │ 0.125x     │ 125 veTOKEN          │          │
+│  │ 1 year        │ 0.25x      │ 250 veTOKEN          │          │
+│  │ 2 years       │ 0.5x       │ 500 veTOKEN          │          │
+│  │ 4 years       │ 1.0x       │ 1,000 veTOKEN        │          │
+│                                                                   │
+│  Power Decay:                                                    │
+│  ● Linear decay (voting power decreases toward unlock)          │
+│  ○ No decay (constant power until unlock)                       │
+│                                                                   │
+└─────────────────────────────────────────────────────────────────┘
+```
+
+### Step 3: Configure Treasury Token Holdings
+
+Set up which tokens the treasury can hold:
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│  Treasury Token Configuration                                    │
+├─────────────────────────────────────────────────────────────────┤
+│                                                                   │
+│  Approved Treasury Tokens:                                       │
+│                                                                   │
+│  │ Token  │ Address                    │ Limit        │ Remove │ │
+│  │────────│────────────────────────────│──────────────│────────│ │
+│  │ TOKEN  │ 0x1234...abcd              │ No limit     │   -    │ │
+│  │ USDC   │ 0x5678...efgh              │ $10,000,000  │   ✕    │ │
+│  │ USDT   │ 0x9abc...ijkl              │ $5,000,000   │   ✕    │ │
+│  │ WETH   │ 0xdef0...mnop              │ 1,000 ETH    │   ✕    │ │
+│                                                                   │
+│  [+ Add Token]                                                   │
+│                                                                   │
+│  Note: Adding tokens requires governance approval                │
+│                                                                   │
+└─────────────────────────────────────────────────────────────────┘
+```
+
+### Step 4: Configure Staking (Optional)
+
+Enable staking for additional functionality:
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│  Staking Configuration                                           │
+├─────────────────────────────────────────────────────────────────┤
+│                                                                   │
+│  ☑ Enable staking                                               │
+│                                                                   │
+│  Staking Model:                                                  │
+│  ○ Simple staking (stake TOKEN, receive rewards)                │
+│  ● Liquid staking (stake TOKEN, receive sTOKEN)                 │
+│  ○ Locked staking (stake with lock period)                      │
+│                                                                   │
+│  Reward Token: [TOKEN ▼]                                        │
+│                                                                   │
+│  Reward Source:                                                  │
+│  ☑ Protocol revenue                                             │
+│  ☐ Inflation (new token issuance)                               │
+│  ☐ Treasury allocation                                          │
+│                                                                   │
+│  Unstaking:                                                      │
+│  Cooldown Period: [7___] days                                   │
+│  Instant Unstake Fee: [5___]%                                   │
+│                                                                   │
+└─────────────────────────────────────────────────────────────────┘
+```
+
+## Token Distribution
+
+### Initial Distribution
+
+Configure how tokens are initially distributed:
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│  Token Distribution                                              │
+├─────────────────────────────────────────────────────────────────┤
+│                                                                   │
+│  Total Supply: 100,000,000 TOKEN                                │
+│                                                                   │
+│  │ Allocation      │ Amount      │ %    │ Vesting        │     │
+│  │─────────────────│─────────────│──────│────────────────│     │
+│  │ Treasury        │ 25,000,000  │ 25%  │ None           │     │
+│  │ Team            │ 15,000,000  │ 15%  │ 4yr cliff+vest │     │
+│  │ Investors       │ 10,000,000  │ 10%  │ 1yr cliff+vest │     │
+│  │ Community       │ 30,000,000  │ 30%  │ Airdrop        │     │
+│  │ Ecosystem       │ 20,000,000  │ 20%  │ Grants         │     │
+│                                                                   │
+│  Circulating Supply: 30,000,000 TOKEN (30%)                     │
+│  Locked Supply: 70,000,000 TOKEN (70%)                          │
+│                                                                   │
+└─────────────────────────────────────────────────────────────────┘
+```
+
+### Vesting Schedules
+
+Configure vesting for allocated tokens:
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│  Vesting Configuration                                           │
+├─────────────────────────────────────────────────────────────────┤
+│                                                                   │
+│  Team Vesting:                                                   │
+│  - Cliff: 12 months                                              │
+│  - Vesting: 36 months (linear)                                   │
+│  - Total: 48 months                                              │
+│                                                                   │
+│  ┌─────────────────────────────────────────────────────────────┐ │
+│  │ Vested %                                                     │ │
+│  │ 100% │                                        ████████████ │ │
+│  │  75% │                              ██████████              │ │
+│  │  50% │                    ██████████                        │ │
+│  │  25% │          ██████████                                  │ │
+│  │   0% │▓▓▓▓▓▓▓▓▓▓                                            │ │
+│  │      └────────────────────────────────────────────────────  │ │
+│  │        0    12    24    36    48 months                     │ │
+│  │             ↑ cliff                                          │ │
+│  └─────────────────────────────────────────────────────────────┘ │
+│                                                                   │
+└─────────────────────────────────────────────────────────────────┘
+```
+
+## Multisig Token Management
+
+### Token Approvals
+
+Configure which tokens the multisig can manage:
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│  Multisig Token Approvals                                        │
+├─────────────────────────────────────────────────────────────────┤
+│                                                                   │
+│  Spending Limits per Transaction:                                │
+│                                                                   │
+│  │ Token  │ Limit per Tx   │ Daily Limit    │ Approval  │       │
+│  │────────│────────────────│────────────────│───────────│       │
+│  │ TOKEN  │ 100,000        │ 500,000        │ 2-of-3    │       │
+│  │ USDC   │ $50,000        │ $200,000       │ 2-of-3    │       │
+│  │ WETH   │ 50 ETH         │ 200 ETH        │ 3-of-5    │       │
+│                                                                   │
+│  Large Transaction Threshold: $100,000                           │
+│  Large Transaction Approval: 3-of-5 + Governance                 │
+│                                                                   │
+└─────────────────────────────────────────────────────────────────┘
+```
+
+### Token Recovery
+
+Configure emergency token recovery:
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│  Token Recovery Settings                                         │
+├─────────────────────────────────────────────────────────────────┤
+│                                                                   │
+│  ☑ Enable token recovery for mistakenly sent tokens             │
+│                                                                   │
+│  Recovery Permissions:                                           │
+│  ● Requires governance proposal                                  │
+│  ○ Multisig can recover directly                                │
+│  ○ Guardian can recover                                         │
+│                                                                   │
+│  Excluded from Recovery:                                         │
+│  ☑ Governance token (TOKEN)                                     │
+│  ☑ Staked tokens (sTOKEN)                                       │
+│  ☑ Vote escrow tokens (veTOKEN)                                 │
+│                                                                   │
+│  Recovery Timelock: [7___] days                                 │
+│                                                                   │
+└─────────────────────────────────────────────────────────────────┘
+```
+
+## Integration with External Tokens
+
+### Adding External Tokens
+
+To add support for external tokens in your DAO:
+
+1. **Verify Token Contract**: Ensure it's a standard ERC-20/SPL
+2. **Add to Approved List**: Governance proposal to approve token
+3. **Set Limits**: Configure spending and holding limits
+4. **Enable Trading**: Allow swaps/transfers as needed
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│  Add External Token                                              │
+├─────────────────────────────────────────────────────────────────┤
+│                                                                   │
+│  Token Address: [0x_________________________________]            │
+│                                                                   │
+│  Detected Token:                                                 │
+│  - Name: USD Coin                                                │
+│  - Symbol: USDC                                                  │
+│  - Decimals: 6                                                   │
+│  - Verified: ✓ Etherscan verified                               │
+│                                                                   │
+│  Configuration:                                                  │
+│  Holding Limit: [$10,000,000_]                                  │
+│  Per-Transaction Limit: [$100,000__]                            │
+│                                                                   │
+│  Enabled Features:                                               │
+│  ☑ Treasury can hold                                            │
+│  ☑ Can be used for payments                                     │
+│  ☐ Can be used for staking rewards                              │
+│  ☐ Can be used for streaming                                    │
+│                                                                   │
+│  This requires a governance proposal.                            │
+│                                                                   │
+│                              [Cancel]  [Create Proposal]         │
+│                                                                   │
+└─────────────────────────────────────────────────────────────────┘
+```
+
+## Security Considerations
+
+### Token Contract Security
+
+Ensure governance token contract includes:
+
+- [ ] Pausable functionality
+- [ ] Access control for minting (if applicable)
+- [ ] No hidden mint functions
+- [ ] Standard transfer behavior
+- [ ] Audited code
+
+### Treasury Security
+
+Protect token holdings with:
+
+- [ ] Multi-signature requirements
+- [ ] Spending limits
+- [ ] Timelock delays
+- [ ] Emergency pause capability
+- [ ] Regular audits
+
+### Vote Escrow Security
+
+Secure voting power with:
+
+- [ ] Non-transferable locks
+- [ ] No flash loan vulnerabilities
+- [ ] Snapshot-based voting
+- [ ] Decay calculations verified
+
+## Troubleshooting
+
+### "Token Not Detected"
+
+**Causes:**
+- Incorrect address
+- Non-standard token contract
+- Wrong network
+
+**Solutions:**
+- Verify address on block explorer
+- Check token standard compliance
+- Ensure correct network is selected
+
+### "Insufficient Balance"
+
+**Causes:**
+- Tokens not transferred to treasury
+- Tokens locked in vesting
+- Different token address
+
+**Solutions:**
+- Verify treasury balance
+- Check vesting unlock status
+- Confirm token address matches
+
+### "Transfer Failed"
+
+**Causes:**
+- Exceeds spending limit
+- Insufficient approvals
+- Token paused
+- Recipient blacklisted
+
+**Solutions:**
+- Check spending limits
+- Gather required signatures
+- Verify token status
+- Confirm recipient address
+
+## Next Steps
+
+<Cards>
+  <Card title="Multisig Operations" href="/docs/guide/multisig" icon="key">
+    Learn to sign multisig proposals
+  </Card>
+  <Card title="Treasury Management" href="/docs/guide/treasury" icon="vault">
+    Manage treasury funds
+  </Card>
+  <Card title="Staking Setup" href="/docs/guide/staking/setup" icon="lock">
+    Configure staking for your token
+  </Card>
+</Cards>

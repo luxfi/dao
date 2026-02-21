@@ -1,0 +1,398 @@
+---
+title: Creating Sub-DAOs
+description: How to create child nodes and delegate authority
+---
+
+# Creating Sub-DAOs
+
+Sub-DAOs (child nodes) allow parent organizations to delegate specific functions while maintaining oversight. This guide covers creating and configuring child nodes.
+
+## Prerequisites
+
+Before creating a sub-DAO:
+
+- Admin role on parent DAO
+- Clear mandate and scope defined
+- Initial funding approved
+- Admin address ready
+
+## Creation Methods
+
+### Method 1: Via UI
+
+#### Step 1: Navigate to Hierarchy
+
+1. Go to your DAO dashboard
+2. Click **"Organization"** in the sidebar
+3. Click **"Create Sub-DAO"**
+
+#### Step 2: Configure Basic Info
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│ Create Sub-DAO                                               │
+├─────────────────────────────────────────────────────────────┤
+│                                                              │
+│  Name:         [Research Committee                  ]        │
+│                                                              │
+│  Description:  [Funds and coordinates research      ]        │
+│                [initiatives across the ecosystem    ]        │
+│                                                              │
+│  Admin:        [0x1234...5678                       ]        │
+│                                                              │
+│  Type:         ( ) Committee                                │
+│                (•) Working Group                            │
+│                ( ) Regional Chapter                         │
+│                                                              │
+└─────────────────────────────────────────────────────────────┘
+```
+
+#### Step 3: Set Governance Parameters
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│ Governance Settings                                          │
+├─────────────────────────────────────────────────────────────┤
+│                                                              │
+│  Voting Period:    [7      ] days                           │
+│                                                              │
+│  Quorum:           [1,000,000] tokens (10% of supply)       │
+│                                                              │
+│  Approval:         [50     ] %                              │
+│                                                              │
+│  Proposal Threshold: [10,000] tokens to create              │
+│                                                              │
+│  ┌─────────────────────────────────────────────────────┐   │
+│  │ ℹ️ Lower thresholds = more proposals                 │   │
+│  │    Higher quorum = stronger mandate                  │   │
+│  └─────────────────────────────────────────────────────┘   │
+│                                                              │
+└─────────────────────────────────────────────────────────────┘
+```
+
+#### Step 4: Configure Permissions
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│ Permissions                                                  │
+├─────────────────────────────────────────────────────────────┤
+│                                                              │
+│  [✓] Can create child nodes                                 │
+│      └── Allow this sub-DAO to create its own children      │
+│                                                              │
+│  [✓] Can transfer externally                                │
+│      └── Send funds outside the hierarchy                   │
+│                                                              │
+│  Spending Limit:  [$50,000] per transaction                 │
+│      └── 0 = unlimited                                      │
+│                                                              │
+│  ──────────────────────────────────────────────────────     │
+│  Parent Controls                                             │
+│  ──────────────────────────────────────────────────────     │
+│                                                              │
+│  [✓] Parent can freeze                                      │
+│      └── Allow parent to halt operations                    │
+│                                                              │
+│  [✓] Parent can clawback                                    │
+│      └── Allow parent to recall funds                       │
+│                                                              │
+│  Clawback Delay:  [3     ] days                             │
+│      └── Notice period before funds recalled                │
+│                                                              │
+└─────────────────────────────────────────────────────────────┘
+```
+
+#### Step 5: Initial Funding (Optional)
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│ Initial Funding                                              │
+├─────────────────────────────────────────────────────────────┤
+│                                                              │
+│  [✓] Fund on creation                                       │
+│                                                              │
+│  Token:   [USDC ▼]                                          │
+│  Amount:  [100,000                    ]                     │
+│                                                              │
+│  Available in parent treasury: 500,000 USDC                 │
+│                                                              │
+│  ┌─────────────────────────────────────────────────────┐   │
+│  │ + Add another token                                  │   │
+│  └─────────────────────────────────────────────────────┘   │
+│                                                              │
+└─────────────────────────────────────────────────────────────┘
+```
+
+#### Step 6: Review and Submit
+
+1. Click **"Preview"** to review configuration
+2. Verify all settings are correct
+3. Click **"Create Sub-DAO"**
+4. Sign the transaction
+
+### Method 2: Via Proposal
+
+For larger organizations, creation should go through governance:
+
+```yaml
+Proposal: "Create Research Committee Sub-DAO"
+
+Description: |
+  This proposal creates a Research Committee to coordinate
+  and fund research initiatives.
+
+  ## Mandate
+  - Evaluate research proposals
+  - Fund approved projects up to $50K
+  - Track research outcomes
+  - Report quarterly to parent
+
+  ## Budget
+  Initial funding: $100,000 USDC
+  Quarterly allocation: $25,000 USDC
+
+  ## Leadership
+  Initial Admin: research-lead.eth (0x1234...)
+
+Actions:
+  - type: create_child
+    name: "Research Committee"
+    admin: "0x1234..."
+    config:
+      votingPeriod: 604800
+      quorum: 1000000
+      threshold: 5000
+      canCreateChildren: false
+      canTransferExternal: true
+      spendingLimit: 50000000000
+      parentCanFreeze: true
+      parentCanClawback: true
+      clawbackDelay: 259200
+
+  - type: transfer
+    to: ${newChild}
+    amount: 100000
+    token: USDC
+```
+
+### Method 3: Via SDK
+
+```typescript
+import { HierarchyClient, NodeConfig } from '@lux/dao-sdk';
+
+const hierarchy = new HierarchyClient(signer);
+
+// Configure the child node
+const config: NodeConfig = {
+  votingPeriod: 7 * 24 * 60 * 60,  // 7 days
+  quorum: ethers.parseUnits('1000000', 18),
+  threshold: 5000,  // 50% in basis points
+  canCreateChildren: false,
+  canTransferExternal: true,
+  spendingLimit: ethers.parseUnits('50000', 6),  // 50K USDC
+  parentCanFreeze: true,
+  parentCanClawback: true,
+  clawbackDelay: 3 * 24 * 60 * 60,  // 3 days
+};
+
+// Create the child
+const tx = await hierarchy.createChild(
+  'Research Committee',
+  '0x1234...admin',
+  config
+);
+
+const receipt = await tx.wait();
+const childId = receipt.events[0].args.childId;
+
+console.log(`Created child node: ${childId}`);
+```
+
+## Configuration Reference
+
+### Governance Parameters
+
+| Parameter | Description | Recommended |
+|-----------|-------------|-------------|
+| `votingPeriod` | Duration of voting | 3-14 days |
+| `quorum` | Minimum participation | 5-20% of supply |
+| `threshold` | Approval percentage | 50-67% |
+| `proposalThreshold` | Tokens to propose | 0.1-1% of supply |
+
+### Permission Flags
+
+| Flag | Default | Description |
+|------|---------|-------------|
+| `canCreateChildren` | false | Create nested sub-DAOs |
+| `canTransferExternal` | true | Send funds outside hierarchy |
+| `spendingLimit` | 0 | Max per-transaction (0 = unlimited) |
+
+### Parent Controls
+
+| Control | Default | Description |
+|---------|---------|-------------|
+| `parentCanFreeze` | true | Parent can halt operations |
+| `parentCanClawback` | true | Parent can recall funds |
+| `clawbackDelay` | 3 days | Notice before clawback |
+
+## Post-Creation Setup
+
+After creating a sub-DAO:
+
+### 1. Configure Roles
+
+```yaml
+Roles to create:
+  - Admin: Full management (multi-sig recommended)
+  - Lead: Create proposals, manage budget
+  - Member: Vote, participate
+  - Observer: Read-only access
+```
+
+### 2. Set Up Committees
+
+If the sub-DAO will have its own working groups:
+
+```yaml
+Working Groups:
+  - Review Panel
+    - Evaluates incoming proposals
+    - 3-5 members
+  - Operations
+    - Handles day-to-day
+    - 2-3 members
+```
+
+### 3. Document Mandate
+
+Create a charter document:
+
+```markdown
+# Research Committee Charter
+
+## Purpose
+Fund and coordinate ecosystem research.
+
+## Scope
+- Academic research partnerships
+- Technical research grants
+- Industry analysis
+
+## Out of Scope
+- Product development
+- Marketing research
+- Operational expenses
+
+## Budget
+- Quarterly allocation: $25,000
+- Single grant limit: $50,000
+- Emergency reserve: $10,000
+
+## Governance
+- Voting period: 7 days
+- Quorum: 10%
+- Approval: 50%
+
+## Reporting
+- Monthly activity report
+- Quarterly budget review
+- Annual impact assessment
+```
+
+### 4. Fund the Treasury
+
+Transfer initial operating funds:
+
+```typescript
+// From parent DAO
+await treasury.transfer(
+  childAddress,
+  usdc.address,
+  ethers.parseUnits('100000', 6),
+  'Initial Research Committee funding'
+);
+```
+
+## Common Configurations
+
+### Autonomous Committee
+
+High autonomy, minimal parent control:
+
+```typescript
+const autonomousConfig: NodeConfig = {
+  votingPeriod: 604800,
+  quorum: ethers.parseUnits('500000', 18),
+  threshold: 5000,
+  canCreateChildren: true,
+  canTransferExternal: true,
+  spendingLimit: 0,  // Unlimited
+  parentCanFreeze: false,  // Cannot freeze
+  parentCanClawback: false,  // Cannot clawback
+  clawbackDelay: 0,
+};
+```
+
+### Controlled Working Group
+
+Limited autonomy, strong oversight:
+
+```typescript
+const controlledConfig: NodeConfig = {
+  votingPeriod: 259200,  // 3 days
+  quorum: ethers.parseUnits('100000', 18),
+  threshold: 5000,
+  canCreateChildren: false,
+  canTransferExternal: false,  // Internal only
+  spendingLimit: ethers.parseUnits('10000', 6),
+  parentCanFreeze: true,
+  parentCanClawback: true,
+  clawbackDelay: 86400,  // 1 day
+};
+```
+
+### Regional Chapter
+
+Balanced autonomy with coordination:
+
+```typescript
+const chapterConfig: NodeConfig = {
+  votingPeriod: 604800,
+  quorum: ethers.parseUnits('200000', 18),
+  threshold: 5000,
+  canCreateChildren: true,  // Can create local groups
+  canTransferExternal: true,
+  spendingLimit: ethers.parseUnits('25000', 6),
+  parentCanFreeze: true,
+  parentCanClawback: true,
+  clawbackDelay: 604800,  // 7 days notice
+};
+```
+
+## Troubleshooting
+
+### Creation Failed
+
+| Error | Cause | Solution |
+|-------|-------|----------|
+| `Unauthorized` | Missing admin role | Get admin permission |
+| `InvalidConfig` | Bad parameters | Check config values |
+| `InsufficientFunds` | Not enough for initial funding | Reduce or skip funding |
+| `MaxDepthExceeded` | Too many hierarchy levels | Create at higher level |
+
+### Common Issues
+
+**Child not visible in UI:**
+- Wait for transaction confirmation
+- Refresh the page
+- Check the transaction succeeded
+
+**Cannot transfer funds:**
+- Verify child has treasury address
+- Check spending limits
+- Confirm transfer is within scope
+
+**Governance not working:**
+- Verify token distribution
+- Check quorum settings
+- Ensure voting period started

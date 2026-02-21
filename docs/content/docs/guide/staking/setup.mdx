@@ -1,0 +1,364 @@
+---
+title: Setting Up Staking
+description: Configure staking for your DAO
+---
+
+# Setting Up Staking
+
+This guide covers how DAO administrators can set up and configure staking for their organization.
+
+## Prerequisites
+
+Before setting up staking, ensure you have:
+
+- **Admin Role** - DAO admin or governance permissions
+- **Token Contract** - Deployed ERC-20 governance token
+- **Treasury Funds** - Initial rewards allocation
+- **Governance Approval** - If required by your DAO
+
+## Staking Configuration
+
+### Step 1: Navigate to Staking Settings
+
+1. Go to your DAO dashboard
+2. Click **Settings** in the sidebar
+3. Select **Staking** tab
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│ DAO Settings                                                 │
+├─────────────────────────────────────────────────────────────┤
+│  [General] [Governance] [Treasury] [Staking] [Gasless]      │
+│                                     ^^^^^^^^                 │
+└─────────────────────────────────────────────────────────────┘
+```
+
+### Step 2: Enable Staking
+
+Toggle staking on and select your model:
+
+```yaml
+Staking Enabled: true
+Staking Model: vote_escrow  # Options: fixed, flexible, vote_escrow
+```
+
+**Model Comparison:**
+
+| Model | Lock Required | Voting Power | Best For |
+|-------|--------------|--------------|----------|
+| Fixed | Yes (preset periods) | Static | Predictable rewards |
+| Flexible | No | Static | Liquidity preference |
+| Vote-Escrow | Yes (variable) | Decaying | Long-term alignment |
+
+### Step 3: Configure Lock Periods
+
+For fixed or vote-escrow models, define lock periods:
+
+```yaml
+lock_periods:
+  - duration: 30 days
+    multiplier: 1.0
+    early_exit_penalty: 10%
+
+  - duration: 90 days
+    multiplier: 1.5
+    early_exit_penalty: 15%
+
+  - duration: 180 days
+    multiplier: 2.0
+    early_exit_penalty: 20%
+
+  - duration: 365 days
+    multiplier: 3.0
+    early_exit_penalty: 25%
+
+  - duration: 730 days  # 2 years
+    multiplier: 4.0
+    early_exit_penalty: 30%
+```
+
+### Step 4: Set Reward Parameters
+
+Configure how rewards are distributed:
+
+```yaml
+rewards:
+  source: protocol_revenue  # Options: inflation, revenue, hybrid
+
+  # For inflation model
+  inflation:
+    annual_rate: 5%
+    distribution:
+      stakers: 80%
+      treasury: 15%
+      development: 5%
+
+  # For revenue model
+  revenue:
+    fee_share: 50%  # % of protocol fees to stakers
+
+  # Distribution frequency
+  distribution_interval: weekly  # daily, weekly, monthly
+```
+
+### Step 5: Configure Minimum Stakes
+
+Set minimum amounts to prevent dust attacks:
+
+```yaml
+minimums:
+  stake_amount: 100 LUX
+  lock_duration: 7 days
+  claim_amount: 1 LUX
+```
+
+### Step 6: Enable/Disable Features
+
+Toggle optional features:
+
+```yaml
+features:
+  compound_rewards: true      # Auto-compound option
+  partial_unstake: false      # Allow partial withdrawals
+  delegate_stake: true        # Delegate voting power
+  early_exit: true            # Allow early exit with penalty
+  boost_nft: false            # NFT-based APY boosts
+```
+
+## Deploying Staking Contracts
+
+If your DAO doesn't have staking contracts yet:
+
+### Option 1: Use Built-in Templates
+
+1. Click **Deploy Staking Contract**
+2. Select template:
+   - Simple Staking
+   - Vote-Escrow (veToken)
+   - Gauge System
+3. Configure parameters
+4. Submit deployment proposal
+5. Execute after approval
+
+### Option 2: Connect Existing Contract
+
+```yaml
+contract_address: 0x1234...5678
+abi: [...]  # Contract ABI
+methods:
+  stake: stake(uint256)
+  unstake: withdraw(uint256)
+  claim: claimReward()
+  balance: balanceOf(address)
+```
+
+## Reward Fund Setup
+
+### Initial Funding
+
+Allocate rewards from treasury:
+
+1. Go to **Treasury** > **Allocations**
+2. Create new allocation:
+
+```yaml
+allocation:
+  name: "Staking Rewards Q1 2026"
+  amount: 1,000,000 LUX
+  destination: staking_rewards_pool
+  schedule: monthly
+  duration: 3 months
+```
+
+### Ongoing Funding
+
+Set up automatic funding from revenue:
+
+```yaml
+auto_fund:
+  enabled: true
+  source: protocol_fees
+  percentage: 50%
+  frequency: weekly
+  cap: 100,000 LUX per week
+```
+
+## Governance Integration
+
+### Voting Power
+
+Configure how staking affects voting:
+
+```yaml
+voting_power:
+  base: 1  # 1 token = 1 vote base
+  staking_multiplier: true
+  lock_bonus:
+    30_days: 1.1x
+    90_days: 1.25x
+    180_days: 1.5x
+    365_days: 2.0x
+```
+
+### Proposal Thresholds
+
+Staked tokens count toward proposal thresholds:
+
+```yaml
+proposal_threshold:
+  create: 10,000 veTokens
+  vote: 1 veToken
+  quorum: 1,000,000 veTokens
+```
+
+## Testing Your Setup
+
+Before going live:
+
+### 1. Testnet Deployment
+
+Deploy to testnet first:
+
+```bash
+# Deploy staking contract to testnet
+forge script script/DeployStaking.s.sol --rpc-url $TESTNET_RPC --broadcast
+```
+
+### 2. Verify Configuration
+
+```yaml
+checklist:
+  - [ ] Lock periods configured correctly
+  - [ ] Reward rates are sustainable
+  - [ ] Minimum stakes prevent dust
+  - [ ] Early exit penalties are reasonable
+  - [ ] Voting power integration works
+  - [ ] Claiming rewards functions
+  - [ ] Compounding works (if enabled)
+```
+
+### 3. UI Preview
+
+Test the staking interface:
+
+1. Connect test wallet
+2. Stake test tokens
+3. Verify lock period
+4. Wait for rewards accrual
+5. Test claiming
+6. Test unstaking
+
+## Launch Checklist
+
+```yaml
+pre_launch:
+  - [ ] Contracts deployed and verified
+  - [ ] Initial rewards funded
+  - [ ] Documentation published
+  - [ ] UI tested thoroughly
+  - [ ] Audit completed (recommended)
+
+launch:
+  - [ ] Announce staking launch
+  - [ ] Monitor first stakes
+  - [ ] Support ready for questions
+  - [ ] Emergency pause available
+
+post_launch:
+  - [ ] Monitor TVL growth
+  - [ ] Track APY sustainability
+  - [ ] Gather user feedback
+  - [ ] Adjust parameters if needed
+```
+
+## Common Issues
+
+### Low Participation
+
+**Symptoms:** Few stakers, low TVL
+
+**Solutions:**
+- Increase reward rates
+- Add lock bonuses
+- Reduce minimum stake
+- Improve UI/UX
+
+### Unsustainable APY
+
+**Symptoms:** Rewards depleting too fast
+
+**Solutions:**
+- Reduce emission rate
+- Cap maximum stake per user
+- Add more revenue sources
+- Adjust reward schedule
+
+### Voting Power Concentration
+
+**Symptoms:** Few large stakers dominate
+
+**Solutions:**
+- Implement quadratic voting
+- Cap maximum voting power
+- Add delegation incentives
+- Time-weight voting power
+
+## Advanced Configuration
+
+### Gauge System
+
+For protocols with multiple pools:
+
+```yaml
+gauges:
+  enabled: true
+  pools:
+    - name: "Core Staking"
+      weight: 60%
+      min_weight: 40%
+
+    - name: "LP Staking"
+      weight: 30%
+      min_weight: 10%
+
+    - name: "NFT Staking"
+      weight: 10%
+      min_weight: 5%
+
+  voting:
+    frequency: weekly
+    min_weight_change: 1%
+```
+
+### Boost System
+
+NFT or threshold-based boosts:
+
+```yaml
+boosts:
+  nft_boost:
+    enabled: true
+    contract: 0xABC...
+    max_boost: 1.5x
+
+  tier_boost:
+    enabled: true
+    tiers:
+      - min_stake: 10,000 LUX
+        boost: 1.1x
+      - min_stake: 100,000 LUX
+        boost: 1.25x
+      - min_stake: 1,000,000 LUX
+        boost: 1.5x
+```
+
+## Next Steps
+
+<Cards>
+  <Card title="Distributions" href="/docs/guide/staking/distributions" icon="pie-chart">
+    Set up reward distributions
+  </Card>
+  <Card title="Using Staking" href="/docs/guide/staking/using-staking" icon="lock">
+    Token holder guide
+  </Card>
+</Cards>
