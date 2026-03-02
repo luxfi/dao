@@ -58,7 +58,7 @@ services:
 
   # PostgreSQL database for indexer
   postgres:
-    image: postgres:16-alpine
+    image: ghcr.io/hanzoai/sql:17-alpine
     container_name: dao-postgres
     environment:
       - POSTGRES_USER=dao
