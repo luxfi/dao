@@ -19,7 +19,7 @@ services:
 
   # PostgreSQL Database
   postgres:
-    image: ghcr.io/hanzoai/sql:17-alpine
+    image: ghcr.io/hanzoai/sql:latest
     container_name: luxdao-postgres
     environment:
       POSTGRES_USER: luxdao
