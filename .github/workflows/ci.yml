@@ -96,7 +96,7 @@ jobs:
     needs: [test-contracts, test-frontend, test-api]
     services:
       postgres:
-        image: postgres:15-alpine
+        image: ghcr.io/hanzoai/sql:17-alpine
         env:
           POSTGRES_USER: luxdao
           POSTGRES_PASSWORD: luxdao123
