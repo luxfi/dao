@@ -1,3 +1,7 @@
 **/node_modules/
 CLAUDE.md
 .env
+
+# Nested repos (not submodules)
+api/
+contracts/
