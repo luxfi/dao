@@ -1,4 +1,4 @@
-# LLM.md - Lux DAO Project Documentation
+# Lux DAO Project Documentation
 
 ## Overview
 Lux DAO is a decentralized autonomous organization platform built for the Lux Protocol ecosystem. It enables transparent, accountable governance that evolves with the community needs at lux.vote.
