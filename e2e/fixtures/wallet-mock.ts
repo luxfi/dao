@@ -16,10 +16,16 @@ const TEST_ACCOUNTS = [
   },
 ];
 
+// Configurable via env so the same harness can target a Lux/Zoo/Pars fork (e.g. the wizard
+// create-DAO e2e runs against an anvil fork of Lux 96369). Defaults preserve the localhost specs.
+const E2E_CHAIN_ID = process.env.E2E_CHAIN_ID || '0x539'; // 1337
+const E2E_CHAIN_DEC = String(parseInt(E2E_CHAIN_ID, 16));
+const E2E_RPC = process.env.E2E_RPC || 'http://127.0.0.1:8545';
+
 const LOCALHOST_CHAIN = {
-  chainId: '0x539', // 1337
-  chainName: 'Localhost',
-  rpcUrls: ['http://127.0.0.1:8545'],
+  chainId: E2E_CHAIN_ID,
+  chainName: process.env.E2E_CHAIN_NAME || 'Localhost',
+  rpcUrls: [E2E_RPC],
   nativeCurrency: {
     name: 'ETH',
     symbol: 'ETH',
@@ -36,7 +42,7 @@ function createMockProvider(account: typeof TEST_ACCOUNTS[0]) {
       isMetaMask: true,
       selectedAddress: '${account.address}',
       chainId: '${LOCALHOST_CHAIN.chainId}',
-      networkVersion: '1337',
+      networkVersion: '${E2E_CHAIN_DEC}',
       _events: {},
 
       on(event, callback) {
@@ -66,7 +72,7 @@ function createMockProvider(account: typeof TEST_ACCOUNTS[0]) {
             return '${LOCALHOST_CHAIN.chainId}';
 
           case 'net_version':
-            return '1337';
+            return '${E2E_CHAIN_DEC}';
 
           case 'eth_accounts':
           case 'eth_requestAccounts':
@@ -79,7 +85,7 @@ function createMockProvider(account: typeof TEST_ACCOUNTS[0]) {
 
           case 'eth_sendTransaction':
             // Forward to local node
-            const response = await fetch('http://127.0.0.1:8545', {
+            const response = await fetch('${E2E_RPC}', {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
               body: JSON.stringify({
@@ -103,7 +109,7 @@ function createMockProvider(account: typeof TEST_ACCOUNTS[0]) {
           case 'eth_getBlockByNumber':
           case 'eth_getLogs':
             // Forward RPC calls to local node
-            const rpcResponse = await fetch('http://127.0.0.1:8545', {
+            const rpcResponse = await fetch('${E2E_RPC}', {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
               body: JSON.stringify({
