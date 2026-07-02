@@ -34,23 +34,24 @@ test.describe('Create DAO — wizard UI (V1 governance)', () => {
     await page.getByTestId('choose-governor').click(); // ERC-20 token voting
     await page.getByTestId('create-skipNextButton').click();
 
-    // 3) ERC-20 token step: name / symbol / supply / an allocation to the connected signer.
-    await page.waitForTimeout(800);
-    const fillFirst = async (labels: RegExp[], value: string) => {
-      for (const l of labels) {
-        const el = page.getByLabel(l).first();
-        if (await el.isVisible({ timeout: 1500 }).catch(() => false)) {
-          await el.fill(value);
-          return true;
-        }
-      }
-      // fallback: fill the visible empty text/number inputs in order
-      return false;
-    };
-    await fillFirst([/token name/i, /name/i], `${daoName} Token`);
-    await fillFirst([/symbol/i], 'E2E');
-    await fillFirst([/supply/i, /amount/i], '1000000');
-    await page.getByTestId('create-skipNextButton').click();
+    // 3) ERC-20 token step: name / symbol / supply + an allocation to the connected signer
+    // (so the wallet has voting power). Real testids from VotesTokenNew / GovernorTokenAllocations.
+    // token step defaults to "existing token" (fields disabled) — choose "new token" first
+    await page.getByTestId('choose-newToken').click();
+    await page.getByTestId('tokenVoting-tokenNameInput').waitFor({ timeout: 15_000 });
+    await expect(page.getByTestId('tokenVoting-tokenNameInput')).toBeEnabled({ timeout: 10_000 });
+    await page.getByTestId('tokenVoting-tokenNameInput').fill(`${daoName} Token`);
+    await page.getByTestId('tokenVoting-tokenSymbolInput').fill('E2E');
+    await page.getByTestId('tokenVoting-tokenSupplyInput').fill('1000000');
+    // add one allocation row (address + amount) so Next validates
+    await page.getByTestId('tokenVoting-addAllocation').click();
+    const alloc = page.getByTestId('tokenVoting-tokenAllocations');
+    const allocInputs = alloc.locator('input');
+    await allocInputs.nth(0).fill('0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266'); // signer
+    await allocInputs.nth(1).fill('100000');
+    const next = page.getByTestId('create-skipNextButton');
+    await expect(next).toBeEnabled({ timeout: 15_000 });
+    await next.click();
 
     // 4) Governance step: quorum (+ any defaults are fine). Then deploy.
     await page.waitForTimeout(800);
