@@ -9,10 +9,10 @@ name: Vote
 # repo root so BOTH sibling submodules are present:
 #   app/        (luxdao/app        — the governance SPA)
 #   contracts/  (luxdao/contracts  — the "@luxdao/contracts": "file:../contracts" dep)
-# Both submodules are PUBLIC, so `submodules: recursive` resolves with the default
-# GITHUB_TOKEN. `fetch-depth: 0` is REQUIRED: the recorded contracts gitlink is an
-# ancestor of (not the tip of) luxdao/contracts main, so a shallow fetch can't
-# check it out.
+# Both are PUBLIC. The dao tree ALSO gitlinks sdk/stack/subgraph/ui-automation,
+# which the image does not use — so we do NOT checkout recursively (that fatals on
+# the unmapped ones). Instead init ONLY app + contracts, with a full (non-shallow)
+# clone so the recorded contracts SHA (an ancestor of main, not its tip) resolves.
 #
 #   lux -> ghcr.io/luxfi/dao-vote:lux-<sha>   (lux.vote  · chain 96369)
 #   zoo -> ghcr.io/luxfi/dao-vote:zoo-<sha>   (zoo.vote  · chain 200200)
@@ -58,9 +58,13 @@ jobs:
             overrides: '{"200200":{"rpc":"https://api.zoo.network/v1/bc/C/rpc"}}'
     steps:
       - uses: actions/checkout@v4
-        with:
-          submodules: recursive
-          fetch-depth: 0
+
+      - name: Init the app + contracts submodules (the only two the image needs)
+        # dao also gitlinks sdk/stack/subgraph/ui-automation (unused by the build and
+        # not mapped in .gitmodules); a recursive checkout would fatal on them. Init
+        # exactly the two the Dockerfile copies. Default full clone => the behind-tip
+        # contracts gitlink resolves.
+        run: git submodule update --init app contracts
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
