@@ -51,11 +51,16 @@ jobs:
             chain_id: "96369"
             site_url: https://lux.vote
             overrides: '{"96369":{"rpc":"https://api.lux.network/v1/bc/C/rpc"}}'
+            # WalletConnect Cloud project id for the Lux DAO (origin-allowlisted to lux.vote).
+            # This is a PUBLIC client identifier (ships in the bundle), not a secret. Was wrongly
+            # sharing the Pars id, which is allowlisted for pars.vote -> connect verify mismatch.
+            wc_project_id: "22b98f00bd4572e2a42773ad82b329b0"
           - brand: zoo
             app_name: Zoo DAO
             chain_id: "200200"
             site_url: https://zoo.vote
             overrides: '{"200200":{"rpc":"https://api.zoo.network/v1/bc/C/rpc"}}'
+            wc_project_id: "e89228fed40d4c6e9520912214dfd68b"
     steps:
       - uses: actions/checkout@v4
 
@@ -121,7 +126,7 @@ jobs:
             VITE_APP_NAME=${{ matrix.app_name }}
             VITE_APP_DEFAULT_CHAIN_ID=${{ matrix.chain_id }}
             VITE_APP_SITE_URL=${{ matrix.site_url }}
-            VITE_APP_WALLET_CONNECT_PROJECT_ID=e89228fed40d4c6e9520912214dfd68b
+            VITE_APP_WALLET_CONNECT_PROJECT_ID=${{ matrix.wc_project_id }}
             VITE_APP_NETWORK_OVERRIDES=${{ matrix.overrides }}
             VITE_APP_GIT_HASH=${{ matrix.brand }}-vote
           tags: ${{ steps.meta.outputs.tags }}
