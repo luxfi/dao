@@ -66,6 +66,18 @@ jobs:
         # contracts gitlink resolves.
         run: git submodule update --init app contracts
 
+      - name: Resolve the local-dev UI link to its published npm package
+        # app/package.json declares "@luxfi/ui": "file:../../ui/pkg/ui" — a local-dev
+        # link to the sibling @hanzo/ui monorepo that is absent in clean CI. It is a
+        # DECLARED-BUT-UNUSED dep (no `from '@luxfi/ui'` anywhere in app source; only
+        # package.json + two tailwind.config.ts comments reference it), so redirecting
+        # it to the published package it aliases (@hanzo/ui) lets pnpm install resolve
+        # with zero effect on the bundle. Ephemeral build-input rewrite ONLY — never
+        # committed to luxdao/app, so the app stays pristine at its pinned gitlink.
+        run: |
+          sed -i 's#"@luxfi/ui": "file:../../ui/pkg/ui"#"@luxfi/ui": "npm:@hanzo/ui@8.0.2"#' app/package.json
+          grep -n '"@luxfi/ui"' app/package.json
+
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
         with:
