@@ -21,17 +21,12 @@ name: Vote
 # VITE_APP_GOV_EXECUTE_ENABLED is deliberately UNSET so treasury-moving proposal
 # execution stays GATED on mainnet.
 #
-# RUNNER: this repo lives in the `lux-apps` GitHub org (luxfi/dao redirects here),
-# so it must use the `lux-apps-build` ARC scale-set (bound to github.com/lux-apps,
-# amd64, containerMode dind) — the luxfi `lux-build-amd64` pool is org-scoped to
-# luxfi and will NOT pick up lux-apps jobs (they queue forever). Same DinD buildx
-# pattern that is proven green on luxfi/work-board.
-#
-# GHCR: images stay canonical `ghcr.io/luxfi/*` (Lux → ghcr.io/luxfi/*). The
-# lux-apps GITHUB_TOKEN cannot write luxfi packages cross-org, so login uses the
-# GHCR_LUXFI_TOKEN secret (a luxfi-scoped write:packages token). The org-canonical
-# reusable `hanzoai/.github/.../docker-build.yml@main` is NOT usable — it is a
-# PRIVATE cross-org repo and `uses:` is blocked at parse time.
+# NOTE: the org-canonical reusable `hanzoai/.github/.../docker-build.yml@main` is
+# NOT usable from luxfi — hanzoai/.github is PRIVATE and cross-org `uses:` is
+# blocked at parse time. This workflow builds entirely within the luxfi org, on the
+# luxfi-scoped `lux-build-amd64` ARC pool, so it actually runs and the default
+# GITHUB_TOKEN can push to ghcr.io/luxfi. Same DinD buildx pattern proven green on
+# luxfi/work-board.
 
 on:
   workflow_dispatch:
@@ -44,10 +39,9 @@ permissions:
 
 jobs:
   build:
-    # lux-apps-build: in-cluster ARC scale-set (lux-k8s, amd64 DOKS, DinD) bound to
-    # the lux-apps org. amd64-only — the deploy target (hanzo-k8s) is amd64; a static
-    # SPA needs no arm64.
-    runs-on: lux-apps-build
+    # lux-build-amd64: in-cluster ARC scale-set (lux-k8s, amd64 DOKS, DinD).
+    # amd64-only — the deploy target (hanzo-k8s) is amd64; a static SPA needs no arm64.
+    runs-on: lux-build-amd64
     strategy:
       fail-fast: false
       matrix:
@@ -79,10 +73,8 @@ jobs:
         uses: docker/login-action@v3
         with:
           registry: ghcr.io
-          # Cross-org push: lux-apps workflow -> ghcr.io/luxfi/* needs a luxfi-scoped
-          # write:packages token, not the lux-apps GITHUB_TOKEN.
-          username: hanzo-dev
-          password: ${{ secrets.GHCR_LUXFI_TOKEN }}
+          username: ${{ github.repository_owner }}
+          password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Image metadata
         id: meta
