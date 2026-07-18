@@ -1,0 +1,105 @@
+name: Vote
+
+# Build the lux.vote / zoo.vote governance images on luxfi's in-cluster ARC pool
+# and push them to GHCR. Same in-org self-hosted pattern proven green by
+# luxfi/work-board · luxfi/node · luxfi/dex.
+#
+# ONE source (luxdao/app) white-labels per tenant PURELY via build-args, so the
+# same tree builds every brand from app/Dockerfile.k8s. The build CONTEXT is the
+# repo root so BOTH sibling submodules are present:
+#   app/        (luxdao/app        — the governance SPA)
+#   contracts/  (luxdao/contracts  — the "@luxdao/contracts": "file:../contracts" dep)
+# Both submodules are PUBLIC, so `submodules: recursive` resolves with the default
+# GITHUB_TOKEN. `fetch-depth: 0` is REQUIRED: the recorded contracts gitlink is an
+# ancestor of (not the tip of) luxdao/contracts main, so a shallow fetch can't
+# check it out.
+#
+#   lux -> ghcr.io/luxfi/dao-vote:lux-<sha>   (lux.vote  · chain 96369)
+#   zoo -> ghcr.io/luxfi/dao-vote:zoo-<sha>   (zoo.vote  · chain 200200)
+# Immutable per-commit tag, one per brand; never :latest / :main. The image org
+# follows the repo org (luxfi); the brand lives in the tag — no cross-org mixing.
+# VITE_APP_GOV_EXECUTE_ENABLED is deliberately UNSET so treasury-moving proposal
+# execution stays GATED on mainnet.
+#
+# NOTE: the org-canonical reusable `hanzoai/.github/.../docker-build.yml@main` is
+# NOT usable from luxfi — hanzoai/.github is PRIVATE and cross-org `uses:` is
+# blocked at parse time. This workflow builds entirely within the luxfi org (ARC
+# runner pools are org-scoped) so it actually runs.
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+  packages: write
+
+jobs:
+  build:
+    # lux-build-amd64: in-cluster ARC scale-set (lux-k8s, amd64 DOKS, DinD).
+    # amd64-only — the deploy target (hanzo-k8s) is amd64; a static SPA needs no arm64.
+    runs-on: lux-build-amd64
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - brand: lux
+            app_name: Lux DAO
+            chain_id: "96369"
+            site_url: https://lux.vote
+            overrides: '{"96369":{"rpc":"https://api.lux.network/v1/bc/C/rpc"}}'
+          - brand: zoo
+            app_name: Zoo DAO
+            chain_id: "200200"
+            site_url: https://zoo.vote
+            overrides: '{"200200":{"rpc":"https://api.zoo.network/v1/bc/C/rpc"}}'
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+          fetch-depth: 0
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+        with:
+          driver: docker-container
+          driver-opts: |
+            network=host
+
+      - name: Login to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.repository_owner }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Image metadata
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ghcr.io/luxfi/dao-vote
+          flavor: |
+            latest=false
+          tags: |
+            type=sha,format=short,prefix=${{ matrix.brand }}-
+
+      - name: Build & push
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: app/Dockerfile.k8s
+          platforms: linux/amd64
+          push: true
+          # White-label PURELY via build-args. VITE_APP_GOV_EXECUTE_ENABLED is left
+          # unset on purpose (execution stays gated on mainnet).
+          build-args: |
+            VITE_APP_NAME=${{ matrix.app_name }}
+            VITE_APP_DEFAULT_CHAIN_ID=${{ matrix.chain_id }}
+            VITE_APP_SITE_URL=${{ matrix.site_url }}
+            VITE_APP_WALLET_CONNECT_PROJECT_ID=e89228fed40d4c6e9520912214dfd68b
+            VITE_APP_NETWORK_OVERRIDES=${{ matrix.overrides }}
+            VITE_APP_GIT_HASH=${{ matrix.brand }}-vote
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          provenance: false
