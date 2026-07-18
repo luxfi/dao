@@ -66,17 +66,23 @@ jobs:
         # contracts gitlink resolves.
         run: git submodule update --init app contracts
 
-      - name: Resolve the local-dev UI link to its published npm package
-        # app/package.json declares "@luxfi/ui": "file:../../ui/pkg/ui" — a local-dev
-        # link to the sibling @hanzo/ui monorepo that is absent in clean CI. It is a
-        # DECLARED-BUT-UNUSED dep (no `from '@luxfi/ui'` anywhere in app source; only
-        # package.json + two tailwind.config.ts comments reference it), so redirecting
-        # it to the published package it aliases (@hanzo/ui) lets pnpm install resolve
-        # with zero effect on the bundle. Ephemeral build-input rewrite ONLY — never
-        # committed to luxdao/app, so the app stays pristine at its pinned gitlink.
+      - name: Resolve local-dev file: links to their published npm packages
+        # app/package.json links two deps to sibling monorepos that are absent in a
+        # clean CI checkout, so pnpm/vite can't resolve them:
+        #   @luxfi/ui         -> file:../../ui/pkg/ui  (the @hanzo/ui components;
+        #                        DECLARED-BUT-UNUSED — no `from '@luxfi/ui'` in app src)
+        #   @luxdao/contracts -> file:../contracts     (governance ABIs, imported 53x;
+        #                        its main is publish/index.js, an unbuilt artifact)
+        # Redirect BOTH to the published packages they mirror at the SAME versions, so
+        # the container build resolves against real, reproducible npm packages.
+        # Ephemeral build-input rewrite ONLY — never committed to luxdao/app; the app
+        # stays pristine at its pinned gitlink.
         run: |
-          sed -i 's#"@luxfi/ui": "file:../../ui/pkg/ui"#"@luxfi/ui": "npm:@hanzo/ui@8.0.2"#' app/package.json
-          grep -n '"@luxfi/ui"' app/package.json
+          sed -i \
+            -e 's#"@luxfi/ui": "file:../../ui/pkg/ui"#"@luxfi/ui": "npm:@hanzo/ui@8.0.2"#' \
+            -e 's#"@luxdao/contracts": "file:../contracts"#"@luxdao/contracts": "2.0.0"#' \
+            app/package.json
+          grep -nE '"@luxfi/ui"|"@luxdao/contracts"' app/package.json
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
