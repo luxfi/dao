@@ -66,7 +66,7 @@ jobs:
         # contracts gitlink resolves.
         run: git submodule update --init app contracts
 
-      - name: Resolve local-dev file: links to their published npm packages
+      - name: Resolve local-dev file links to their published npm packages
         # app/package.json links two deps to sibling monorepos that are absent in a
         # clean CI checkout, so pnpm/vite can't resolve them:
         #   @luxfi/ui         -> file:../../ui/pkg/ui  (the @hanzo/ui components;
