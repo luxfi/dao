@@ -115,6 +115,48 @@ import '@luxfi/wallet/styles.css'
 - **AutonomousAdminV1**: Admin functions
 - **PaymasterV1**: Account abstraction paymaster
 
+### Work-Market (canonical, non-versioned) — `contracts/contracts/deployables/bounty/`
+
+ONE finished implementation each (no v1/v2). Three orthogonal concerns + the global Karma bridge:
+
+- **Bounty** (`Bounty.sol` / `IBounty.sol`): permissionless two-sided market. Reward may be
+  **native / ERC-20 / ERC-721 / ERC-1155**; the worker's **stake is always fungible** (native
+  or ERC-20). Lifecycle: propose → fund → claim → submit → accept | finalize (review-window
+  liveness escape) | dispute → resolve. `propose` takes a `RewardSpec{kind,token,tokenId,amount}`
+  with a `MIN_WINDOW`/`MAX_WINDOW` floor+cap on both windows. `claim(bountyId, ackArbiter)` —
+  the worker must **acknowledge the arbiter** (informed consent; reverts `ArbiterMismatch`). On
+  dispute a **fungible reward splits**, an **NFT reward is indivisible**; the delivered worker's
+  **stake is ALWAYS returned** (never slashed by dispute — stake slashing is exclusive to the
+  abandonment `reclaim` path), so a Sybil funder+arbiter cannot rob staked capital.
+  `recoverReward(bountyId)` lets the funder reclaim (after a 30d grace) a reward the worker
+  provably could not receive. Sole controller of Escrow + sole writer of Reputation.
+- **Escrow** (`Escrow.sol` / `IEscrow.sol`): conservation-safe multi-asset vault. Custodies all
+  four asset kinds; `remaining` debited before any transfer; ERC-721/1155 arrive ONLY via a
+  controller-driven `deposit()` pull (unsolicited transfers revert `UnsolicitedTransfer`);
+  ERC-721 whole-only; fee-on-transfer ERC-20 rejected at deposit. **Credit-on-failure pull-payment**:
+  `release`/`refund` never bubble a failed outward transfer (non-receiver / blocklisted / paused
+  recipient across all 4 kinds) — they CREDIT the recipient (`withdraw` later) so a bad recipient
+  can never brick a settlement. `reassignCredit` (controller-only) powers funder-recovery.
+- **Reputation** (`Reputation.sol` / `IReputation.sol`): append-only local ledger + a
+  **best-effort bridge into global Karma** via `KarmaController.earnKarma(worker, karmaPerCompletion,
+  source)` inside try/catch, keyed once-only by `source = keccak256(chainid,market,bountyId)` — a
+  Karma failure can **never block a payout**, mints at most once per bounty, and a transient failure
+  RELEASES the key (retryable via `retryKarmaBridge`, owner-only). Flat Safe-tunable award.
+- **Karma** (`@luxfi/standard/governance/Karma.sol` + `KarmaController.sol`): ONE global,
+  soul-bound reputation per org; **org DAO Safe is the admin/slasher**. Reputation is the sole
+  `KARMA_SOURCE`; KarmaController is the sole Karma `ATTESTOR`. Slashing stays Safe-governed.
+- **WorkMarketDeployer** (`WorkMarketDeployer.sol`): ONE constructor atomically deploys Karma +
+  KarmaController + the trio proxies over **caller-supplied (pre-deployed, reusable) impls**,
+  wires the escrow↔reputation↔bounty cycle (predict-then-wire, on-chain verified), grants
+  least-privilege roles, hands ALL governance to the org Safe, and renounces its own authority —
+  reverting on any mis-wire. (Impls are injected, not embedded, to keep the deployer initcode
+  well under the EIP-3860 limit.)
+- Deploy scripts: `DeployDAO.s.sol` (full platform) and `DeployWorkMarket.s.sol` (surgical
+  work-market + Karma only, reuses existing masters/Governor). Post-deploy: `WorkMarketSmoke.s.sol`
+  is the mandatory TSTORE launch gate (creates+pays bounty 0). Owner/Karma-admin = org DAO Safe,
+  REQUIRED on production chains. Tests: `Bounty.t.sol`, `Escrow.t.sol`, `Reputation.t.sol`,
+  `DeployDAOLive.t.sol`, `DeployWorkMarket.t.sol`.
+
 ### Network Configuration
 - **Localhost**: Chain ID 1337 for development
 - **Mainnet Support**: Ethereum, Optimism, Polygon, Base, Sepolia
