@@ -24,13 +24,13 @@ export const parsBrand: BrandConfig = {
     mainnet: {
       name: "Pars Mainnet",
       chainId: 7070,
-      rpcUrl: "https://rpc.pars.network/ext/bc/C/rpc",
+      rpcUrl: "https://rpc.pars.network/v1/bc/C/rpc",
       explorerUrl: "https://explorer.pars.network",
     },
     testnet: {
       name: "Pars Testnet",
       chainId: 7071,
-      rpcUrl: "https://rpc-testnet.pars.network/ext/bc/C/rpc",
+      rpcUrl: "https://rpc-testnet.pars.network/v1/bc/C/rpc",
       explorerUrl: "https://explorer-testnet.pars.network",
     },
   },
