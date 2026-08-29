@@ -5,7 +5,9 @@
   "main": "dist/index.js",
   "module": "dist/index.mjs",
   "types": "dist/index.d.ts",
-  "files": ["dist"],
+  "files": [
+    "dist"
+  ],
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
@@ -21,35 +23,43 @@
     "lint": "eslint ."
   },
   "peerDependencies": {
-    "react": "^18.0.0",
-    "react-dom": "^18.0.0"
+    "react": ">=19.2.8",
+    "react-dom": ">=19.2.8"
   },
   "dependencies": {
-    "@rainbow-me/rainbowkit": "^2.2.0",
-    "@solana/wallet-adapter-base": "^0.9.23",
-    "@solana/wallet-adapter-coinbase": "^0.1.19",
+    "@rainbow-me/rainbowkit": "^2.2.11",
+    "@solana/wallet-adapter-base": "^0.9.27",
+    "@solana/wallet-adapter-coinbase": "^0.1.23",
     "@solana/wallet-adapter-glow": "^0.1.18",
-    "@solana/wallet-adapter-phantom": "^0.9.24",
-    "@solana/wallet-adapter-react": "^0.15.35",
-    "@solana/wallet-adapter-react-ui": "^0.9.35",
-    "@solana/wallet-adapter-solflare": "^0.6.28",
-    "@solana/wallet-adapter-walletconnect": "^0.1.16",
-    "@solana/web3.js": "^1.95.4",
-    "@tanstack/react-query": "^5.36.2",
-    "viem": "^2.23.2",
-    "wagmi": "^2.12.12"
+    "@solana/wallet-adapter-phantom": "^0.9.29",
+    "@solana/wallet-adapter-react": "^0.15.39",
+    "@solana/wallet-adapter-react-ui": "^0.9.39",
+    "@solana/wallet-adapter-solflare": "^0.6.33",
+    "@solana/wallet-adapter-walletconnect": "^0.1.21",
+    "@solana/web3.js": "^1.98.4",
+    "@tanstack/react-query": "^5.102.8",
+    "viem": "^2.56.0",
+    "wagmi": "^3.7.7"
   },
   "devDependencies": {
-    "@types/react": "^18.2.0",
-    "@types/react-dom": "^18.2.0",
-    "tsup": "^8.0.0",
-    "typescript": "^5.4.0"
+    "@types/react": "19.2.18",
+    "@types/react-dom": "19.2.5",
+    "tsup": "^8.5.1",
+    "typescript": "7.0.2"
   },
   "repository": {
     "type": "git",
     "url": "https://github.com/luxfi/dao.git",
     "directory": "packages/wallet"
   },
-  "keywords": ["lux", "wallet", "rainbowkit", "solana", "wagmi", "viem", "web3"],
+  "keywords": [
+    "lux",
+    "wallet",
+    "rainbowkit",
+    "solana",
+    "wagmi",
+    "viem",
+    "web3"
+  ],
   "license": "MIT"
 }
