@@ -22,7 +22,7 @@
     "dist"
   ],
   "dependencies": {
-    "@wundergraph/sdk": "^0.178.0"
+    "@wundergraph/sdk": "^0.184.2"
   },
   "license": "MIT"
 }
