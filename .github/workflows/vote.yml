@@ -50,7 +50,18 @@ jobs:
             app_name: Lux DAO
             chain_id: "96369"
             site_url: https://lux.vote
-            overrides: '{"96369":{"rpc":"https://api.lux.network/v1/bc/C/rpc"}}'
+            # governor: the OZ-v5 Governor that is actually live on 96369, read off
+            # deployments/registry.json (generated from eth_getCode) and confirmed by
+            # eth_call: CLOCK_MODE() = "mode=timestamp", votingDelay 86400,
+            # votingPeriod 604800 — seconds, which is what those numbers were meant
+            # to be. There is deliberately no baked-in default for this, so unset
+            # means the UI renders no governance at all.
+            # governorFromBlock brackets the deployment: no code at 1093632, code by
+            # 1097728. Earlier than the true block only costs log-scan range; later
+            # would silently drop proposals. Note eth_getCode answers "missing trie
+            # node" for a pruned middle range on this chain — an error, not an empty
+            # result, and reading it as "no code" is how you get a wrong block here.
+            overrides: '{"96369":{"rpc":"https://api.lux.network/v1/bc/C/rpc","governor":"0x976520c30903F0744814D149574f9C0D9BaA1431","governorFromBlock":1093632}}'
             # White-label favicon (the SVG in the <head>). Per-brand asset shipped in public/.
             favicon_svg: /lux-triangle.svg
             # WalletConnect Cloud project id for the Lux DAO (origin-allowlisted to lux.vote).
