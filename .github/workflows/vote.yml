@@ -41,7 +41,14 @@ jobs:
   build:
     # lux-build-amd64: in-cluster ARC scale-set (lux-k8s, amd64 DOKS, DinD).
     # amd64-only — the deploy target (hanzo-k8s) is amd64; a static SPA needs no arm64.
-    runs-on: lux-build-amd64
+    # Capability labels rather than the purpose label `lux-build-amd64`.
+    # RUNNERS.md gives the amd64-Linux pool a label UNION, and both name the
+    # same pool — but the only runner currently carrying any of them is evo
+    # (self-hosted, linux, amd64, x64), which serves git.hanzo.ai. The
+    # in-cluster ARC pool that holds `lux-build-amd64` is on the suspended DO
+    # account, so a job asking for it waits forever: every run since 2026-08-05
+    # is still queued.
+    runs-on: [self-hosted, linux, amd64]
     strategy:
       fail-fast: false
       matrix:
