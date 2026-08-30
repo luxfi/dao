@@ -68,6 +68,14 @@ jobs:
             # This is a PUBLIC client identifier (ships in the bundle), not a secret. Was wrongly
             # sharing the Pars id, which is allowlisted for pars.vote -> connect verify mismatch.
             wc_project_id: "22b98f00bd4572e2a42773ad82b329b0"
+            # Each brand's image goes to its own org's registry, which is also
+            # where that brand's deployment declaration reads from:
+            # universe deploy/lux-vote reads ghcr.io/luxfi/vote,
+            # deploy/zoo-mainnet/zoo-vote reads ghcr.io/zooai/vote.
+            # Both brands used to be pushed to ghcr.io/luxfi/dao-vote, which no
+            # declaration anywhere reads and which also put Zoo images in Lux's
+            # registry. lux.vote has been serving a 2026-07-18 image ever since.
+            image_repo: ghcr.io/luxfi/vote
           - brand: zoo
             app_name: Zoo DAO
             chain_id: "200200"
@@ -75,6 +83,7 @@ jobs:
             overrides: '{"200200":{"rpc":"https://api.zoo.network/v1/bc/C/rpc"}}'
             favicon_svg: /images/dao/zoo-labs.svg
             wc_project_id: "e89228fed40d4c6e9520912214dfd68b"
+            image_repo: ghcr.io/zooai/vote
     steps:
       - uses: actions/checkout@v4
 
@@ -110,18 +119,22 @@ jobs:
           driver-opts: |
             network=host
 
+      # GITHUB_TOKEN is scoped to this repo's owner, so it cannot write to
+      # another org's registry. GH_TOKEN is the org-wide credential that can;
+      # fall back to GITHUB_TOKEN where it is absent, which still covers the
+      # same-org push.
       - name: Login to GHCR
         uses: docker/login-action@v3
         with:
           registry: ghcr.io
           username: ${{ github.repository_owner }}
-          password: ${{ secrets.GITHUB_TOKEN }}
+          password: ${{ secrets.GH_TOKEN != '' && secrets.GH_TOKEN || secrets.GITHUB_TOKEN }}
 
       - name: Image metadata
         id: meta
         uses: docker/metadata-action@v5
         with:
-          images: ghcr.io/luxfi/dao-vote
+          images: ${{ matrix.image_repo }}
           flavor: |
             latest=false
           tags: |
