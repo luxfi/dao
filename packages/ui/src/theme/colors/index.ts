@@ -34,17 +34,17 @@ export default {
   'color-charcoal-950': '#0d0d0d',
 
   // Lilac shades
-  'color-lilac-50': '#ecddf8',
-  'color-lilac-100': '#dcc8f0',
-  'color-lilac-200': '#b993e1',
-  'color-lilac-300': '#a677d8',
-  'color-lilac-400': '#925ace',
-  'color-lilac-500': '#7f3fc4',
-  'color-lilac-600': '#6c35a8',
-  'color-lilac-700': '#5a2d8a',
-  'color-lilac-800': '#47256d',
-  'color-lilac-900': '#341c50',
-  'color-lilac-950': '#221233',
+  'color-lilac-50': '#f5f5f5',
+  'color-lilac-100': '#e0e0e0',
+  'color-lilac-200': '#cccccc',
+  'color-lilac-300': '#b3b3b3',
+  'color-lilac-400': '#999999',
+  'color-lilac-500': '#808080',
+  'color-lilac-600': '#666666',
+  'color-lilac-700': '#4d4d4d',
+  'color-lilac-800': '#333333',
+  'color-lilac-900': '#1a1a1a',
+  'color-lilac-950': '#0d0d0d',
 
   // Red shades (Error colors)
   'color-red-50': '#f9ddde',
