@@ -23,14 +23,14 @@ export const luxBrand: BrandConfig = {
     mainnet: {
       name: "Lux C-Chain",
       chainId: 96369,
-      rpcUrl: "https://api.lux.network/v1/bc/C/rpc",
+      rpcUrl: "https://api.lux.network/v1/chain/C/rpc",
       explorerUrl: "https://explorer.lux.network",
       subgraphUrl: "https://subgraph.lux.network",
     },
     testnet: {
       name: "Lux Testnet",
       chainId: 96368,
-      rpcUrl: "https://api.lux-test.network/v1/bc/C/rpc",
+      rpcUrl: "https://api.lux-test.network/v1/chain/C/rpc",
       explorerUrl: "https://explorer.lux-test.network",
     },
   },

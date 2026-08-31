@@ -66,7 +66,7 @@ jobs:
             # would silently drop proposals. Note eth_getCode answers "missing trie
             # node" for a pruned middle range on this chain — an error, not an empty
             # result, and reading it as "no code" is how you get a wrong block here.
-            overrides: '{"96369":{"rpc":"https://api.lux.network/v1/bc/C/rpc","governor":"0x976520c30903F0744814D149574f9C0D9BaA1431","governorFromBlock":1093632}}'
+            overrides: '{"96369":{"rpc":"https://api.lux.network/v1/chain/C/rpc","governor":"0x976520c30903F0744814D149574f9C0D9BaA1431","governorFromBlock":1093632}}'
             # White-label favicon (the SVG in the <head>). Per-brand asset shipped in public/.
             favicon_svg: /lux-triangle.svg
             # WalletConnect Cloud project id for the Lux DAO (origin-allowlisted to lux.vote).
@@ -85,7 +85,7 @@ jobs:
             app_name: Zoo DAO
             chain_id: "200200"
             site_url: https://zoo.vote
-            overrides: '{"200200":{"rpc":"https://api.zoo.network/v1/bc/C/rpc"}}'
+            overrides: '{"200200":{"rpc":"https://api.zoo.network/v1/chain/C/rpc"}}'
             favicon_svg: /images/dao/zoo-labs.svg
             wc_project_id: "e89228fed40d4c6e9520912214dfd68b"
             image_repo: ghcr.io/zooai/vote

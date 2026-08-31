@@ -23,13 +23,13 @@ export const hanzoBrand: BrandConfig = {
     mainnet: {
       name: "Hanzo Network",
       chainId: 36963,
-      rpcUrl: "https://api.hanzo.network/v1/bc/C/rpc",
+      rpcUrl: "https://api.hanzo.network/v1/chain/C/rpc",
       explorerUrl: "https://explorer.hanzo.ai",
     },
     testnet: {
       name: "Hanzo Testnet",
       chainId: 36962,
-      rpcUrl: "https://api.hanzo-test.network/v1/bc/C/rpc",
+      rpcUrl: "https://api.hanzo-test.network/v1/chain/C/rpc",
       explorerUrl: "https://explorer.hanzo-test.ai",
     },
   },

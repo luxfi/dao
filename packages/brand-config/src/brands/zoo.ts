@@ -23,13 +23,13 @@ export const zooBrand: BrandConfig = {
     mainnet: {
       name: "Zoo Network",
       chainId: 200200,
-      rpcUrl: "https://api.zoo.ngo/v1/bc/C/rpc",
+      rpcUrl: "https://api.zoo.ngo/v1/chain/C/rpc",
       explorerUrl: "https://explorer.zoo.ngo",
     },
     testnet: {
       name: "Zoo Testnet",
       chainId: 200201,
-      rpcUrl: "https://api.zoo-test.network/v1/bc/C/rpc",
+      rpcUrl: "https://api.zoo-test.network/v1/chain/C/rpc",
       explorerUrl: "https://explorer.zoo-test.ngo",
     },
   },
