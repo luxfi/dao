@@ -60,7 +60,7 @@ export const parsBrand: BrandConfig = {
       accentColor: "#ea4335",
       backgroundColor: "#ffffff",
       paperColor: "#f8f9fa",
-      fontFamily: "'Inter', sans-serif",
+      fontFamily: "'Zen', sans-serif",
     },
     dark: {
       primaryColor: "#8ab4f8",
@@ -68,7 +68,7 @@ export const parsBrand: BrandConfig = {
       accentColor: "#f28b82",
       backgroundColor: "#1a1a2e",
       paperColor: "#16213e",
-      fontFamily: "'Inter', sans-serif",
+      fontFamily: "'Zen', sans-serif",
     },
   },
 

@@ -51,7 +51,7 @@ export const luxBrand: BrandConfig = {
       accentColor: "#f59e0b",
       backgroundColor: "#ffffff",
       paperColor: "#f5f3ff",
-      fontFamily: "'Inter', sans-serif",
+      fontFamily: "'Zen', sans-serif",
     },
     dark: {
       primaryColor: "#818cf8",
@@ -59,7 +59,7 @@ export const luxBrand: BrandConfig = {
       accentColor: "#fbbf24",
       backgroundColor: "#0f0f23",
       paperColor: "#1e1b4b",
-      fontFamily: "'Inter', sans-serif",
+      fontFamily: "'Zen', sans-serif",
     },
   },
 

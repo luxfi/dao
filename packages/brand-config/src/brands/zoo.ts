@@ -50,7 +50,7 @@ export const zooBrand: BrandConfig = {
       accentColor: "#f97316",
       backgroundColor: "#ffffff",
       paperColor: "#ecfdf5",
-      fontFamily: "'Inter', sans-serif",
+      fontFamily: "'Zen', sans-serif",
     },
     dark: {
       primaryColor: "#34d399",
@@ -58,7 +58,7 @@ export const zooBrand: BrandConfig = {
       accentColor: "#fb923c",
       backgroundColor: "#0a1628",
       paperColor: "#064e3b",
-      fontFamily: "'Inter', sans-serif",
+      fontFamily: "'Zen', sans-serif",
     },
   },
 

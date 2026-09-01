@@ -50,7 +50,7 @@ export const hanzoBrand: BrandConfig = {
       accentColor: "#f43f5e",
       backgroundColor: "#ffffff",
       paperColor: "#f0f9ff",
-      fontFamily: "'Inter', sans-serif",
+      fontFamily: "'Zen', sans-serif",
     },
     dark: {
       primaryColor: "#38bdf8",
@@ -58,7 +58,7 @@ export const hanzoBrand: BrandConfig = {
       accentColor: "#fb7185",
       backgroundColor: "#0c0a1d",
       paperColor: "#1a1333",
-      fontFamily: "'Inter', sans-serif",
+      fontFamily: "'Zen', sans-serif",
     },
   },
 
