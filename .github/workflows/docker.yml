@@ -15,6 +15,6 @@ jobs:
     with:
       image: ghcr.io/luxfi/dao
       runner-amd64: '["linux-amd64"]'
-      runner-arm64: '["self-hosted","linux","arm64"]'
+      runner-arm64: '["linux-arm64"]'
       runner-deploy: '["linux-amd64"]'
     secrets: inherit
