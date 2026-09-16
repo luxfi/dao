@@ -17,7 +17,7 @@ env:
 jobs:
   test-contracts:
     name: Test Smart Contracts
-    runs-on: lux-build-amd64
+    runs-on: linux-amd64
     steps:
     - uses: actions/checkout@v4
     - name: Setup Node.js
@@ -35,7 +35,7 @@ jobs:
       run: pnpm test
   test-frontend:
     name: Test Frontend
-    runs-on: lux-build-amd64
+    runs-on: linux-amd64
     steps:
     - uses: actions/checkout@v4
     - name: Setup Node.js
@@ -59,7 +59,7 @@ jobs:
       run: pnpm test || true
   test-api:
     name: Test API
-    runs-on: lux-build-amd64
+    runs-on: linux-amd64
     steps:
     - uses: actions/checkout@v4
     - name: Setup Bun
@@ -79,7 +79,7 @@ jobs:
       run: bun test || true
   e2e-tests:
     name: E2E Tests
-    runs-on: lux-build-amd64
+    runs-on: linux-amd64
     needs:
     - test-contracts
     - test-frontend
@@ -135,7 +135,7 @@ jobs:
         path: ./stack/playwright-report/
   create-release:
     name: Create Release
-    runs-on: lux-build-amd64
+    runs-on: linux-amd64
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     permissions:
       contents: write
@@ -159,7 +159,7 @@ jobs:
         prerelease: false
   deploy:
     name: Deploy to Production
-    runs-on: lux-build-amd64
+    runs-on: linux-amd64
     needs:
     - create-release
     if: github.event_name == 'release' || (github.event_name == 'push' && github.ref == 'refs/heads/main')
