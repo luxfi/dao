@@ -11,7 +11,7 @@
   "scripts": {
     "build": "tsup",
     "dev": "tsup --watch",
-    "type-check": "tsc --noEmit",
+    "type-check": "node_modules/tsgo/bin/tsc --noEmit --incremental false",
     "lint": "eslint .",
     "test": "vitest",
     "test:ui": "vitest --ui",
@@ -56,7 +56,8 @@
     "storybook": "^10.5.10",
     "tsup": "^8.5.1",
     "typedoc": "^0.28.20",
-    "typescript": "7.0.2",
+    "tsgo": "npm:typescript@7.0.2",
+    "typescript": "6.0.3",
     "vite": "^8.2.2",
     "vitest": "^4.1.11"
   },

@@ -19,7 +19,7 @@
   "scripts": {
     "build": "tsup",
     "dev": "tsup --watch",
-    "type-check": "tsc --noEmit",
+    "type-check": "node_modules/tsgo/bin/tsc --noEmit --incremental false",
     "lint": "eslint ."
   },
   "peerDependencies": {
@@ -45,7 +45,8 @@
     "@types/react": "19.2.18",
     "@types/react-dom": "19.2.5",
     "tsup": "^8.5.1",
-    "typescript": "7.0.2"
+    "tsgo": "npm:typescript@7.0.2",
+    "typescript": "6.0.3"
   },
   "repository": {
     "type": "git",
